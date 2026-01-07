@@ -293,3 +293,31 @@
     flex-direction: column;
     gap: 16px;
 }
+
+/* Spacing Grid for Margin/Padding */
+.spacing-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.spacing-grid > div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.spacing-grid > div > span {
+    display: block;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-rich-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.spacing-grid input {
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 13px;
+}

@@ -2,13 +2,18 @@ import React from 'react';
 import {
     DndContext,
     DragOverlay,
-    closestCorners,
+    closestCenter,
+    pointerWithin,
+    rectIntersection,
     KeyboardSensor,
     PointerSensor,
     useSensor,
     useSensors,
     DragStartEvent,
     DragEndEvent,
+    DragOverEvent,
+    CollisionDetection,
+    getFirstCollision,
 } from '@dnd-kit/core';
 import {
     arrayMove,
@@ -76,12 +81,51 @@ const TemplateEditor: React.FC<TemplateEditorProps> = () => {
         })
     );
 
+    // Custom collision detection that prioritizes containers (columns/tables) when pointer is inside them
+    const customCollisionDetection: CollisionDetection = React.useCallback((args) => {
+        // First, use pointerWithin to detect if we're inside a container (column or table cell)
+        const pointerCollisions = pointerWithin(args);
+        
+        // Check if any of the pointer collisions are column containers or table cells
+        const containerCollisions = pointerCollisions.filter(collision => {
+            const id = collision.id as string;
+            return id.includes('-col-') || id.includes('-cell-');
+        });
+
+        // If we're inside a container (column or table cell), prioritize that
+        if (containerCollisions.length > 0) {
+            return containerCollisions;
+        }
+
+        // Next, check for collisions with sortable root elements using closestCenter
+        const closestCenterCollisions = closestCenter(args);
+        
+        // Filter to get only collisions with root-level elements
+        const sortableCollisions = closestCenterCollisions.filter(collision => {
+            const id = collision.id as string;
+            return id !== 'page-canvas' && doc.rootElementIds.includes(id);
+        });
+
+        // If we have sortable element collisions, use those
+        if (sortableCollisions.length > 0) {
+            return sortableCollisions;
+        }
+
+        // If pointer is over the canvas, return that
+        if (pointerCollisions.length > 0) {
+            return pointerCollisions;
+        }
+
+        // Final fallback to rectIntersection
+        return rectIntersection(args);
+    }, [doc.rootElementIds]);
+
     const handleDragStart = (event: DragStartEvent) => {
         setActiveId(event.active.id as string);
     };
 
     const handleDragEnd = (event: DragEndEvent) => {
-        const { active, over } = event;
+        const { active, over, delta } = event;
 
         if (!over) {
             setActiveId(null);
@@ -99,7 +143,32 @@ const TemplateEditor: React.FC<TemplateEditorProps> = () => {
                 // We'll need to update addElement to handle table nesting
                 addElement(type, overData.parentId, overData.rowIndex, overData.colIndex);
             } else {
-                addElement(type);
+                // Calculate the drop position based on where the element is dropped
+                const overId = over.id as string;
+                
+                // If dropped on an existing element, determine if above or below center
+                if (overId !== 'page-canvas' && doc.rootElementIds.includes(overId)) {
+                    const overIndex = doc.rootElementIds.indexOf(overId);
+                    
+                    // Check if we're dropping in the lower half of the element
+                    // If delta.y is positive (dragging downward) and we're over an element,
+                    // or if over.rect exists we can use it to determine position
+                    const overRect = over.rect;
+                    const isBelow = overRect && event.activatorEvent instanceof MouseEvent
+                        ? (event.activatorEvent as MouseEvent).clientY > (overRect.top + overRect.height / 2)
+                        : delta.y > 0;
+                    
+                    if (isBelow) {
+                        // Insert after this element
+                        addElement(type, undefined, overIndex + 1);
+                    } else {
+                        // Insert before this element
+                        addElement(type, undefined, overIndex);
+                    }
+                } else {
+                    // Dropped on the canvas itself - add to the end
+                    addElement(type);
+                }
             }
         }
         // Handle reordering existing elements
@@ -135,7 +204,7 @@ const TemplateEditor: React.FC<TemplateEditorProps> = () => {
 
             <DndContext
                 sensors={sensors}
-                collisionDetection={closestCorners}
+                collisionDetection={customCollisionDetection}
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
             >

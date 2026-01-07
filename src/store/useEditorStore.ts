@@ -99,10 +99,22 @@ export const useEditorStore = create<EditorState>()(
                         break;
                     case 'columns':
                         newElement = {
-                            ...baseProps, type: 'columns', columns: [
+                            ...baseProps,
+                            type: 'columns',
+                            columns: [
                                 { width: '50%', content: [] },
                                 { width: '50%', content: [] }
-                            ]
+                            ],
+                            columnGap: 10,
+                            borderWidth: 0,
+                            borderColor: '#e2e8f0',
+                            borderStyle: 'none',
+                            borderRadius: 0,
+                            backgroundColor: 'transparent',
+                            verticalAlign: 'top',
+                            showColumnBorders: false,
+                            columnBorderWidth: 1,
+                            columnBorderColor: '#e2e8f0'
                         };
                         break;
                     case 'table':
@@ -346,6 +358,28 @@ export const useEditorStore = create<EditorState>()(
 
             removeElement: (id) => set((state) => {
                 const newElements = { ...state.document.elements };
+                
+                // Remove the element from any column's content array
+                Object.values(newElements).forEach((el) => {
+                    if (el.type === 'columns') {
+                        const columnsEl = el as any;
+                        columnsEl.columns = columnsEl.columns.map((col: any) => ({
+                            ...col,
+                            content: col.content.filter((contentId: string) => contentId !== id)
+                        }));
+                    }
+                    // Also clean up table cells if needed
+                    if (el.type === 'table') {
+                        const tableEl = el as any;
+                        tableEl.body = tableEl.body.map((row: any[]) =>
+                            row.map((cell: any) => ({
+                                ...cell,
+                                content: cell.content.filter((contentId: string) => contentId !== id)
+                            }))
+                        );
+                    }
+                });
+
                 delete newElements[id];
 
                 return {

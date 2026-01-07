@@ -6,6 +6,7 @@ import DividerProperties from './components/DividerProperties';
 import ImageProperties from './components/ImageProperties';
 import TableProperties from './components/TableProperties';
 import InfoProperties from './components/InfoProperties';
+import ColumnProperties from './components/ColumnProperties';
 import '../styles/PropertiesPanel.css';
 
 const PropertiesPanel: React.FC = () => {
@@ -74,6 +75,14 @@ const PropertiesPanel: React.FC = () => {
                         onUpdate={handleUpdate}
                         onAddRow={addTableRow}
                         onAddCol={addTableColumn}
+                        onStyleChange={handleStyleChange}
+                    />
+                );
+            case 'columns':
+                return (
+                    <ColumnProperties
+                        element={element as any}
+                        onUpdate={handleUpdate}
                         onStyleChange={handleStyleChange}
                     />
                 );

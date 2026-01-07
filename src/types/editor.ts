@@ -105,6 +105,16 @@ export interface Column {
 export interface ColumnsElement extends BaseElement {
     type: 'columns';
     columns: Column[];
+    columnGap?: number;
+    borderWidth?: number;
+    borderColor?: string;
+    borderStyle?: 'none' | 'solid' | 'dashed' | 'dotted';
+    borderRadius?: number;
+    backgroundColor?: string;
+    verticalAlign?: 'top' | 'middle' | 'bottom';
+    showColumnBorders?: boolean;
+    columnBorderWidth?: number;
+    columnBorderColor?: string;
 }
 
 export interface TableCell {

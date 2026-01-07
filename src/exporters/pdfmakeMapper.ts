@@ -88,13 +88,41 @@ export const exportToPdfMake = (doc: DocumentSchema): any => {
 
             case 'columns': {
                 const cols = element as any;
-                return {
+                const columnGap = cols.columnGap ?? 10;
+                
+                const columnsContent = {
                     columns: cols.columns.map((col: any) => ({
                         width: col.width,
                         stack: col.content.map(mapElement).filter(Boolean)
                     })),
+                    columnGap: columnGap,
                     ...mapStyle(element.style),
                 };
+
+                // If the columns element has border or background, wrap it in a table for visual effect
+                if ((cols.borderWidth && cols.borderStyle !== 'none') || 
+                    (cols.backgroundColor && cols.backgroundColor !== 'transparent')) {
+                    return {
+                        table: {
+                            widths: ['*'],
+                            body: [[columnsContent]]
+                        },
+                        layout: {
+                            hLineWidth: () => cols.borderWidth ?? 0,
+                            vLineWidth: () => cols.borderWidth ?? 0,
+                            hLineColor: () => cols.borderColor || '#e2e8f0',
+                            vLineColor: () => cols.borderColor || '#e2e8f0',
+                            paddingLeft: () => cols.style.padding?.[0] ?? 0,
+                            paddingRight: () => cols.style.padding?.[2] ?? 0,
+                            paddingTop: () => cols.style.padding?.[1] ?? 0,
+                            paddingBottom: () => cols.style.padding?.[3] ?? 0,
+                            fillColor: () => cols.backgroundColor !== 'transparent' ? cols.backgroundColor : undefined,
+                        },
+                        margin: cols.style.margin || undefined,
+                    };
+                }
+
+                return columnsContent;
             }
 
             case 'table': {

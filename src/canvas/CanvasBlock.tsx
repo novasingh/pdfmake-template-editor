@@ -22,10 +22,7 @@ const CanvasBlock: React.FC<CanvasBlockProps> = ({ element }) => {
     const [isEditing, setIsEditing] = React.useState(false);
     const [editValue, setEditValue] = React.useState('');
 
-    if (!element) return null;
-
-    const isSelected = selectedElementId === element.id;
-
+    // All hooks must be called before any conditional returns
     const {
         attributes,
         listeners,
@@ -34,9 +31,14 @@ const CanvasBlock: React.FC<CanvasBlockProps> = ({ element }) => {
         transition,
         isDragging,
     } = useSortable({
-        id: element.id,
-        disabled: isEditing // Disable dragging while editing
+        id: element?.id ?? 'placeholder',
+        disabled: isEditing || !element
     });
+
+    // Early return after all hooks are called
+    if (!element) return null;
+
+    const isSelected = selectedElementId === element.id;
 
     const style: React.CSSProperties = {
         transform: CSS.Transform.toString(transform),
