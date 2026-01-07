@@ -1,0 +1,137 @@
+[11:06:47.253] [INFO] [36mInitializing Storybook[39m
+[11:06:47.620] [DEBUG] Getting package.json info for F:/Personal/npm/pdfmake-editor/package.json...
+[11:06:47.621] [DEBUG] Getting CLI versions from NPM for storybook...
+[11:06:47.621] [DEBUG] Executing command: npm info storybook version
+[11:06:48.726] [INFO] Adding Storybook version 10.1.10 to your project
+[11:06:48.728] [DEBUG] Project type detected: react
+[11:06:48.728] [DEBUG] Using cached package.json for F:\Personal\npm\pdfmake-editor\package.json...
+[11:06:48.729] [DEBUG] Using cached package.json for F:\Personal\npm\pdfmake-editor\package.json...
+[11:06:58.932] [PROMPT] We were not able to detect the right builder for your project. Please select one: {"choice":"vite"}
+[11:06:58.932] [INFO] Framework detected: react-vite
+[11:06:58.933] [DEBUG] Getting installed version for vitest...
+[11:06:58.933] [DEBUG] Executing command: npm ls --json --depth=99 2>NUL
+[11:06:59.873] [DEBUG] Executing command: npm ls --json --depth=0 2>NUL
+[11:07:00.762] [DEBUG] An issue occurred while trying to find dependencies metadata using npm: Error: Command failed with exit code 1: npm.cmd ls --json --depth=0 2>NUL
+npm error code EINVALIDTAGNAME
+npm error Invalid tag name "2>NUL" of package "2>NUL": Tags may not have any characters that encodeURIComponent encodes.
+npm error A complete log of this run can be found in: C:\Users\Akash\AppData\Local\npm-cache\_logs\2025-12-24T05_37_00_130Z-debug-0.log
+{
+  "error": {
+    "code": "EINVALIDTAGNAME",
+    "summary": "Invalid tag name \"2>NUL\" of package \"2>NUL\": Tags may not have any characters that encodeURIComponent encodes.",
+    "detail": ""
+  }
+}
+[11:07:00.762] [DEBUG] Getting installed version for msw...
+[11:07:00.762] [DEBUG] Executing command: npm ls --json --depth=99 2>NUL
+[11:07:01.657] [DEBUG] Executing command: npm ls --json --depth=0 2>NUL
+[11:07:02.539] [DEBUG] An issue occurred while trying to find dependencies metadata using npm: Error: Command failed with exit code 1: npm.cmd ls --json --depth=0 2>NUL
+npm error code EINVALIDTAGNAME
+npm error Invalid tag name "2>NUL" of package "2>NUL": Tags may not have any characters that encodeURIComponent encodes.
+npm error A complete log of this run can be found in: C:\Users\Akash\AppData\Local\npm-cache\_logs\2025-12-24T05_37_01_905Z-debug-0.log
+{
+  "error": {
+    "code": "EINVALIDTAGNAME",
+    "summary": "Invalid tag name \"2>NUL\" of package \"2>NUL\": Tags may not have any characters that encodeURIComponent encodes.",
+    "detail": ""
+  }
+}
+[11:07:02.545] [INFO] base-generator-task-start: Generating Storybook configuration
+[11:07:02.545] [DEBUG] Using cached package.json for F:\Personal\npm\pdfmake-editor\package.json...
+[11:07:02.545] [DEBUG] Using cached package.json for F:\Personal\npm\pdfmake-editor\package.json...
+[11:07:02.545] [DEBUG] Using cached package.json for F:\Personal\npm\pdfmake-editor\package.json...
+[11:07:02.546] [DEBUG] Using cached version for storybook...
+[11:07:02.546] [DEBUG] Getting CLI versions from NPM for @storybook/react-vite...
+[11:07:02.546] [DEBUG] Executing command: npm info @storybook/react-vite version
+[11:07:02.567] [DEBUG] Getting CLI versions from NPM for @chromatic-com/storybook...
+[11:07:02.567] [DEBUG] Executing command: npm info @chromatic-com/storybook version
+[11:07:02.588] [DEBUG] Getting CLI versions from NPM for @storybook/addon-vitest...
+[11:07:02.588] [DEBUG] Executing command: npm info @storybook/addon-vitest version
+[11:07:02.609] [DEBUG] Getting CLI versions from NPM for @storybook/addon-a11y...
+[11:07:02.609] [DEBUG] Executing command: npm info @storybook/addon-a11y version
+[11:07:02.632] [DEBUG] Getting CLI versions from NPM for @storybook/addon-docs...
+[11:07:02.632] [DEBUG] Executing command: npm info @storybook/addon-docs version
+[11:07:02.656] [DEBUG] Getting CLI versions from NPM for @storybook/addon-onboarding...
+[11:07:02.656] [DEBUG] Executing command: npm info @storybook/addon-onboarding version
+[11:07:05.285] [INFO] base-generator-task: - Configuring main.ts
+[11:07:05.287] [INFO] base-generator-task: - Configuring preview.ts
+[11:07:05.289] [INFO] base-generator-task: - Adding Storybook command to package.json
+[11:07:05.289] [DEBUG] Getting package.json info for F:/Personal/npm/pdfmake-editor/package.json...
+[11:07:05.289] [DEBUG] Using cached package.json for F:\Personal\npm\pdfmake-editor\package.json...
+[11:07:05.290] [INFO] base-generator-task: - Copying framework templates
+[11:07:05.334] [DEBUG] Executing command: npm config get registry -ws=false -iwr
+[11:07:06.484] [INFO] base-generator-task-success: Storybook configuration generated
+[11:07:06.484] [DEBUG] Using cached package.json for F:\Personal\npm\pdfmake-editor\package.json...
+[11:07:06.484] [DEBUG] Using cached installed version for vitest...
+[11:07:06.484] [DEBUG] Getting installed version for @vitest/coverage-v8...
+[11:07:06.484] [DEBUG] Executing command: npm ls --json --depth=99 2>NUL
+[11:07:07.380] [DEBUG] Executing command: npm ls --json --depth=0 2>NUL
+[11:07:08.253] [DEBUG] An issue occurred while trying to find dependencies metadata using npm: Error: Command failed with exit code 1: npm.cmd ls --json --depth=0 2>NUL
+npm error code EINVALIDTAGNAME
+npm error Invalid tag name "2>NUL" of package "2>NUL": Tags may not have any characters that encodeURIComponent encodes.
+npm error A complete log of this run can be found in: C:\Users\Akash\AppData\Local\npm-cache\_logs\2025-12-24T05_37_07_624Z-debug-0.log
+{
+  "error": {
+    "code": "EINVALIDTAGNAME",
+    "summary": "Invalid tag name \"2>NUL\" of package \"2>NUL\": Tags may not have any characters that encodeURIComponent encodes.",
+    "detail": ""
+  }
+}
+[11:07:08.253] [DEBUG] Getting installed version for @vitest/coverage-istanbul...
+[11:07:08.253] [DEBUG] Executing command: npm ls --json --depth=99 2>NUL
+[11:07:09.132] [DEBUG] Executing command: npm ls --json --depth=0 2>NUL
+[11:07:10.047] [DEBUG] An issue occurred while trying to find dependencies metadata using npm: Error: Command failed with exit code 1: npm.cmd ls --json --depth=0 2>NUL
+npm error code EINVALIDTAGNAME
+npm error Invalid tag name "2>NUL" of package "2>NUL": Tags may not have any characters that encodeURIComponent encodes.
+npm error A complete log of this run can be found in: C:\Users\Akash\AppData\Local\npm-cache\_logs\2025-12-24T05_37_09_378Z-debug-0.log
+{
+  "error": {
+    "code": "EINVALIDTAGNAME",
+    "summary": "Invalid tag name \"2>NUL\" of package \"2>NUL\": Tags may not have any characters that encodeURIComponent encodes.",
+    "detail": ""
+  }
+}
+[11:07:10.048] [INFO] adding-dependencies-task-start: Adding dependencies to package.json
+[11:07:10.048] [INFO] adding-dependencies-task: Adding devDependencies:
+- storybook@^10.1.10
+- @storybook/react-vite@^10.1.10
+- @chromatic-com/storybook@^4.1.3
+- @storybook/addon-vitest@^10.1.10
+- @storybook/addon-a11y@^10.1.10
+- @storybook/addon-docs@^10.1.10
+- @storybook/addon-onboarding@^10.1.10
+- vitest
+- playwright
+- @vitest/browser-playwright
+- @vitest/coverage-v8
+[11:07:10.048] [DEBUG] Using cached package.json for F:\Personal\npm\pdfmake-editor\package.json...
+[11:07:10.048] [DEBUG] Using cached version for storybook...
+[11:07:10.048] [DEBUG] Using cached version for @storybook/react-vite...
+[11:07:10.048] [DEBUG] Using cached version for @chromatic-com/storybook...
+[11:07:10.048] [DEBUG] Using cached version for @storybook/addon-vitest...
+[11:07:10.048] [DEBUG] Using cached version for @storybook/addon-a11y...
+[11:07:10.048] [DEBUG] Using cached version for @storybook/addon-docs...
+[11:07:10.048] [DEBUG] Using cached version for @storybook/addon-onboarding...
+[11:07:10.048] [DEBUG] Getting CLI versions from NPM for vitest...
+[11:07:10.048] [DEBUG] Executing command: npm info vitest version
+[11:07:10.834] [DEBUG] Getting CLI versions from NPM for playwright...
+[11:07:10.834] [DEBUG] Executing command: npm info playwright version
+[11:07:11.967] [DEBUG] Getting CLI versions from NPM for @vitest/browser-playwright...
+[11:07:11.967] [DEBUG] Executing command: npm info @vitest/browser-playwright version
+[11:07:13.732] [DEBUG] Getting CLI versions from NPM for @vitest/coverage-v8...
+[11:07:13.732] [DEBUG] Executing command: npm info @vitest/coverage-v8 version
+[11:07:14.907] [INFO] adding-dependencies-task-success: Dependencies added to package.json
+[11:07:14.908] [INFO] Installing dependencies...
+[11:07:14.908] [INFO] install-dependencies-spinner-start: Installing dependencies...
+[11:07:14.909] [DEBUG] Executing command: npm install
+[11:07:16.123] [ERROR] Installation of dependencies failed! {"error":"Error: Command failed with exit code 1: npm.cmd install\nnpm error code ERESOLVE\nnpm error ERESOLVE unable to resolve dependency tree\nnpm error\nnpm error While resolving: pdfmake-editor@1.0.0\nnpm error Found: react@18.3.1\nnpm error node_modules/react\nnpm error   react@\"^18.0.0\" from the root project\nnpm error   peer react@\"^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0\" from @storybook/react-vite@10.1.10\nnpm error   node_modules/@storybook/react-vite\nnpm error     dev @storybook/react-vite@\"^10.1.10\" from the root project\nnpm error\nnpm error Could not resolve dependency:\nnpm error peer react@\"^19.2.3\" from react-dom@19.2.3\nnpm error node_modules/react-dom\nnpm error   peer react-dom@\"^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0\" from @storybook/react-vite@10.1.10\nnpm error   node_modules/@storybook/react-vite\nnpm error     dev @storybook/react-vite@\"^10.1.10\" from the root project\nnpm error\nnpm error Fix the upstream dependency conflict, or retry\nnpm error this command with --force or --legacy-peer-deps\nnpm error to accept an incorrect (and potentially broken) dependency resolution.\nnpm error\nnpm error\nnpm error For a full report see:\nnpm error C:\\Users\\Akash\\AppData\\Local\\npm-cache\\_logs\\2025-12-24T05_37_15_160Z-eresolve-report.txt\nnpm error A complete log of this run can be found in: C:\\Users\\Akash\\AppData\\Local\\npm-cache\\_logs\\2025-12-24T05_37_15_160Z-debug-0.log\n    at makeError (file:///C:/Users/Akash/AppData/Local/npm-cache/_npx/16684dbf41d9f438/node_modules/storybook/dist/_node-chunks/chunk-LLCTWVOB.js:12912:95)\n    at file:///C:/Users/Akash/AppData/Local/npm-cache/_npx/16684dbf41d9f438/node_modules/storybook/dist/_node-chunks/chunk-LLCTWVOB.js:13486:27\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async Object.executeTaskWithSpinner (file:///C:/Users/Akash/AppData/Local/npm-cache/_npx/16684dbf41d9f438/node_modules/storybook/dist/_node-chunks/chunk-TTS5PSCO.js:3701:11)\n    at async NPMProxy.installDependencies (file:///C:/Users/Akash/AppData/Local/npm-cache/_npx/16684dbf41d9f438/node_modules/storybook/dist/_node-chunks/chunk-LLCTWVOB.js:11259:5)\n    at async DependencyInstallationCommand.execute (file:///C:/Users/Akash/AppData/Local/npm-cache/_npx/16684dbf41d9f438/node_modules/create-storybook/dist/_node-chunks/chunk-4PJVQNF4.js:1511:9)\n    at async doInitiate (file:///C:/Users/Akash/AppData/Local/npm-cache/_npx/16684dbf41d9f438/node_modules/create-storybook/dist/_node-chunks/chunk-4PJVQNF4.js:2287:38)\n    at async file:///C:/Users/Akash/AppData/Local/npm-cache/_npx/16684dbf41d9f438/node_modules/create-storybook/dist/_node-chunks/chunk-4PJVQNF4.js:2322:20\n    at async withTelemetry (file:///C:/Users/Akash/AppData/Local/npm-cache/_npx/16684dbf41d9f438/node_modules/storybook/dist/_node-chunks/chunk-PGCRO4IZ.js:209:12)\n    at async initiate (file:///C:/Users/Akash/AppData/Local/npm-cache/_npx/16684dbf41d9f438/node_modules/create-storybook/dist/_node-chunks/chunk-4PJVQNF4.js:2315:24)"}
+[11:07:16.123] [ERROR] install-dependencies-spinner-error: [31mInstallation of dependencies failed![39m
+[11:07:16.124] [WARN] The following addons couldn't be configured:
+
+- @storybook/addon-vitest: https://storybook.js.org/docs/writing-tests/integrations/vitest-addon#manual-setup
+
+Please follow each addon's configuration instructions manually.
+[11:07:16.125] [WARN] Storybook setup completed, but some non-blocking errors occurred. Please check the log file below for details.
+[11:07:16.125] [INFO] To run Storybook manually, run [36mnpm run storybook[39m. CTRL+C to stop.
+[11:07:16.126] [INFO] Wanna know more about Storybook? Check out [36mhttps://storybook.js.org/[39m
+Having trouble or want to chat? Join us at [36mhttps://discord.gg/storybook/[39m

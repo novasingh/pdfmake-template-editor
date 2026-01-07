@@ -1,0 +1,175 @@
+.properties-panel {
+    width: 290px;
+    background-color: #ffffff;
+    border-left: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    z-index: 20;
+}
+
+.properties-panel.empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.panel-header {
+    padding: 16px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.panel-header h2 {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+    letter-spacing: 0.05em;
+}
+
+.panel-content {
+    padding: 16px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    /* Hide for Firefox */
+    -ms-overflow-style: none;
+    /* Hide for IE/Edge */
+    flex: 1;
+    /* Grow to fill panel */
+    display: flex;
+    /* Allow pushing child to bottom */
+    flex-direction: column;
+}
+
+.panel-content::-webkit-scrollbar {
+    display: none;
+    /* Hide for Chrome/Safari/Webkit */
+}
+
+.prop-section {
+    margin-bottom: 16px;
+}
+
+.prop-section label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+.prop-section input,
+.prop-section select,
+.prop-section textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    font-size: 13px;
+    background-color: #f8fafc;
+    color: #1e293b;
+}
+
+.prop-section input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+    cursor: pointer;
+}
+
+.prop-section input[type="color"] {
+    width: 100%;
+    height: 35px;
+    padding: 2px;
+    cursor: pointer;
+}
+
+.checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.checkbox-row label {
+    margin: 0;
+    text-transform: none;
+    font-size: 12px;
+    font-weight: 500;
+    color: #475569;
+    cursor: pointer;
+}
+
+.prop-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.prop-group span {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 4px;
+}
+
+.alignment-toggle {
+    display: flex;
+    gap: 4px;
+}
+
+.alignment-toggle button {
+    flex: 1;
+    padding: 6px;
+    border: 1px solid #e2e8f0;
+    background-color: #ffffff;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.alignment-toggle button.active {
+    background-color: #3b82f6;
+    color: #ffffff;
+    border-color: #3b82f6;
+}
+
+.secondary-btn {
+    background-color: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.secondary-btn:hover {
+    background-color: #e2e8f0;
+    color: #1e293b;
+}
+
+.delete-btn {
+    margin-top: 24px;
+    width: 100%;
+    padding: 10px;
+    background-color: #fef2f2;
+    color: #ef4444;
+    border: 1px solid #fee2e2;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.delete-btn:hover {
+    background-color: #fee2e2;
+}
