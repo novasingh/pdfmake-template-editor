@@ -197,11 +197,10 @@ const PropertiesPanel: React.FC = () => {
 
                 {(element.type === 'client-info' || element.type === 'business-info' || element.type === 'signature') && (
                     <>
-                        {/* Heading Section */}
-                        <div className="prop-section" style={{ marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid #eee' }}>
-                            <label style={{ fontWeight: '600', color: '#1e293b', marginBottom: '10px', display: 'block' }}>Heading Typography</label>
+                        <div className="prop-section border-top">
+                            <label className="section-label">Heading Typography</label>
 
-                            <div className="prop-group" style={{ marginBottom: '10px' }}>
+                            <div className="prop-group">
                                 <span>Heading Text</span>
                                 <input
                                     type="text"
@@ -234,18 +233,16 @@ const PropertiesPanel: React.FC = () => {
                                 </div>
                             </div>
 
-                            <div className="prop-section" style={{ marginTop: '10px' }}>
-                                <div className="checkbox-row">
-                                    <input
-                                        type="checkbox"
-                                        id="boldHeading"
-                                        checked={(element as any).headingStyle?.fontWeight === 'bold'}
-                                        onChange={(e) => updateElement(element.id, {
-                                            headingStyle: { ...((element as any).headingStyle || {}), fontWeight: e.target.checked ? 'bold' : 'normal' }
-                                        } as any)}
-                                    />
-                                    <label htmlFor="boldHeading">Bold Heading</label>
-                                </div>
+                            <div className="checkbox-row">
+                                <input
+                                    type="checkbox"
+                                    id="boldHeading"
+                                    checked={(element as any).headingStyle?.fontWeight === 'bold'}
+                                    onChange={(e) => updateElement(element.id, {
+                                        headingStyle: { ...((element as any).headingStyle || {}), fontWeight: e.target.checked ? 'bold' : 'normal' }
+                                    } as any)}
+                                />
+                                <label htmlFor="boldHeading">Bold Heading</label>
                             </div>
                         </div>
 
@@ -279,21 +276,19 @@ const PropertiesPanel: React.FC = () => {
                         </div>
 
                         {element.type === 'client-info' && (
-                            <div className="branding-section" style={{ marginTop: '20px', borderTop: '1px solid #eee', paddingTop: '15px' }}>
-                                <div className="prop-section">
-                                    <div className="checkbox-row">
-                                        <input
-                                            type="checkbox"
-                                            id="showLeftBorder"
-                                            checked={(element as any).showLeftBorder}
-                                            onChange={(e) => updateElement(element.id, { showLeftBorder: e.target.checked } as any)}
-                                        />
-                                        <label htmlFor="showLeftBorder">Show Left Border</label>
-                                    </div>
+                            <div className="branding-section border-top">
+                                <div className="checkbox-row">
+                                    <input
+                                        type="checkbox"
+                                        id="showLeftBorder"
+                                        checked={(element as any).showLeftBorder}
+                                        onChange={(e) => updateElement(element.id, { showLeftBorder: e.target.checked } as any)}
+                                    />
+                                    <label htmlFor="showLeftBorder">Show Left Border</label>
                                 </div>
 
                                 {(element as any).showLeftBorder && (
-                                    <div className="prop-grid">
+                                    <div className="prop-grid" style={{ marginTop: '12px' }}>
                                         <div className="prop-group">
                                             <span>Thickness (px)</span>
                                             <input
@@ -348,14 +343,14 @@ const PropertiesPanel: React.FC = () => {
 
                 {element.type === 'table' && (
                     <>
-                        <div className="prop-section" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div className="checkbox-row">
                             <input
                                 type="checkbox"
                                 id="headerRow"
                                 checked={(element as any).headerRow}
                                 onChange={(e) => updateElement(element.id, { headerRow: e.target.checked } as any)}
                             />
-                            <label htmlFor="headerRow" style={{ margin: 0 }}>Has Header Row</label>
+                            <label htmlFor="headerRow">Has Header Row</label>
                         </div>
 
                         {(element as any).headerRow && (
@@ -398,18 +393,16 @@ const PropertiesPanel: React.FC = () => {
 
                         <div className="prop-section">
                             <label>Structure</label>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '5px' }}>
+                            <div className="prop-grid">
                                 <button
                                     className="secondary-btn"
                                     onClick={() => addTableRow(element.id)}
-                                    style={{ fontSize: '11px', padding: '5px' }}
                                 >
                                     + Add Row
                                 </button>
                                 <button
                                     className="secondary-btn"
                                     onClick={() => addTableColumn(element.id)}
-                                    style={{ fontSize: '11px', padding: '5px' }}
                                 >
                                     + Add Col
                                 </button>

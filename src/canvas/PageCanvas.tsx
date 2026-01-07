@@ -8,20 +8,10 @@ import {
     verticalListSortingStrategy
 } from '@dnd-kit/sortable';
 import CanvasBlock from './CanvasBlock';
-import JsonPreviewModal from './JsonPreviewModal';
-import { exportToPdfMake } from '../exporters/pdfmakeMapper';
-import * as pdfMake from 'pdfmake/build/pdfmake';
-import * as pdfFonts from 'pdfmake/build/vfs_fonts';
-
-// Initialize pdfmake fonts with type-safe assignment
-if (pdfFonts && (pdfFonts as any).pdfMake) {
-    (pdfMake as any).vfs = (pdfFonts as any).pdfMake.vfs;
-}
 
 const PageCanvas: React.FC = () => {
     const { document: doc, selectElement } = useEditorStore();
     const { page, rootElementIds, elements } = doc;
-    const [isJsonModalOpen, setIsJsonModalOpen] = React.useState(false);
 
     const { setNodeRef } = useDroppable({
         id: 'page-canvas',
@@ -128,16 +118,6 @@ const PageCanvas: React.FC = () => {
         return null;
     };
 
-    const handleDownloadPDF = () => {
-        try {
-            const docDefinition = exportToPdfMake(doc);
-            (pdfMake as any).createPdf(docDefinition).download(`Template_${new Date().getTime()}.pdf`);
-        } catch (error) {
-            console.error('PDF Generation failed:', error);
-            alert('Could not generate PDF. Please check the console for details.');
-        }
-    };
-
     return (
         <div className="canvas-container" onClick={() => selectElement(null)}>
             <div
@@ -153,7 +133,16 @@ const PageCanvas: React.FC = () => {
                 {renderWatermark()}
 
                 {/* Droppable Content Area */}
-                <div className="content-area" style={{ height: '100%', position: 'relative', zIndex: 2 }}>
+                <div className="content-area" style={{
+                    height: '100%',
+                    position: 'relative',
+                    zIndex: 2,
+                    paddingTop: mmToPx(page.margins.top),
+                    paddingRight: mmToPx(page.margins.right),
+                    paddingBottom: mmToPx(page.margins.bottom),
+                    paddingLeft: mmToPx(page.margins.left),
+                    boxSizing: 'border-box'
+                }}>
                     <SortableContext
                         items={rootElementIds}
                         strategy={verticalListSortingStrategy}
@@ -164,36 +153,6 @@ const PageCanvas: React.FC = () => {
                     </SortableContext>
                 </div>
             </div>
-
-            {/* Floating JSON Button */}
-            <button
-                className="floating-json-btn"
-                onClick={(e) => {
-                    e.stopPropagation();
-                    setIsJsonModalOpen(true);
-                }}
-                title="View PDFMake JSON"
-            >
-                JSON
-            </button>
-
-            {/* Floating PDF Download Button */}
-            <button
-                className="floating-pdf-btn"
-                onClick={(e) => {
-                    e.stopPropagation();
-                    handleDownloadPDF();
-                }}
-                title="Download as PDF"
-            >
-                Download PDF
-            </button>
-
-            {/* JSON Preview Modal */}
-            <JsonPreviewModal
-                isOpen={isJsonModalOpen}
-                onClose={() => setIsJsonModalOpen(false)}
-            />
         </div>
     );
 };

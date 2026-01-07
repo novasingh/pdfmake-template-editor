@@ -1,6 +1,11 @@
 import { DocumentSchema, EditorElement, BaseStyle } from '../types/editor';
 
 /**
+ * Constants for conversion
+ */
+const MM_TO_PT = 2.83465;
+
+/**
  * Maps our internal EditorElement style to pdfmake style properties
  */
 const mapStyle = (style: BaseStyle) => {
@@ -17,8 +22,19 @@ const mapStyle = (style: BaseStyle) => {
  * Recursively maps our internal schema to pdfmake document definition
  */
 export const exportToPdfMake = (doc: DocumentSchema): any => {
-    const content = doc.rootElementIds.map(id => {
-        const element = doc.elements[id];
+    // Helper to calculate available width (A4 is ~595pt wide)
+    const getPageWidth = () => {
+        const sizes: Record<string, [number, number]> = {
+            'A4': [595.28, 841.89]
+        };
+        const [w] = sizes[doc.page.size as string] || [595.28, 841.89];
+        return w - (doc.page.margins.left + doc.page.margins.right) * MM_TO_PT;
+    };
+
+    const pageWidth = getPageWidth();
+
+    const mapElement = (elementId: string): any => {
+        const element = doc.elements[elementId];
         if (!element) return null;
 
         switch (element.type) {
@@ -32,7 +48,6 @@ export const exportToPdfMake = (doc: DocumentSchema): any => {
 
             case 'divider': {
                 const div = element as any;
-                const pageWidth = 515; // Approx A4 width (595 - margins)
                 let lineWidth = pageWidth;
 
                 if (typeof div.width === 'string' && div.width.endsWith('%')) {
@@ -41,7 +56,6 @@ export const exportToPdfMake = (doc: DocumentSchema): any => {
                     lineWidth = div.width;
                 }
 
-                // Handle x1, x2 based on alignment
                 let x1 = 0;
                 const align = element.style.alignment;
                 if (align === 'center') x1 = (pageWidth - lineWidth) / 2;
@@ -66,39 +80,35 @@ export const exportToPdfMake = (doc: DocumentSchema): any => {
                 const img = element as any;
                 return {
                     image: img.src,
-                    width: typeof img.width === 'string' && img.width.endsWith('%') ? 515 * (parseFloat(img.width) / 100) : (img.width || 150),
+                    width: typeof img.width === 'string' && img.width.endsWith('%') ? pageWidth * (parseFloat(img.width) / 100) : (img.width || 150),
                     height: img.height === 'auto' ? undefined : img.height,
                     ...mapStyle(element.style),
                 };
             }
 
-            case 'columns':
+            case 'columns': {
+                const cols = element as any;
                 return {
-                    columns: (element as any).columns.map((col: any) => ({
+                    columns: cols.columns.map((col: any) => ({
                         width: col.width,
-                        stack: col.content.map((childId: string) => {
-                            const child = doc.elements[childId];
-                            // Recursive mapping for nested content
-                            // (For now, top-level reordering is prioritized)
-                            return child ? { text: (child as any).content, ...mapStyle(child.style) } : null;
-                        }).filter(Boolean)
+                        stack: col.content.map(mapElement).filter(Boolean)
                     })),
                     ...mapStyle(element.style),
                 };
+            }
 
             case 'table': {
                 const table = element as any;
+                const colsCount = table.body[0]?.length || 0;
                 return {
                     table: {
                         headerRows: table.headerRow ? 1 : 0,
+                        widths: Array(colsCount).fill('*'),
                         body: table.body.map((row: any[], rIdx: number) =>
                             row.map(cell => {
                                 const isHeader = table.headerRow && rIdx === 0;
                                 return {
-                                    stack: cell.content.map((childId: string) => {
-                                        const child = doc.elements[childId];
-                                        return child ? exportToPdfMake({ ...doc, rootElementIds: [childId] }).content[0] : null;
-                                    }).filter(Boolean),
+                                    stack: cell.content.map(mapElement).filter(Boolean),
                                     fillColor: isHeader ? (table.headerColor || '#f8fafc') : undefined
                                 };
                             })
@@ -139,14 +149,14 @@ export const exportToPdfMake = (doc: DocumentSchema): any => {
                             body: [[{ stack, border: [true, false, false, false], padding: [10, 2, 0, 2] }]]
                         },
                         layout: {
-                            hLineWidth: (): number => 0,
-                            vLineWidth: (): number => 0,
-                            hLineColor: (): string => 'white',
-                            vLineColor: (): string => 'white',
-                            paddingLeft: (): number => 0,
-                            paddingRight: (): number => 0,
-                            paddingTop: (): number => 0,
-                            paddingBottom: (): number => 0,
+                            hLineWidth: () => 0,
+                            vLineWidth: (i: number) => (i === 0 ? (info.borderWidth || 3) : 0),
+                            hLineColor: () => 'white',
+                            vLineColor: () => info.borderColor || '#3b82f6',
+                            paddingLeft: () => 0,
+                            paddingRight: () => 0,
+                            paddingTop: () => 0,
+                            paddingBottom: () => 0,
                         },
                         ...mapStyle(element.style),
                     };
@@ -191,15 +201,17 @@ export const exportToPdfMake = (doc: DocumentSchema): any => {
             default:
                 return null;
         }
-    }).filter(Boolean);
+    };
+
+    const content = doc.rootElementIds.map(mapElement).filter(Boolean);
 
     const definition: any = {
         pageSize: doc.page.size,
         pageMargins: [
-            doc.page.margins.left,
-            doc.page.margins.top,
-            doc.page.margins.right,
-            doc.page.margins.bottom
+            doc.page.margins.left * MM_TO_PT,
+            doc.page.margins.top * MM_TO_PT,
+            doc.page.margins.right * MM_TO_PT,
+            doc.page.margins.bottom * MM_TO_PT
         ],
         content,
         background: (currentPage: number, pageSize: any) => {
@@ -220,39 +232,22 @@ export const exportToPdfMake = (doc: DocumentSchema): any => {
                 });
             }
 
-            // 2. Watermark
+            // 2. Watermark Implementation
             if (doc.page.watermark) {
                 const wm = doc.page.watermark;
                 const opacity = wm.opacity ?? 0.1;
-                const pos = wm.position || 'center';
-
-                // Calculate position offsets
-                let x = pageSize.width / 2;
-                let y = pageSize.height / 2;
-                let alignment = 'center';
-
-                if (pos.includes('left')) x = doc.page.margins.left;
-                if (pos.includes('right')) x = pageSize.width - doc.page.margins.right;
-                if (pos.includes('top')) y = doc.page.margins.top;
-                if (pos.includes('bottom')) y = pageSize.height - doc.page.margins.bottom;
-
-                if (pos.includes('left')) alignment = 'left';
-                if (pos.includes('right')) alignment = 'right';
 
                 if (wm.type === 'text') {
                     bg.push({
                         text: wm.textValue,
-                        fontSize: wm.fontSize || 60,
+                        fontSize: (wm.fontSize || 60) * 1.5,
                         color: wm.color || 'black',
                         opacity: opacity,
                         bold: wm.fontWeight === 'bold',
-                        alignment: alignment as any,
-                        margin: [
-                            pos.includes('left') ? 20 : 0,
-                            pos.includes('top') ? 20 : pos.includes('bottom') ? 0 : y - (wm.fontSize || 60) / 2,
-                            pos.includes('right') ? 20 : 0,
-                            pos.includes('bottom') ? 20 : 0
-                        ]
+                        alignment: 'center',
+                        margin: [0, (pageSize.height / 2) - ((wm.fontSize || 60) / 2), 0, 0],
+                        // Rotation isn't directly supported in text inside background but we can use canvas if needed.
+                        // However, pdfmake's top-level watermark is better for simple rotation.
                     });
                 } else if (wm.type === 'image' && wm.imageUrl) {
                     bg.push({
@@ -261,16 +256,32 @@ export const exportToPdfMake = (doc: DocumentSchema): any => {
                         height: wm.height || 200,
                         opacity: opacity,
                         absolutePosition: {
-                            x: pos.includes('left') ? doc.page.margins.left : pos.includes('right') ? pageSize.width - (wm.width || 200) - doc.page.margins.right : (pageSize.width - (wm.width || 200)) / 2,
-                            y: pos.includes('top') ? doc.page.margins.top : pos.includes('bottom') ? pageSize.height - (wm.height || 200) - doc.page.margins.bottom : (pageSize.height - (wm.height || 200)) / 2
+                            x: (pageSize.width - (wm.width || 200)) / 2,
+                            y: (pageSize.height - (wm.height || 200)) / 2
                         }
                     });
                 }
             }
 
             return bg;
-        }
+        },
+        // Native watermark for centered, rotated text
+        watermark: doc.page.watermark?.type === 'text' ? {
+            text: doc.page.watermark.textValue,
+            color: doc.page.watermark.color || 'black',
+            opacity: doc.page.watermark.opacity ?? 0.1,
+            bold: doc.page.watermark.fontWeight === 'bold',
+            fontSize: doc.page.watermark.fontSize || 60,
+        } : undefined
     };
+
+    // Remove text watermark from background if using native watermark
+    if (definition.watermark && definition.background) {
+        const originalBg = definition.background;
+        definition.background = (currentPage: number, pageSize: any) => {
+            return originalBg(currentPage, pageSize).filter((item: any) => !item.text);
+        };
+    }
 
     return definition;
 };

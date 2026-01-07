@@ -1,175 +1,295 @@
+:root {
+    --bg-rich-input: #f8fafc;
+    --border-rich: #e2e8f0;
+    --brand-primary: #3b82f6;
+    --brand-primary-hover: #2563eb;
+    --text-rich-main: #1e293b;
+    --text-rich-muted: #64748b;
+    --radius-rich: 8px;
+    --shadow-rich-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-rich-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-rich-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .properties-panel {
-    width: 290px;
+    width: 320px;
     background-color: #ffffff;
-    border-left: 1px solid #e2e8f0;
+    border-left: 1px solid var(--border-rich);
     display: flex;
     flex-direction: column;
     z-index: 20;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.02);
+    overflow: hidden;
+    /* Prevent panel itself from scrolling */
 }
 
 .properties-panel.empty {
+    width: 320px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 40px;
     text-align: center;
-    color: #94a3b8;
-    font-size: 13px;
-    line-height: 1.5;
+    color: var(--text-rich-muted);
+    font-size: 14px;
+    line-height: 1.6;
+    opacity: 0.6;
+    height: 100%;
+}
+
+.properties-panel.empty p {
+    margin-top: 16px;
+    font-weight: 500;
 }
 
 .panel-header {
-    padding: 16px;
-    border-bottom: 1px solid #e2e8f0;
+    padding: 24px 20px;
+    border-bottom: 1px solid var(--border-rich);
+    background: #fff;
+    flex-shrink: 0;
 }
 
 .panel-header h2 {
-    font-size: 12px;
-    font-weight: 700;
-    color: #1e293b;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text-rich-main);
     margin: 0;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
 }
 
 .panel-content {
-    padding: 16px;
+    padding: 24px 20px;
     overflow-y: auto;
-    scrollbar-width: none;
-    /* Hide for Firefox */
-    -ms-overflow-style: none;
-    /* Hide for IE/Edge */
+    overflow-x: hidden;
     flex: 1;
-    /* Grow to fill panel */
     display: flex;
-    /* Allow pushing child to bottom */
     flex-direction: column;
+    gap: 32px;
 }
 
+/* Custom Scrollbar */
 .panel-content::-webkit-scrollbar {
-    display: none;
-    /* Hide for Chrome/Safari/Webkit */
+    width: 6px;
+}
+
+.panel-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.panel-content::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 10px;
+}
+
+.panel-content::-webkit-scrollbar-thumb:hover {
+    background: #cbd5e1;
 }
 
 .prop-section {
-    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
 .prop-section label {
     display: block;
     font-size: 11px;
-    font-weight: 600;
-    color: #64748b;
+    font-weight: 700;
+    color: var(--text-rich-muted);
     text-transform: uppercase;
-    margin-bottom: 6px;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
 }
 
 .prop-section input,
 .prop-section select,
 .prop-section textarea {
     width: 100%;
-    padding: 8px;
-    border: 1px solid #e2e8f0;
-    border-radius: 4px;
-    font-size: 13px;
-    background-color: #f8fafc;
-    color: #1e293b;
+    padding: 10px 5px;
+    border: 1px solid var(--border-rich);
+    border-radius: var(--radius-rich);
+    font-size: 14px;
+    font-weight: 500;
+    background-color: var(--bg-rich-input);
+    color: var(--text-rich-main);
+    transition: var(--transition-smooth);
+    box-shadow: var(--shadow-rich-sm);
+}
+
+.prop-section input:hover,
+.prop-section select:hover,
+.prop-section textarea:hover {
+    border-color: #cbd5e1;
+    background-color: #f1f5f9;
+}
+
+.prop-section input:focus,
+.prop-section select:focus,
+.prop-section textarea:focus {
+    background-color: #ffffff;
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12), var(--shadow-rich-md);
+    outline: none;
 }
 
 .prop-section input[type="checkbox"] {
-    width: auto;
+    width: 18px;
+    height: 18px;
     margin: 0;
     cursor: pointer;
+    border-radius: 6px;
+    accent-color: var(--brand-primary);
+    box-shadow: none;
 }
 
 .prop-section input[type="color"] {
     width: 100%;
-    height: 35px;
-    padding: 2px;
+    height: 40px;
+    padding: 4px;
     cursor: pointer;
+    border-radius: var(--radius-rich);
 }
 
 .checkbox-row {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     cursor: pointer;
+    padding: 12px;
+    background: var(--bg-rich-input);
+    border-radius: var(--radius-rich);
+    border: 1px solid var(--border-rich);
+    transition: var(--transition-smooth);
+}
+
+.checkbox-row:hover {
+    border-color: #cbd5e1;
+    background: #f1f5f9;
 }
 
 .checkbox-row label {
     margin: 0;
     text-transform: none;
-    font-size: 12px;
-    font-weight: 500;
-    color: #475569;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-rich-main);
     cursor: pointer;
 }
 
 .prop-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    gap: 16px;
 }
 
 .prop-group span {
     display: block;
     font-size: 11px;
-    font-weight: 600;
-    color: #64748b;
-    margin-bottom: 4px;
+    font-weight: 700;
+    color: var(--text-rich-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
 }
 
 .alignment-toggle {
     display: flex;
-    gap: 4px;
+    gap: 2px;
+    background: var(--bg-rich-input);
+    padding: 3px;
+    border-radius: var(--radius-rich);
+    border: 1px solid var(--border-rich);
 }
 
 .alignment-toggle button {
     flex: 1;
-    padding: 6px;
-    border: 1px solid #e2e8f0;
-    background-color: #ffffff;
-    font-size: 11px;
+    padding: 8px;
+    border: none;
+    background-color: transparent;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-rich-muted);
     cursor: pointer;
+    border-radius: 6px;
+    transition: var(--transition-smooth);
+}
+
+.alignment-toggle button:hover {
+    color: var(--text-rich-main);
+    background-color: rgba(0, 0, 0, 0.03);
 }
 
 .alignment-toggle button.active {
-    background-color: #3b82f6;
-    color: #ffffff;
-    border-color: #3b82f6;
+    background-color: #ffffff;
+    color: var(--brand-primary);
+    box-shadow: var(--shadow-rich-sm), 0 0 0 1px rgba(0, 0, 0, 0.02);
 }
 
 .secondary-btn {
-    background-color: #f1f5f9;
-    color: #475569;
-    border: 1px solid #e2e8f0;
-    border-radius: 4px;
-    font-weight: 600;
+    background: #ffffff;
+    color: var(--text-rich-main);
+    border: 1px solid var(--border-rich);
+    border-radius: var(--radius-rich);
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: var(--transition-smooth);
+    box-shadow: var(--shadow-rich-sm);
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
 }
 
 .secondary-btn:hover {
-    background-color: #e2e8f0;
-    color: #1e293b;
+    border-color: #cbd5e1;
+    background: #f8fafc;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-rich-md);
+}
+
+.secondary-btn:active {
+    transform: translateY(0);
 }
 
 .delete-btn {
-    margin-top: 24px;
+    margin-top: 40px;
     width: 100%;
-    padding: 10px;
-    background-color: #fef2f2;
-    color: #ef4444;
-    border: 1px solid #fee2e2;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 600;
+    padding: 12px;
+    background-color: #fff1f2;
+    color: #e11d48;
+    border: 1px solid #fecaca;
+    border-radius: var(--radius-rich);
+    font-size: 13px;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: var(--transition-smooth);
 }
 
 .delete-btn:hover {
-    background-color: #fee2e2;
+    background-color: #ffe4e6;
+    border-color: #fda4af;
+    color: #be123c;
+}
+
+/* Helper Classes */
+.border-top {
+    border-top: 1px solid var(--border-rich);
+    padding-top: 24px;
+    margin-top: 8px;
+}
+
+.section-label {
+    margin-bottom: 20px !important;
+    color: var(--text-rich-main) !important;
+    font-size: 13px !important;
+}
+
+.branding-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }

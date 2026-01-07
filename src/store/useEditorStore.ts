@@ -25,13 +25,15 @@ interface EditorState {
     addTableColumn: (tableId: string) => void;
     cloneElement: (id: string) => void;
     selectElement: (id: string | null) => void;
+    resetDocument: () => void;
+    loadTemplate: (template: 'blank' | 'default') => void;
 }
 
 const DEFAULT_PAGE: PageSettings = {
     size: 'A4',
     width: 210,
     height: 297,
-    margins: { top: 20, right: 20, bottom: 20, left: 20 },
+    margins: { top: 10, right: 10, bottom: 10, left: 10 },
     padding: 0,
 };
 
@@ -468,6 +470,56 @@ export const useEditorStore = create<EditorState>()(
             }),
 
             selectElement: (id) => set({ selectedElementId: id }),
+
+            resetDocument: () => set({
+                document: {
+                    page: DEFAULT_PAGE,
+                    elements: {},
+                    rootElementIds: [],
+                },
+                selectedElementId: null,
+            }),
+
+            loadTemplate: (template) => {
+                if (template === 'blank') {
+                    set({
+                        document: {
+                            page: DEFAULT_PAGE,
+                            elements: {},
+                            rootElementIds: [],
+                        },
+                        selectedElementId: null,
+                    });
+                } else if (template === 'default') {
+                    const id1 = `heading-${Math.random().toString(36).substr(2, 9)}`;
+                    const id2 = `paragraph-${Math.random().toString(36).substr(2, 9)}`;
+                    const tableId = `table-${Math.random().toString(36).substr(2, 9)}`;
+
+                    set({
+                        document: {
+                            page: DEFAULT_PAGE,
+                            elements: {
+                                [id1]: { id: id1, type: 'heading', content: 'Invoice', style: { fontSize: 32, fontWeight: 'bold', margin: [0, 0, 0, 20] } } as any,
+                                [id2]: { id: id2, type: 'paragraph', content: 'Thank you for your business!', style: { fontSize: 12, margin: [0, 20, 0, 0] } } as any,
+                                [tableId]: {
+                                    id: tableId,
+                                    type: 'table',
+                                    rows: 2,
+                                    cols: 2,
+                                    headerRow: true,
+                                    body: [
+                                        [{ content: [] }, { content: [] }],
+                                        [{ content: [] }, { content: [] }]
+                                    ],
+                                    style: { margin: [0, 0, 0, 10] }
+                                } as any
+                            },
+                            rootElementIds: [id1, tableId, id2],
+                        },
+                        selectedElementId: null,
+                    });
+                }
+            },
         }),
         {
             name: 'pdfmake-editor-storage',

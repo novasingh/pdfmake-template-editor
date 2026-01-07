@@ -1,72 +1,117 @@
 .sidebar {
-    width: 320px;
+    width: 280px;
     background-color: #ffffff;
-    border-right: 1px solid #e2e8f0;
+    border-right: 1px solid var(--border-rich);
     display: flex;
     flex-direction: column;
     z-index: 20;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.02);
+    overflow: hidden;
 }
 
 .sidebar-tabs {
     display: flex;
-    border-bottom: 1px solid #e2e8f0;
+    padding: 8px;
+    background: #f8fafc;
+    border-bottom: 1px solid var(--border-rich);
+    gap: 4px;
+    flex-shrink: 0;
 }
 
 .tab-btn {
     flex: 1;
-    padding: 12px;
+    padding: 10px;
     border: none;
-    background: none;
+    background: transparent;
     font-size: 13px;
-    font-weight: 600;
-    color: #64748b;
+    font-weight: 700;
+    color: var(--text-rich-muted);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: var(--transition-smooth);
+    border-radius: var(--radius-rich);
+}
+
+.tab-btn:hover {
+    background: rgba(0, 0, 0, 0.03);
+    color: var(--text-rich-main);
 }
 
 .tab-btn.active {
-    color: #3b82f6;
-    box-shadow: inset 0 -2px 0 #3b82f6;
-    background-color: #f8fafc;
+    color: var(--brand-primary);
+    background-color: #ffffff;
+    box-shadow: var(--shadow-rich-sm), 0 0 0 1px rgba(0, 0, 0, 0.02);
 }
 
 .sidebar-content {
     flex: 1;
-    padding: 16px;
+    padding: 24px 20px;
     overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+.sidebar-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 10px;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb:hover {
+    background: #cbd5e1;
 }
 
 .sidebar-content h3 {
     font-size: 11px;
+    font-weight: 800;
     text-transform: uppercase;
-    color: #94a3b8;
-    letter-spacing: 0.05em;
-    margin-bottom: 12px;
+    color: var(--text-rich-muted);
+    letter-spacing: 0.1em;
+    margin: 24px 0 16px;
+}
+
+.sidebar-content h3:first-child {
+    margin-top: 0;
 }
 
 .block-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    gap: 12px;
 }
 
 .draggable-block-preview {
-    padding: 12px;
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
+    padding: 16px 12px;
+    border: 1px solid var(--border-rich);
+    border-radius: var(--radius-rich);
     font-size: 12px;
-    color: #475569;
-    background-color: #f8fafc;
+    font-weight: 600;
+    color: var(--text-rich-main);
+    background-color: #ffffff;
     cursor: grab;
     text-align: center;
-    transition: all 0.2s;
+    transition: var(--transition-smooth);
     touch-action: none;
+    box-shadow: var(--shadow-rich-sm);
 }
 
 .draggable-block-preview:hover {
-    border-color: #3b82f6;
-    color: #3b82f6;
+    border-color: var(--brand-primary);
+    color: var(--brand-primary);
     background-color: #eff6ff;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-rich-md);
+}
+
+.draggable-block-preview:active {
+    cursor: grabbing;
+    transform: scale(0.96);
 }
 
 .prop-group {

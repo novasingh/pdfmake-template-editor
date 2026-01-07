@@ -1,18 +1,123 @@
 .template-editor-wrapper {
-    display: flex;
     height: 100vh;
-    width: 100vw;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
-    background-color: #f1f5f9;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f8fafc;
+}
+
+.editor-main-layout {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    position: relative;
+}
+
+.sidebar-container,
+.properties-container {
+    width: 280px;
+    background: white;
+    border-right: 1px solid var(--border-rich);
+    transition: var(--transition-smooth);
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+}
+
+.properties-container {
+    border-right: none;
+    border-left: 1px solid var(--border-rich);
+    width: 320px;
+}
+
+.sidebar-container.hidden {
+    margin-left: -280px;
+}
+
+.properties-container.hidden {
+    margin-right: -320px;
+}
+
+.canvas-wrapper-outer {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    background: #f1f5f9;
+    overflow: auto;
+}
+
+.panel-overlay {
+    display: none;
+}
+
+/* Mobile specific positioning */
+@media (max-width: 1023px) {
+
+    .sidebar-container,
+    .properties-container {
+        position: fixed;
+        top: 64px;
+        bottom: 0;
+        width: 280px;
+        max-width: 90vw;
+        background: white;
+        box-shadow: 0 0 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar-container.hidden {
+        transform: translateX(-110%);
+        margin-left: 0;
+    }
+
+    .properties-container.hidden {
+        transform: translateX(110%);
+        margin-right: 0;
+    }
+
+    .sidebar-container.open {
+        transform: translateX(0);
+        left: 0;
+    }
+
+    .properties-container.open {
+        transform: translateX(0);
+        right: 0;
+        width: 320px;
+    }
+
+    .panel-overlay {
+        display: block;
+        position: fixed;
+        top: 64px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(15, 23, 42, 0.3);
+        backdrop-filter: blur(2px);
+        z-index: -1;
+        animation: fadeIn 0.2s ease-out;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .drag-overlay-item {
-    padding: 12px;
+    padding: 12px 24px;
     background: white;
-    border: 2px solid #3b82f6;
-    border-radius: 4px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    opacity: 0.8;
-    cursor: grabbing;
+    border: 1px solid var(--border-rich);
+    border-radius: var(--radius-rich);
+    box-shadow: var(--shadow-rich-lg);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--brand-primary);
+    pointer-events: none;
+    white-space: nowrap;
 }
