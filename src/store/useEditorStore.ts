@@ -20,6 +20,7 @@ interface EditorState {
     updateElement: (id: string, updates: Partial<EditorElement>) => void;
     removeElement: (id: string) => void;
     reorderElements: (activeId: string, overId: string) => void;
+    moveElement: (elementId: string, targetParentId: string | null, targetIndex?: number, targetColIndex?: number) => void;
 
     addTableRow: (tableId: string) => void;
     addTableColumn: (tableId: string) => void;
@@ -396,6 +397,9 @@ export const useEditorStore = create<EditorState>()(
                 const oldIndex = state.document.rootElementIds.indexOf(activeId);
                 const newIndex = state.document.rootElementIds.indexOf(overId);
 
+                // Only reorder if both elements are in root
+                if (oldIndex === -1 || newIndex === -1) return state;
+
                 const newRootIds = [...state.document.rootElementIds];
                 newRootIds.splice(oldIndex, 1);
                 newRootIds.splice(newIndex, 0, activeId);
@@ -403,6 +407,79 @@ export const useEditorStore = create<EditorState>()(
                 return {
                     document: {
                         ...state.document,
+                        rootElementIds: newRootIds,
+                    }
+                };
+            }),
+
+            moveElement: (elementId, targetParentId, targetIndex, targetColIndex) => set((state) => {
+                const newElements = { ...state.document.elements };
+                let newRootIds = [...state.document.rootElementIds];
+
+                // Helper function to remove element from its current location
+                const removeFromCurrentLocation = () => {
+                    // Remove from root if present
+                    const rootIdx = newRootIds.indexOf(elementId);
+                    if (rootIdx !== -1) {
+                        newRootIds.splice(rootIdx, 1);
+                        return;
+                    }
+
+                    // Remove from columns
+                    Object.values(newElements).forEach((el) => {
+                        if (el.type === 'columns') {
+                            const columnsEl = el as any;
+                            columnsEl.columns = columnsEl.columns.map((col: any) => ({
+                                ...col,
+                                content: col.content.filter((id: string) => id !== elementId)
+                            }));
+                        }
+                        // Remove from table cells
+                        if (el.type === 'table') {
+                            const tableEl = el as any;
+                            tableEl.body = tableEl.body.map((row: any[]) =>
+                                row.map((cell: any) => ({
+                                    ...cell,
+                                    content: cell.content.filter((id: string) => id !== elementId)
+                                }))
+                            );
+                        }
+                    });
+                };
+
+                // Remove from current location first
+                removeFromCurrentLocation();
+
+                // Add to new location
+                if (targetParentId && newElements[targetParentId]) {
+                    const parent = newElements[targetParentId];
+                    
+                    if (parent.type === 'columns' && typeof targetIndex === 'number') {
+                        // Add to column
+                        const columnsEl = parent as any;
+                        if (columnsEl.columns[targetIndex]) {
+                            columnsEl.columns[targetIndex].content.push(elementId);
+                        }
+                    } else if (parent.type === 'table' && typeof targetIndex === 'number' && typeof targetColIndex === 'number') {
+                        // Add to table cell
+                        const tableEl = parent as any;
+                        if (tableEl.body[targetIndex] && tableEl.body[targetIndex][targetColIndex]) {
+                            tableEl.body[targetIndex][targetColIndex].content.push(elementId);
+                        }
+                    }
+                } else {
+                    // Add to root
+                    if (typeof targetIndex === 'number' && targetIndex >= 0) {
+                        newRootIds.splice(targetIndex, 0, elementId);
+                    } else {
+                        newRootIds.push(elementId);
+                    }
+                }
+
+                return {
+                    document: {
+                        ...state.document,
+                        elements: newElements,
                         rootElementIds: newRootIds,
                     }
                 };

@@ -35,7 +35,7 @@ export interface TemplateEditorProps {
 }
 
 const TemplateEditor: React.FC<TemplateEditorProps> = () => {
-    const { document: doc, reorderElements, addElement, selectedElementId, selectElement } = useEditorStore();
+    const { document: doc, reorderElements, addElement, moveElement, selectedElementId, selectElement } = useEditorStore();
     const [activeId, setActiveId] = React.useState<string | null>(null);
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
     const [isPropertiesOpen, setIsPropertiesOpen] = React.useState(true);
@@ -132,49 +132,71 @@ const TemplateEditor: React.FC<TemplateEditorProps> = () => {
             return;
         }
 
+        const activeId = active.id as string;
+        const overId = over.id as string;
+        const overData = over.data.current;
+
         // Handle dropping a NEW element from the sidebar
         if (active.data.current?.isSidebarItem) {
             const type = active.data.current.type;
-            const overData = over.data.current;
 
             if (overData?.isColumnContainer) {
                 addElement(type, overData.parentId, overData.colIndex);
             } else if (overData?.isTableCell) {
-                // We'll need to update addElement to handle table nesting
                 addElement(type, overData.parentId, overData.rowIndex, overData.colIndex);
             } else {
                 // Calculate the drop position based on where the element is dropped
-                const overId = over.id as string;
-                
-                // If dropped on an existing element, determine if above or below center
                 if (overId !== 'page-canvas' && doc.rootElementIds.includes(overId)) {
                     const overIndex = doc.rootElementIds.indexOf(overId);
                     
-                    // Check if we're dropping in the lower half of the element
-                    // If delta.y is positive (dragging downward) and we're over an element,
-                    // or if over.rect exists we can use it to determine position
                     const overRect = over.rect;
                     const isBelow = overRect && event.activatorEvent instanceof MouseEvent
                         ? (event.activatorEvent as MouseEvent).clientY > (overRect.top + overRect.height / 2)
                         : delta.y > 0;
                     
                     if (isBelow) {
-                        // Insert after this element
                         addElement(type, undefined, overIndex + 1);
                     } else {
-                        // Insert before this element
                         addElement(type, undefined, overIndex);
                     }
                 } else {
-                    // Dropped on the canvas itself - add to the end
                     addElement(type);
                 }
             }
         }
-        // Handle reordering existing elements
-        else if (active.id !== over.id) {
-            // Reordering logic for nested elements would go here
-            reorderElements(active.id as string, over.id as string);
+        // Handle moving/reordering EXISTING elements
+        else if (activeId !== overId) {
+            // Moving to a column container
+            if (overData?.isColumnContainer) {
+                moveElement(activeId, overData.parentId, overData.colIndex);
+            }
+            // Moving to a table cell
+            else if (overData?.isTableCell) {
+                moveElement(activeId, overData.parentId, overData.rowIndex, overData.colIndex);
+            }
+            // Moving to root level (canvas or another root element)
+            else if (overId === 'page-canvas') {
+                // Move to end of root
+                moveElement(activeId, null);
+            }
+            else if (doc.rootElementIds.includes(overId)) {
+                // Reorder within root elements
+                const overIndex = doc.rootElementIds.indexOf(overId);
+                const activeInRoot = doc.rootElementIds.includes(activeId);
+                
+                if (activeInRoot) {
+                    // Simple reorder within root
+                    reorderElements(activeId, overId);
+                } else {
+                    // Moving from container to root
+                    const overRect = over.rect;
+                    const isBelow = overRect && event.activatorEvent instanceof MouseEvent
+                        ? (event.activatorEvent as MouseEvent).clientY > (overRect.top + overRect.height / 2)
+                        : delta.y > 0;
+                    
+                    moveElement(activeId, null, isBelow ? overIndex + 1 : overIndex);
+                }
+            }
         }
 
         setActiveId(null);
