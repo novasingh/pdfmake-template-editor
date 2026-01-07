@@ -1,7 +1,7 @@
 import React from 'react';
 import { useEditorStore } from '../store/useEditorStore';
 import { A4_DIMENSIONS, mmToPx } from '../utils/dimensions';
-import './PageCanvas.css';
+import '../styles/PageCanvas.css';
 import { useDroppable } from '@dnd-kit/core';
 import {
     SortableContext,

@@ -1,0 +1,29 @@
+
+# Welcome to PDFMake Editor Storybook
+
+This Storybook documents the components used in the **PDFMake Editor**, a drag-and-drop tool for creating PDF templates using `pdfmake`.
+
+## Getting Started
+
+The editor is built with React, Zustand, and Dnd-Kit. It allows users to:
+1.  **Drag and Drop** blocks from the sidebar to the canvas.
+2.  **Edit Properties** of selected elements using the properties panel.
+3.  **Export** the final design to PDF.
+
+## Core Components
+
+- **TemplateEditor**: The main container that orchestrates the editor state and layout.
+- **PageCanvas**: The droppable area where the PDF document is visualized.
+- **Sidebar**: Contains the draggable building blocks (Heading, Paragraph, Tables, etc.).
+- **PropertiesPanel**: Context-aware panel for editing the currently selected element.
+
+## State Management
+
+We use `zustand` for state management. The store (`useEditorStore`) handles:
+- The document structure (sections, columns, elements).
+- Selection state.
+- Drag and drop reordering logic.
+
+## Styling
+
+All styles are centralized in `src/styles`. Components import their respective CSS files from there.

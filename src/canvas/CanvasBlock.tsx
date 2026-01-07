@@ -3,9 +3,9 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { EditorElement, ColumnsElement } from '../types/editor';
 import { useEditorStore } from '../store/useEditorStore';
-import './CanvasBlock.css';
-import ColumnContainer from './ColumnContainer';
-import TableContainer from './TableContainer';
+import '../styles/CanvasBlock.css';
+const ColumnContainer = React.lazy(() => import('./ColumnContainer'));
+const TableContainer = React.lazy(() => import('./TableContainer'));
 
 interface CanvasBlockProps {
     element: EditorElement;
@@ -153,9 +153,17 @@ const CanvasBlock: React.FC<CanvasBlockProps> = ({ element }) => {
                 );
             }
             case 'columns':
-                return <ColumnContainer element={element as ColumnsElement} />;
+                return (
+                    <React.Suspense fallback={<div>Loading columns...</div>}>
+                        <ColumnContainer element={element as ColumnsElement} />
+                    </React.Suspense>
+                );
             case 'table':
-                return <TableContainer element={element as any} />;
+                return (
+                    <React.Suspense fallback={<div>Loading table...</div>}>
+                        <TableContainer element={element as any} />
+                    </React.Suspense>
+                );
             case 'client-info': {
                 const info = element as any;
                 const borderStyle = info.showLeftBorder

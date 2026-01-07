@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useEditorStore } from '../store/useEditorStore';
 import { exportToPdfMake } from '../exporters/pdfmakeMapper';
-import './JsonPreviewModal.css';
+import '../styles/JsonPreviewModal.css';
 
 interface JsonPreviewModalProps {
     isOpen: boolean;

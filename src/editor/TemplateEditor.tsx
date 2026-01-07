@@ -23,7 +23,7 @@ import PropertiesPanel from '../properties/PropertiesPanel';
 import EditorHeader from './EditorHeader';
 import { useEditorStore } from '../store/useEditorStore';
 
-import './TemplateEditor.css';
+import '../styles/TemplateEditor.css';
 
 export interface TemplateEditorProps {
     // Add props if needed

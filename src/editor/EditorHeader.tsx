@@ -1,15 +1,9 @@
 import React, { useState } from 'react';
 import { useEditorStore } from '../store/useEditorStore';
-import { exportToPdfMake } from '../exporters/pdfmakeMapper';
-import * as pdfMake from 'pdfmake/build/pdfmake';
-import * as pdfFonts from 'pdfmake/build/vfs_fonts';
+import { useFullscreen } from '../hooks/useFullscreen';
+import { usePDFExport } from '../hooks/usePDFExport';
 import JsonPreviewModal from '../canvas/JsonPreviewModal';
-import './EditorHeader.css';
-
-// Initialize fonts
-if (pdfFonts && (pdfFonts as any).pdfMake) {
-    (pdfMake as any).vfs = (pdfFonts as any).pdfMake.vfs;
-}
+import '../styles/EditorHeader.css';
 
 interface EditorHeaderProps {
     onToggleSidebar: () => void;
@@ -19,29 +13,14 @@ interface EditorHeaderProps {
 const EditorHeader: React.FC<EditorHeaderProps> = ({ onToggleSidebar, onToggleProperties }) => {
     const { document: doc, loadTemplate } = useEditorStore();
     const [isJsonOpen, setIsJsonOpen] = useState(false);
-    const [isFullscreen, setIsFullscreen] = useState(false);
     const [showTemplateDropdown, setShowTemplateDropdown] = useState(false);
 
-    const handlePrint = () => {
-        try {
-            const docDefinition = exportToPdfMake(doc);
-            (pdfMake as any).createPdf(docDefinition).download(`Template_${new Date().getTime()}.pdf`);
-        } catch (error) {
-            console.error('PDF Generation failed:', error);
-            alert('Could not generate PDF. Please check the console for details.');
-        }
-    };
+    // Custom hooks
+    const { isFullscreen, toggleFullscreen } = useFullscreen();
+    const { exportPDF } = usePDFExport();
 
-    const toggleFullscreen = () => {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen();
-            setIsFullscreen(true);
-        } else {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-                setIsFullscreen(false);
-            }
-        }
+    const handlePrint = () => {
+        exportPDF(doc, `Template_${new Date().getTime()}.pdf`);
     };
 
     const handleLoadTemplate = (type: 'blank' | 'default') => {
@@ -54,10 +33,6 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({ onToggleSidebar, onTogglePr
     return (
         <header className="editor-header">
             <div className="header-left">
-
-
-
-
                 <div className="template-dropdown-container">
                     <button
                         className="header-btn secondary"

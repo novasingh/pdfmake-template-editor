@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useEditorStore } from '../store/useEditorStore';
-import './Sidebar.css';
+import '../styles/Sidebar.css';
 import DraggableBlock from './DraggableBlock';
 import { ElementType } from '../types/editor';
 
