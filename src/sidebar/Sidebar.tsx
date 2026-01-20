@@ -3,8 +3,10 @@ import { useEditorStore } from '../store/useEditorStore';
 import '../styles/Sidebar.css';
 import DraggableBlock from './DraggableBlock';
 import { ElementType, Alignment } from '../types/editor';
+import { useLocalization } from '../hooks/useLocalization';
 
 const Sidebar: React.FC = () => {
+    const { t } = useLocalization();
     const [activeTab, setActiveTab] = useState<'blocks' | 'page'>('blocks');
     const { document: doc, setPageSettings } = useEditorStore();
     const { page } = doc;
@@ -49,7 +51,6 @@ const Sidebar: React.FC = () => {
         });
     };
 
-
     return (
         <div className="sidebar">
             <div className="sidebar-tabs">
@@ -57,40 +58,40 @@ const Sidebar: React.FC = () => {
                     className={`tab-btn ${activeTab === 'blocks' ? 'active' : ''}`}
                     onClick={() => setActiveTab('blocks')}
                 >
-                    Blocks
+                    {t('Blocks', 'Blocks')}
                 </button>
                 <button
                     className={`tab-btn ${activeTab === 'page' ? 'active' : ''}`}
                     onClick={() => setActiveTab('page')}
                 >
-                    Page Properties
+                    {t('Page Properties', 'Page Properties')}
                 </button>
             </div>
 
             <div className="sidebar-content">
                 {activeTab === 'blocks' && (
                     <div className="blocks-tab">
-                        <h3>Standard Blocks</h3>
+                        <h3>{t('Standard Blocks', 'Standard Blocks')}</h3>
                         <div className="block-grid">
                             {standardBlocks.map((block) => (
-                                <DraggableBlock key={block.type} type={block.type} label={block.label} />
+                                <DraggableBlock key={block.type} type={block.type} label={t(block.label, block.label)} />
                             ))}
                         </div>
 
-                        <h3 style={{ marginTop: '20px' }}>Business Blocks</h3>
+                        <h3 style={{ marginTop: '20px' }}>{t('Business Blocks', 'Business Blocks')}</h3>
                         <div className="block-grid">
                             {businessBlocks.map((block) => (
-                                <DraggableBlock key={block.type} type={block.type} label={block.label} />
+                                <DraggableBlock key={block.type} type={block.type} label={t(block.label, block.label)} />
                             ))}
                         </div>
 
-                        <h3 style={{ marginTop: '20px' }}>Australian Compliance</h3>
+                        <h3 style={{ marginTop: '20px' }}>{t('Australian Compliance', 'Australian Compliance')}</h3>
                         <div className="block-grid">
                             {complianceBlocks.map((block, idx) => (
                                 <DraggableBlock
                                     key={`${block.type}-${idx}`}
                                     type={block.type}
-                                    label={block.label}
+                                    label={t(block.label, block.label)}
                                     moduleName={block.moduleName}
                                 />
                             ))}

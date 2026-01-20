@@ -1,17 +1,3 @@
-:root {
-    --bg-rich-input: #f8fafc;
-    --border-rich: #e2e8f0;
-    --brand-primary: #3b82f6;
-    --brand-primary-hover: #2563eb;
-    --text-rich-main: #1e293b;
-    --text-rich-muted: #64748b;
-    --radius-rich: 8px;
-    --shadow-rich-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-rich-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-rich-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 .properties-panel {
     width: 320px;
     background-color: #ffffff;
@@ -301,13 +287,13 @@
     gap: 12px;
 }
 
-.spacing-grid > div {
+.spacing-grid>div {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
-.spacing-grid > div > span {
+.spacing-grid>div>span {
     display: block;
     font-size: 10px;
     font-weight: 600;

@@ -53,12 +53,51 @@ npm install pdfmake-editor
 import { TemplateEditor } from 'pdfmake-editor';
 
 const MyEditor = () => {
+  const handleSave = (document) => {
+    console.log('Template saved:', document);
+  };
+
   return (
     <div style={{ height: '100vh' }}>
-      <TemplateEditor />
+      <TemplateEditor 
+        onSave={handleSave}
+        config={{
+          theme: {
+            primaryColor: '#3b82f6',
+            borderRadius: '8px'
+          }
+        }}
+      />
     </div>
   );
 };
+```
+
+## 🔌 API Reference
+
+### TemplateEditor Props
+
+| Prop | Type | Description |
+| :--- | :--- | :--- |
+| `initialData` | `DocumentSchema` | Initial template to load on mount. |
+| `onSave` | `(doc: DocumentSchema) => void` | Callback when "Save" is clicked. |
+| `onChange` | `(doc: DocumentSchema) => void` | Callback on every document change. |
+| `onExport` | `(doc: DocumentSchema) => void` | Callback when "PDF" is exported. |
+| `config` | `EditorConfig` | Theme and localization settings. |
+| `locale` | `string` | Current UI locale (default: 'en'). |
+
+### EditorConfig Object
+
+```tsx
+{
+  theme: {
+    primaryColor: string;
+    accentColor?: string;
+    fontFamily?: string;
+    borderRadius?: string;
+  },
+  labels?: Record<string, string>; // Replace any UI text
+}
 ```
 
 ## 🛠️ Development

@@ -241,8 +241,73 @@ export type EditorElement =
     | ABNFieldElement
     | BankDetailsElement;
 
+/**
+ * Represents the full state of a PDF template document.
+ */
 export interface DocumentSchema {
+    /** Page settings including size, margins, and watermarks */
     page: PageSettings;
+    /** Flat map of all elements by their Unique ID */
     elements: Record<string, EditorElement>;
-    rootElementIds: string[]; // Order of top-level blocks
+    /** Ordered list of top-level element IDs (root level drag sequence) */
+    rootElementIds: string[];
 }
+
+/**
+ * Configuration options for customizing the editor's appearance and terminology.
+ */
+export interface EditorConfig {
+    /** Visual theme overrides */
+    theme?: {
+        /** The primary brand color (used for buttons, active states, etc.) */
+        primaryColor?: string;
+        /** Accent color used for hover states and highlights */
+        accentColor?: string;
+        /** Global font family (e.g., "'Inter', sans-serif") */
+        fontFamily?: string;
+        /** CSS border-radius value (e.g., "8px") */
+        borderRadius?: string;
+    };
+    /** Current UI locale key (e.g., "en", "ja") */
+    locale?: string;
+    /** Map of UI string overrides to satisfy specific terminology or translation needs */
+    labels?: Record<string, string>;
+}
+
+/**
+ * Public Props for the TemplateEditor React component.
+ */
+export interface TemplateEditorProps {
+    /** 
+     * Initial document schema to load on mount. 
+     * If provided, this document will be loaded into the editor state immediately.
+     */
+    initialData?: DocumentSchema;
+
+    /** 
+     * Callback triggered on every document modification. 
+     * Ideal for implementing auto-save functionality.
+     */
+    onChange?: (document: DocumentSchema) => void;
+
+    /** 
+     * Callback triggered when the 'Save' button in the header is clicked. 
+     */
+    onSave?: (document: DocumentSchema) => void;
+
+    /** 
+     * Callback triggered when the 'PDF' export button is clicked. 
+     */
+    onExport?: (document: DocumentSchema) => void;
+
+    /** 
+     * Optional configuration for theming and UI label overrides.
+     */
+    config?: EditorConfig;
+
+    /** 
+     * The locale used for UI labels. Defaults to 'en'.
+     */
+    locale?: string;
+}
+

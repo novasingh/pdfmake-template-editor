@@ -22,13 +22,17 @@ interface EditorHeaderProps {
     onToggleProperties: () => void;
     isSidebarOpen?: boolean;
     isPropertiesOpen?: boolean;
+    onSave?: () => void;
+    onExport?: () => void;
 }
 
 const EditorHeader: React.FC<EditorHeaderProps> = ({
     onToggleSidebar,
     onToggleProperties,
     isSidebarOpen,
-    isPropertiesOpen
+    isPropertiesOpen,
+    onSave,
+    onExport
 }) => {
     const { document: doc, loadTemplate, loadDocument, showDialog } = useEditorStore();
     const [isJsonOpen, setIsJsonOpen] = useState(false);
@@ -43,6 +47,7 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({
 
     const handlePrint = () => {
         exportPDF(doc, `Template_${new Date().getTime()}.pdf`);
+        onExport?.();
     };
 
     const handleLoadTemplate = (type: 'blank' | 'default') => {
@@ -146,24 +151,6 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({
                 </button>
 
                 <div className="header-divider" />
-                <div className="action-group">
-                    <button
-                        className="header-btn secondary"
-                        onClick={() => (useEditorStore as any).temporal.getState().undo()}
-                        title="Undo (Ctrl+Z)"
-                    >
-                        <span>↩ Undo</span>
-                    </button>
-                    <button
-                        className="header-btn secondary"
-                        onClick={() => (useEditorStore as any).temporal.getState().redo()}
-                        title="Redo (Ctrl+Y)"
-                    >
-                        <span>↪ Redo</span>
-                    </button>
-                </div>
-
-                <div className="header-divider" />
 
                 <div className="template-dropdown-container">
                     <button
@@ -230,8 +217,12 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({
                     <button
                         className="header-btn secondary"
                         onClick={() => {
-                            setShowSaveDropdown(!showSaveDropdown);
-                            setShowTemplateDropdown(false);
+                            if (onSave) {
+                                onSave();
+                            } else {
+                                setShowSaveDropdown(!showSaveDropdown);
+                                setShowTemplateDropdown(false);
+                            }
                         }}
                     >
                         <span>Save</span>
@@ -253,6 +244,24 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({
                             </div>
                         </div>
                     )}
+                </div>
+
+                <div className="header-divider" />
+                <div className="action-group">
+                    <button
+                        className="header-btn secondary"
+                        onClick={() => (useEditorStore as any).temporal.getState().undo()}
+                        title="Undo (Ctrl+Z)"
+                    >
+                        <span>Undo</span>
+                    </button>
+                    <button
+                        className="header-btn secondary"
+                        onClick={() => (useEditorStore as any).temporal.getState().redo()}
+                        title="Redo (Ctrl+Y)"
+                    >
+                        <span>Redo</span>
+                    </button>
                 </div>
 
                 {/* Hidden file input for import */}

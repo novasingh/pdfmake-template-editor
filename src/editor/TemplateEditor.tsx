@@ -28,16 +28,38 @@ import PropertiesPanel from '../properties/PropertiesPanel';
 import EditorHeader from './EditorHeader';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { useEditorStore } from '../store/useEditorStore';
+import { LocalizationProvider } from '../hooks/useLocalization';
 import CustomDialog from '../components/CustomDialog';
 
 import '../styles/TemplateEditor.css';
 
-export interface TemplateEditorProps {
-    // Add props if needed
-}
+import {
+    TemplateEditorProps,
+    DocumentSchema,
+    EditorConfig
+} from '../types/editor';
 
-const TemplateEditor: React.FC<TemplateEditorProps> = () => {
-    const { document: doc, reorderElements, addElement, insertModule, moveElement, selectedElementId, selectElement, propertiesPanelOpen, togglePropertiesPanel } = useEditorStore();
+const TemplateEditor: React.FC<TemplateEditorProps> = ({
+    initialData,
+    config,
+    onChange,
+    onSave,
+    onExport,
+    locale = 'en'
+}) => {
+    const {
+        document: doc,
+        reorderElements,
+        addElement,
+        insertModule,
+        moveElement,
+        selectedElementId,
+        selectElement,
+        propertiesPanelOpen,
+        togglePropertiesPanel,
+        loadDocument
+    } = useEditorStore();
+
     useKeyboardShortcuts();
     const [activeId, setActiveId] = React.useState<string | null>(null);
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(window.innerWidth >= 1200);
@@ -46,6 +68,32 @@ const TemplateEditor: React.FC<TemplateEditorProps> = () => {
     const [sidebarWidth, setSidebarWidth] = React.useState(280);
     const [propertiesWidth, setPropertiesWidth] = React.useState(320);
     const [isTooSmall, setIsTooSmall] = React.useState(window.innerWidth < 1024);
+
+    // Initial load from props
+    React.useEffect(() => {
+        if (initialData) {
+            loadDocument(initialData);
+        }
+    }, [initialData, loadDocument]);
+
+    // Handle onChange callback
+    React.useEffect(() => {
+        if (onChange) {
+            onChange(doc);
+        }
+    }, [doc, onChange]);
+
+    // Apply theme configuration
+    const themeStyles = React.useMemo(() => {
+        if (!config?.theme) return {};
+        const { theme } = config;
+        return {
+            '--brand-primary': theme.primaryColor,
+            '--brand-primary-hover': theme.accentColor || theme.primaryColor,
+            '--radius-rich': theme.borderRadius,
+            '--font-family': theme.fontFamily,
+        } as React.CSSProperties;
+    }, [config?.theme]);
 
     // Initial state based on screen size
     React.useEffect(() => {
@@ -275,67 +323,74 @@ const TemplateEditor: React.FC<TemplateEditorProps> = () => {
     }
 
     return (
-        <div className={`template-editor-wrapper ${isMobile ? 'mobile' : ''}`}>
-            <EditorHeader
-                onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-                onToggleProperties={() => togglePropertiesPanel()}
-                isSidebarOpen={isSidebarOpen}
-                isPropertiesOpen={propertiesPanelOpen}
-            />
-
-            <DndContext
-                sensors={sensors}
-                collisionDetection={customCollisionDetection}
-                onDragStart={handleDragStart}
-                onDragEnd={handleDragEnd}
+        <LocalizationProvider locale={locale} labels={config?.labels}>
+            <div
+                className={`template-editor-wrapper ${isMobile ? 'mobile' : ''}`}
+                style={themeStyles}
             >
-                <div className="editor-main-layout">
-                    <div
-                        className={`sidebar-container ${isSidebarOpen ? 'open' : 'hidden'}`}
-                        style={!isMobile ? {
-                            width: `${sidebarWidth}px`,
-                            marginLeft: isSidebarOpen ? 0 : `-${sidebarWidth}px`
-                        } : {}}
-                    >
-                        <Sidebar />
-                        {isMobile && isSidebarOpen && <div className="panel-overlay" onClick={() => setIsSidebarOpen(false)} />}
+                <EditorHeader
+                    onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+                    onToggleProperties={() => togglePropertiesPanel()}
+                    isSidebarOpen={isSidebarOpen}
+                    isPropertiesOpen={propertiesPanelOpen}
+                    onSave={() => onSave?.(doc)}
+                    onExport={() => onExport?.(doc)}
+                />
+
+                <DndContext
+                    sensors={sensors}
+                    collisionDetection={customCollisionDetection}
+                    onDragStart={handleDragStart}
+                    onDragEnd={handleDragEnd}
+                >
+                    <div className="editor-main-layout">
+                        <div
+                            className={`sidebar-container ${isSidebarOpen ? 'open' : 'hidden'}`}
+                            style={!isMobile ? {
+                                width: `${sidebarWidth}px`,
+                                marginLeft: isSidebarOpen ? 0 : `-${sidebarWidth}px`
+                            } : {}}
+                        >
+                            <Sidebar />
+                            {isMobile && isSidebarOpen && <div className="panel-overlay" onClick={() => setIsSidebarOpen(false)} />}
+                        </div>
+
+                        {!isMobile && isSidebarOpen && (
+                            <div className="resizer sidebar-resizer" onMouseDown={startSidebarResize} />
+                        )}
+
+                        <div className="canvas-wrapper-outer" onClick={() => {
+                            if (isMobile) {
+                                setIsSidebarOpen(false);
+                                togglePropertiesPanel(false);
+                            }
+                        }}>
+                            <PageCanvas />
+                        </div>
+
+                        {!isMobile && propertiesPanelOpen && (
+                            <div className="resizer properties-resizer" onMouseDown={startPropertiesResize} />
+                        )}
+
+                        <div
+                            className={`properties-container ${propertiesPanelOpen ? 'open' : 'hidden'}`}
+                            style={!isMobile ? {
+                                width: `${propertiesWidth}px`,
+                                marginRight: propertiesPanelOpen ? 0 : `-${propertiesWidth}px`
+                            } : {}}
+                        >
+                            <PropertiesPanel />
+                            {isMobile && propertiesPanelOpen && <div className="panel-overlay" onClick={() => togglePropertiesPanel(false)} />}
+                        </div>
                     </div>
 
-                    {!isMobile && isSidebarOpen && (
-                        <div className="resizer sidebar-resizer" onMouseDown={startSidebarResize} />
-                    )}
-
-                    <div className="canvas-wrapper-outer" onClick={() => {
-                        if (isMobile) {
-                            setIsSidebarOpen(false);
-                            togglePropertiesPanel(false);
-                        }
-                    }}>
-                        <PageCanvas />
-                    </div>
-
-                    {!isMobile && propertiesPanelOpen && (
-                        <div className="resizer properties-resizer" onMouseDown={startPropertiesResize} />
-                    )}
-
-                    <div
-                        className={`properties-container ${propertiesPanelOpen ? 'open' : 'hidden'}`}
-                        style={!isMobile ? {
-                            width: `${propertiesWidth}px`,
-                            marginRight: propertiesPanelOpen ? 0 : `-${propertiesWidth}px`
-                        } : {}}
-                    >
-                        <PropertiesPanel />
-                        {isMobile && propertiesPanelOpen && <div className="panel-overlay" onClick={() => togglePropertiesPanel(false)} />}
-                    </div>
-                </div>
-
-                <DragOverlay>
-                    {renderDragOverlay()}
-                </DragOverlay>
-            </DndContext>
-            <CustomDialog />
-        </div>
+                    <DragOverlay>
+                        {renderDragOverlay()}
+                    </DragOverlay>
+                </DndContext>
+                <CustomDialog />
+            </div>
+        </LocalizationProvider>
     );
 };
 

@@ -1,29 +1,42 @@
+# 📄 pdfmake-editor
 
-# Welcome to PDFMake Editor Storybook
+A powerful, drag-and-drop PDF template editor for React that generates `pdfmake` JSON definitions. Build complex document layouts visually and export them as high-quality PDFs instantly.
 
-This Storybook documents the components used in the **PDFMake Editor**, a drag-and-drop tool for creating PDF templates using `pdfmake`.
+## 🚀 Key Features
 
-## Getting Started
+- **Intuitive Drag & Drop**: Built with `@dnd-kit` for a smooth, native-feeling layout experience.
+- **Rich Component Library**: Headings, Paragraphs, Images, Tables, Columns, and specialized Business Modules.
+- **Real-time Preview**: Synchronized canvas and PDF export capabilities.
+- **Theming & Localization**: Fully customizable UI to match your brand's look and feel.
 
-The editor is built with React, Zustand, and Dnd-Kit. It allows users to:
-1.  **Drag and Drop** blocks from the sidebar to the canvas.
-2.  **Edit Properties** of selected elements using the properties panel.
-3.  **Export** the final design to PDF.
+## 📦 Storybook Guide
 
-## Core Components
+This Storybook serves as a live documentation and playground for the editor.
 
-- **TemplateEditor**: The main container that orchestrates the editor state and layout.
-- **PageCanvas**: The droppable area where the PDF document is visualized.
-- **Sidebar**: Contains the draggable building blocks (Heading, Paragraph, Tables, etc.).
-- **PropertiesPanel**: Context-aware panel for editing the currently selected element.
+### 🧩 Editor
+The main `TemplateEditor` component. Dive into various configurations including:
+- **Default**: The clean, empty state.
+- **Initial Data**: Loading pre-existing templates (Invoices, Quotes).
+- **Custom Theme**: Modifying the UI aesthetics.
+- **Event Callbacks**: Integrating with your backend.
 
-## State Management
+### 🛠️ Components
+Deep dives into the individual building blocks:
+- **EditorHeader**: Control bar for saving, exporting, and settings.
+- **Sidebar**: The component gallery and page property controls.
+- **PropertiesPanel**: Context-aware styling controls for selected elements.
 
-We use `zustand` for state management. The store (`useEditorStore`) handles:
-- The document structure (sections, columns, elements).
-- Selection state.
-- Drag and drop reordering logic.
+## 📖 Quick Start
 
-## Styling
+```tsx
+import { TemplateEditor } from 'pdfmake-editor';
+import 'pdfmake-editor/dist/index.css';
 
-All styles are centralized in `src/styles`. Components import their respective CSS files from there.
+const MyEditor = () => (
+  <div style={{ height: '100vh' }}>
+    <TemplateEditor 
+      onSave={(doc) => console.log('Saved:', doc)}
+    />
+  </div>
+);
+```
