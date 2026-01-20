@@ -24,6 +24,16 @@ interface EditorHeaderProps {
     isPropertiesOpen?: boolean;
     onSave?: () => void;
     onExport?: () => void;
+    hideButtons?: {
+        template?: boolean;
+        save?: boolean;
+        undo?: boolean;
+        redo?: boolean;
+        help?: boolean;
+        fullscreen?: boolean;
+        exportPdf?: boolean;
+        json?: boolean;
+    };
 }
 
 const EditorHeader: React.FC<EditorHeaderProps> = ({
@@ -32,7 +42,8 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({
     isSidebarOpen,
     isPropertiesOpen,
     onSave,
-    onExport
+    onExport,
+    hideButtons = {}
 }) => {
     const { document: doc, loadTemplate, loadDocument, showDialog } = useEditorStore();
     const [isJsonOpen, setIsJsonOpen] = useState(false);
@@ -152,116 +163,124 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({
 
                 <div className="header-divider" />
 
-                <div className="template-dropdown-container">
-                    <button
-                        className="header-btn secondary"
-                        onClick={() => {
-                            setShowTemplateDropdown(!showTemplateDropdown);
-                            setShowSaveDropdown(false);
-                        }}
-                    >
-                        <span>Templates</span>
-                    </button>
+                {!hideButtons.template && (
+                    <div className="template-dropdown-container">
+                        <button
+                            className="header-btn secondary"
+                            onClick={() => {
+                                setShowTemplateDropdown(!showTemplateDropdown);
+                                setShowSaveDropdown(false);
+                            }}
+                        >
+                            <span>Templates</span>
+                        </button>
 
-                    {showTemplateDropdown && (
-                        <div className="template-dropdown">
-                            <div className="dropdown-section-title">New</div>
-                            <div className="dropdown-item" onClick={() => handleLoadTemplate('blank')}>
-                                <div className="item-info">
-                                    <span className="item-title">Blank Template</span>
-                                    <span className="item-desc">Start from scratch</span>
+                        {showTemplateDropdown && (
+                            <div className="template-dropdown">
+                                <div className="dropdown-section-title">New</div>
+                                <div className="dropdown-item" onClick={() => handleLoadTemplate('blank')}>
+                                    <div className="item-info">
+                                        <span className="item-title">Blank Template</span>
+                                        <span className="item-desc">Start from scratch</span>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div className="dropdown-section-title">Pre-built (Australian)</div>
-                            <div className="dropdown-item" onClick={() => handleLoadPrebuiltTemplate(invoiceTemplateAU)}>
-                                <div className="item-info">
-                                    <span className="item-title">📄 Tax Invoice</span>
-                                    <span className="item-desc">ATO-compliant with GST</span>
+                                <div className="dropdown-section-title">Pre-built (Australian)</div>
+                                <div className="dropdown-item" onClick={() => handleLoadPrebuiltTemplate(invoiceTemplateAU)}>
+                                    <div className="item-info">
+                                        <span className="item-title">📄 Tax Invoice</span>
+                                        <span className="item-desc">ATO-compliant with GST</span>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="dropdown-item" onClick={() => handleLoadPrebuiltTemplate(quoteTemplateAU)}>
-                                <div className="item-info">
-                                    <span className="item-title">💼 Quote / Proposal</span>
-                                    <span className="item-desc">With terms & signature</span>
+                                <div className="dropdown-item" onClick={() => handleLoadPrebuiltTemplate(quoteTemplateAU)}>
+                                    <div className="item-info">
+                                        <span className="item-title">💼 Quote / Proposal</span>
+                                        <span className="item-desc">With terms & signature</span>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="dropdown-item" onClick={() => handleLoadPrebuiltTemplate(complianceTemplate)}>
-                                <div className="item-info">
-                                    <span className="item-title">✅ Compliance Certificate</span>
-                                    <span className="item-desc">Official document template</span>
+                                <div className="dropdown-item" onClick={() => handleLoadPrebuiltTemplate(complianceTemplate)}>
+                                    <div className="item-info">
+                                        <span className="item-title">✅ Compliance Certificate</span>
+                                        <span className="item-desc">Official document template</span>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div className="dropdown-section-title">Import / Browse</div>
-                            <div className="dropdown-item" onClick={() => {
-                                setIsGalleryOpen(true);
-                                setShowTemplateDropdown(false);
-                            }}>
-                                <div className="item-info">
-                                    <span className="item-title">🗂️ Browser Gallery</span>
-                                    <span className="item-desc">Browse your saved templates</span>
+                                <div className="dropdown-section-title">Import / Browse</div>
+                                <div className="dropdown-item" onClick={() => {
+                                    setIsGalleryOpen(true);
+                                    setShowTemplateDropdown(false);
+                                }}>
+                                    <div className="item-info">
+                                        <span className="item-title">🗂️ Browser Gallery</span>
+                                        <span className="item-desc">Browse your saved templates</span>
+                                    </div>
+                                </div>
+                                <div className="dropdown-item" onClick={handleImportJSON}>
+                                    <div className="item-info">
+                                        <span className="item-title">📁 Import from JSON</span>
+                                        <span className="item-desc">Load a saved template file</span>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="dropdown-item" onClick={handleImportJSON}>
-                                <div className="item-info">
-                                    <span className="item-title">📁 Import from JSON</span>
-                                    <span className="item-desc">Load a saved template file</span>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
+                        )}
+                    </div>
+                )}
 
-                <div className="template-dropdown-container">
-                    <button
-                        className="header-btn secondary"
-                        onClick={() => {
-                            if (onSave) {
-                                onSave();
-                            } else {
-                                setShowSaveDropdown(!showSaveDropdown);
-                                setShowTemplateDropdown(false);
-                            }
-                        }}
-                    >
-                        <span>Save</span>
-                    </button>
+                {!hideButtons.save && (
+                    <div className="template-dropdown-container">
+                        <button
+                            className="header-btn secondary"
+                            onClick={() => {
+                                if (onSave) {
+                                    onSave();
+                                } else {
+                                    setShowSaveDropdown(!showSaveDropdown);
+                                    setShowTemplateDropdown(false);
+                                }
+                            }}
+                        >
+                            <span>Save</span>
+                        </button>
 
-                    {showSaveDropdown && (
-                        <div className="template-dropdown">
-                            <div className="dropdown-item" onClick={handleSaveAsTemplate}>
-                                <div className="item-info">
-                                    <span className="item-title">💾 Save to Browser</span>
-                                    <span className="item-desc">Store in local storage</span>
+                        {showSaveDropdown && (
+                            <div className="template-dropdown">
+                                <div className="dropdown-item" onClick={handleSaveAsTemplate}>
+                                    <div className="item-info">
+                                        <span className="item-title">💾 Save to Browser</span>
+                                        <span className="item-desc">Store in local storage</span>
+                                    </div>
+                                </div>
+                                <div className="dropdown-item" onClick={handleExportJSON}>
+                                    <div className="item-info">
+                                        <span className="item-title">📥 Export as JSON</span>
+                                        <span className="item-desc">Download template file</span>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="dropdown-item" onClick={handleExportJSON}>
-                                <div className="item-info">
-                                    <span className="item-title">📥 Export as JSON</span>
-                                    <span className="item-desc">Download template file</span>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
+                        )}
+                    </div>
+                )}
 
                 <div className="header-divider" />
                 <div className="action-group">
-                    <button
-                        className="header-btn secondary"
-                        onClick={() => (useEditorStore as any).temporal.getState().undo()}
-                        title="Undo (Ctrl+Z)"
-                    >
-                        <span>Undo</span>
-                    </button>
-                    <button
-                        className="header-btn secondary"
-                        onClick={() => (useEditorStore as any).temporal.getState().redo()}
-                        title="Redo (Ctrl+Y)"
-                    >
-                        <span>Redo</span>
-                    </button>
+                    {!hideButtons.undo && (
+                        <button
+                            className="header-btn secondary"
+                            onClick={() => (useEditorStore as any).temporal.getState().undo()}
+                            title="Undo (Ctrl+Z)"
+                        >
+                            <span>Undo</span>
+                        </button>
+                    )}
+                    {!hideButtons.redo && (
+                        <button
+                            className="header-btn secondary"
+                            onClick={() => (useEditorStore as any).temporal.getState().redo()}
+                            title="Redo (Ctrl+Y)"
+                        >
+                            <span>Redo</span>
+                        </button>
+                    )}
                 </div>
 
                 {/* Hidden file input for import */}
@@ -284,12 +303,13 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({
             <div className="header-right">
                 <div className="header-divider" />
                 <div className="action-group">
-                    <button
-                        className="header-btn secondary"
-                        onClick={() => showDialog({
-                            type: 'alert',
-                            title: '⌨️ Keyboard Shortcuts',
-                            message: `
+                    {!hideButtons.help && (
+                        <button
+                            className="header-btn secondary"
+                            onClick={() => showDialog({
+                                type: 'alert',
+                                title: '⌨️ Keyboard Shortcuts',
+                                message: `
 • Delete / Backspace : Remove selected element
 • Ctrl + D : Duplicate element
 • Ctrl + C : Copy element
@@ -298,30 +318,37 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({
 • Ctrl + Y : Redo
 • Arrow Up/Down : Move element
 • Escape : Deselect
-                            `,
-                        })}
-                    >
-                        <span>Help</span>
-                    </button>
-                    <button
-                        className={`header-btn secondary ${isFullscreen ? 'active' : ''}`}
-                        onClick={toggleFullscreen}
-                        title="Toggle Fullscreen"
-                    >
-                        {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
-                    </button>
-                    <button
-                        className="header-btn secondary"
-                        onClick={() => setIsJsonOpen(true)}
-                    >
-                        JSON
-                    </button>
-                    <button
-                        className="header-btn primary"
-                        onClick={handlePrint}
-                    >
-                        <span>Print PDF</span>
-                    </button>
+                                `,
+                            })}
+                        >
+                            <span>Help</span>
+                        </button>
+                    )}
+                    {!hideButtons.fullscreen && (
+                        <button
+                            className={`header-btn secondary ${isFullscreen ? 'active' : ''}`}
+                            onClick={toggleFullscreen}
+                            title="Toggle Fullscreen"
+                        >
+                            {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+                        </button>
+                    )}
+                    {!hideButtons.json && (
+                        <button
+                            className="header-btn secondary"
+                            onClick={() => setIsJsonOpen(true)}
+                        >
+                            JSON
+                        </button>
+                    )}
+                    {!hideButtons.exportPdf && (
+                        <button
+                            className="header-btn primary"
+                            onClick={handlePrint}
+                        >
+                            <span>Print PDF</span>
+                        </button>
+                    )}
 
                     <div className="header-divider" />
 

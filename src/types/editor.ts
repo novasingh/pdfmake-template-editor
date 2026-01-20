@@ -273,6 +273,28 @@ export interface EditorConfig {
     locale?: string;
     /** Map of UI string overrides to satisfy specific terminology or translation needs */
     labels?: Record<string, string>;
+    /** 
+     * Selective visibility for header buttons. 
+     * Set a property to `true` to hide the corresponding button.
+     */
+    hideHeaderButtons?: {
+        /** Hide the 'Templates' dropdown */
+        template?: boolean;
+        /** Hide the 'Save' button/dropdown */
+        save?: boolean;
+        /** Hide the 'Undo' button */
+        undo?: boolean;
+        /** Hide the 'Redo' button */
+        redo?: boolean;
+        /** Hide the 'Help' button */
+        help?: boolean;
+        /** Hide the 'Fullscreen' toggle */
+        fullscreen?: boolean;
+        /** Hide the 'Print PDF' button */
+        exportPdf?: boolean;
+        /** Hide the raw 'JSON' preview button */
+        json?: boolean;
+    };
 }
 
 /**

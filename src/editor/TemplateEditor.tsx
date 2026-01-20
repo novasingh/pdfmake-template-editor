@@ -330,6 +330,7 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
                     isPropertiesOpen={propertiesPanelOpen}
                     onSave={() => onSave?.(doc)}
                     onExport={() => onExport?.(doc)}
+                    hideButtons={config?.hideHeaderButtons}
                 />
 
                 <DndContext

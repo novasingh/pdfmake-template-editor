@@ -113,3 +113,23 @@ export const EventHandling: Story = {
         }
     }
 };
+
+/**
+ * Demonstrates the use of hideHeaderButtons to create a cleaner, more focused UI.
+ * In this example, we hide almost everything except for Save and PDF Export.
+ */
+export const MinimalistHeader: Story = {
+    args: {
+        initialData: invoiceTemplateAU.document,
+        config: {
+            hideHeaderButtons: {
+                template: true,
+                undo: true,
+                redo: true,
+                help: true,
+                fullscreen: true,
+                json: true
+            }
+        }
+    }
+};
