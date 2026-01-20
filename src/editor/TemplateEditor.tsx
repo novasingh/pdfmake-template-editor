@@ -37,41 +37,76 @@ export interface TemplateEditorProps {
 }
 
 const TemplateEditor: React.FC<TemplateEditorProps> = () => {
-    const { document: doc, reorderElements, addElement, insertModule, moveElement, selectedElementId, selectElement } = useEditorStore();
+    const { document: doc, reorderElements, addElement, insertModule, moveElement, selectedElementId, selectElement, propertiesPanelOpen, togglePropertiesPanel } = useEditorStore();
     useKeyboardShortcuts();
     const [activeId, setActiveId] = React.useState<string | null>(null);
-    const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
-    const [isPropertiesOpen, setIsPropertiesOpen] = React.useState(true);
-    const [isMobile, setIsMobile] = React.useState(window.innerWidth < 1024);
+    const [isSidebarOpen, setIsSidebarOpen] = React.useState(window.innerWidth >= 1200);
+    const [isMobile, setIsMobile] = React.useState(window.innerWidth < 1200);
+    const prevMobileRef = React.useRef(window.innerWidth < 1200);
+    const [sidebarWidth, setSidebarWidth] = React.useState(280);
+    const [propertiesWidth, setPropertiesWidth] = React.useState(320);
+    const [isTooSmall, setIsTooSmall] = React.useState(window.innerWidth < 1024);
 
     // Initial state based on screen size
     React.useEffect(() => {
         const handleResize = () => {
-            const mobile = window.innerWidth < 1024;
-            setIsMobile(mobile);
-            if (mobile) {
-                setIsSidebarOpen(false);
-                setIsPropertiesOpen(false);
-            } else {
-                setIsSidebarOpen(true);
-                setIsPropertiesOpen(true);
+            const width = window.innerWidth;
+            setIsTooSmall(width < 1024);
+            const mobile = width < 1200;
+
+            // Only reset panel visibility when switching between mobile and desktop modes
+            if (mobile !== prevMobileRef.current) {
+                setIsMobile(mobile);
+                if (mobile) {
+                    setIsSidebarOpen(false);
+                    togglePropertiesPanel(false);
+                } else {
+                    setIsSidebarOpen(true);
+                }
+                prevMobileRef.current = mobile;
             }
         };
 
-        handleResize(); // Run once on mount
+        handleResize();
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Auto-open properties on selection (for mobile)
-    React.useEffect(() => {
-        if (selectedElementId && isMobile) {
-            setIsPropertiesOpen(true);
-            setIsSidebarOpen(false);
-        } else if (!selectedElementId && isMobile) {
-            setIsPropertiesOpen(false);
+    const handleSidebarResize = React.useCallback((e: MouseEvent) => {
+        const newWidth = e.clientX;
+        if (newWidth > 200 && newWidth < 600) {
+            setSidebarWidth(newWidth);
         }
-    }, [selectedElementId, isMobile]);
+    }, []);
+
+    const handlePropertiesResize = React.useCallback((e: MouseEvent) => {
+        const newWidth = window.innerWidth - e.clientX;
+        if (newWidth > 250 && newWidth < 600) {
+            setPropertiesWidth(newWidth);
+        }
+    }, []);
+
+    const stopResizing = React.useCallback(() => {
+        window.removeEventListener('mousemove', handleSidebarResize);
+        window.removeEventListener('mousemove', handlePropertiesResize);
+        window.removeEventListener('mouseup', stopResizing);
+        document.body.style.cursor = 'default';
+        document.body.style.userSelect = 'auto';
+    }, [handleSidebarResize, handlePropertiesResize]);
+
+    const startSidebarResize = () => {
+        window.addEventListener('mousemove', handleSidebarResize);
+        window.addEventListener('mouseup', stopResizing);
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+    };
+
+    const startPropertiesResize = () => {
+        window.addEventListener('mousemove', handlePropertiesResize);
+        window.addEventListener('mouseup', stopResizing);
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+    };
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -176,7 +211,7 @@ const TemplateEditor: React.FC<TemplateEditorProps> = () => {
             }
         }
         // Handle moving/reordering EXISTING elements
-        else if (activeId !== overId) {
+        if (activeId !== overId) {
             // Moving to a column container
             if (overData?.isColumnContainer) {
                 moveElement(activeId, overData.parentId, overData.colIndex);
@@ -211,7 +246,6 @@ const TemplateEditor: React.FC<TemplateEditorProps> = () => {
         }
 
         setActiveId(null);
-        if (isMobile) setIsSidebarOpen(false);
     };
 
     const renderDragOverlay = () => {
@@ -228,11 +262,25 @@ const TemplateEditor: React.FC<TemplateEditorProps> = () => {
         return <div className="drag-overlay-item">{element.type.toUpperCase()}</div>;
     };
 
+    if (isTooSmall) {
+        return (
+            <div className="resolution-warning">
+                <div className="warning-content">
+                    <span className="warning-icon">⚠️</span>
+                    <h1>Resolution Not Supported</h1>
+                    <p>This app does not support small device resolutions. Please use a screen wider than 1024px.</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className={`template-editor-wrapper ${isMobile ? 'mobile' : ''}`}>
             <EditorHeader
                 onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-                onToggleProperties={() => setIsPropertiesOpen(!isPropertiesOpen)}
+                onToggleProperties={() => togglePropertiesPanel()}
+                isSidebarOpen={isSidebarOpen}
+                isPropertiesOpen={propertiesPanelOpen}
             />
 
             <DndContext
@@ -242,23 +290,43 @@ const TemplateEditor: React.FC<TemplateEditorProps> = () => {
                 onDragEnd={handleDragEnd}
             >
                 <div className="editor-main-layout">
-                    <div className={`sidebar-container ${isSidebarOpen ? 'open' : 'hidden'}`}>
+                    <div
+                        className={`sidebar-container ${isSidebarOpen ? 'open' : 'hidden'}`}
+                        style={!isMobile ? {
+                            width: `${sidebarWidth}px`,
+                            marginLeft: isSidebarOpen ? 0 : `-${sidebarWidth}px`
+                        } : {}}
+                    >
                         <Sidebar />
                         {isMobile && isSidebarOpen && <div className="panel-overlay" onClick={() => setIsSidebarOpen(false)} />}
                     </div>
 
+                    {!isMobile && isSidebarOpen && (
+                        <div className="resizer sidebar-resizer" onMouseDown={startSidebarResize} />
+                    )}
+
                     <div className="canvas-wrapper-outer" onClick={() => {
                         if (isMobile) {
                             setIsSidebarOpen(false);
-                            setIsPropertiesOpen(false);
+                            togglePropertiesPanel(false);
                         }
                     }}>
                         <PageCanvas />
                     </div>
 
-                    <div className={`properties-container ${isPropertiesOpen ? 'open' : 'hidden'}`}>
+                    {!isMobile && propertiesPanelOpen && (
+                        <div className="resizer properties-resizer" onMouseDown={startPropertiesResize} />
+                    )}
+
+                    <div
+                        className={`properties-container ${propertiesPanelOpen ? 'open' : 'hidden'}`}
+                        style={!isMobile ? {
+                            width: `${propertiesWidth}px`,
+                            marginRight: propertiesPanelOpen ? 0 : `-${propertiesWidth}px`
+                        } : {}}
+                    >
                         <PropertiesPanel />
-                        {isMobile && isPropertiesOpen && <div className="panel-overlay" onClick={() => setIsPropertiesOpen(false)} />}
+                        {isMobile && propertiesPanelOpen && <div className="panel-overlay" onClick={() => togglePropertiesPanel(false)} />}
                     </div>
                 </div>
 

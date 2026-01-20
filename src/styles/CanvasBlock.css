@@ -67,3 +67,21 @@
 .block-action-btn.delete:hover {
     background-color: #ef4444;
 }
+
+/* Touch targets for mobile/tablet */
+@media (pointer: coarse) {
+    .block-actions-toolbar {
+        top: -40px;
+        height: 40px;
+    }
+
+    .block-action-btn {
+        padding: 0 16px;
+        font-size: 14px;
+        height: 40px;
+    }
+
+    .canvas-block {
+        min-height: 44px;
+    }
+}

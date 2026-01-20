@@ -20,9 +20,16 @@ import '../styles/EditorHeader.css';
 interface EditorHeaderProps {
     onToggleSidebar: () => void;
     onToggleProperties: () => void;
+    isSidebarOpen?: boolean;
+    isPropertiesOpen?: boolean;
 }
 
-const EditorHeader: React.FC<EditorHeaderProps> = ({ onToggleSidebar, onToggleProperties }) => {
+const EditorHeader: React.FC<EditorHeaderProps> = ({
+    onToggleSidebar,
+    onToggleProperties,
+    isSidebarOpen,
+    isPropertiesOpen
+}) => {
     const { document: doc, loadTemplate, loadDocument, showDialog } = useEditorStore();
     const [isJsonOpen, setIsJsonOpen] = useState(false);
     const [showTemplateDropdown, setShowTemplateDropdown] = useState(false);
@@ -130,6 +137,15 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({ onToggleSidebar, onTogglePr
     return (
         <header className="editor-header">
             <div className="header-left">
+                <button
+                    className={`header-btn icon-only ${isSidebarOpen ? 'active' : ''}`}
+                    onClick={onToggleSidebar}
+                    title="Toggle Sidebar"
+                >
+                    <span>☰</span>
+                </button>
+
+                <div className="header-divider" />
                 <div className="action-group">
                     <button
                         className="header-btn secondary"
@@ -296,6 +312,16 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({ onToggleSidebar, onTogglePr
                         onClick={handlePrint}
                     >
                         <span>Print PDF</span>
+                    </button>
+
+                    <div className="header-divider" />
+
+                    <button
+                        className={`header-btn icon-only ${isPropertiesOpen ? 'active' : ''}`}
+                        onClick={onToggleProperties}
+                        title="Toggle Properties"
+                    >
+                        <span>⚙</span>
                     </button>
                 </div>
             </div>

@@ -80,6 +80,32 @@
     margin-top: 0;
 }
 
+/* Touch targets for mobile/tablet */
+@media (pointer: coarse) {
+    .sidebar-tabs {
+        padding: 12px;
+        gap: 8px;
+    }
+
+    .tab-btn {
+        padding: 14px;
+        font-size: 14px;
+    }
+
+    .sidebar-content {
+        padding: 20px 16px;
+    }
+
+    .draggable-block-preview {
+        padding: 20px 12px;
+        font-size: 14px;
+    }
+
+    .block-grid {
+        gap: 16px;
+    }
+}
+
 .block-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;

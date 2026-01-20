@@ -10,7 +10,7 @@ import {
 import CanvasBlock from './CanvasBlock';
 
 const PageCanvas: React.FC = () => {
-    const { document: doc, selectElement } = useEditorStore();
+    const { document: doc, selectElement, canvasZoom, setCanvasZoom } = useEditorStore();
     const { page, rootElementIds, elements } = doc;
 
     const { setNodeRef: setCanvasRef } = useDroppable({
@@ -29,6 +29,9 @@ const PageCanvas: React.FC = () => {
         margin: '0 auto',
         overflow: 'hidden',
         cursor: 'default',
+        transform: `scale(${canvasZoom})`,
+        transformOrigin: 'top center',
+        transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
     };
 
     const marginGuideStyle: React.CSSProperties = {
@@ -153,6 +156,23 @@ const PageCanvas: React.FC = () => {
                         ))}
                     </SortableContext>
                 </div>
+            </div>
+
+            {/* Floating Zoom Controls */}
+            <div className="canvas-zoom-controls">
+                <button
+                    onClick={() => setCanvasZoom(canvasZoom - 0.1)}
+                    title="Zoom Out"
+                    disabled={canvasZoom <= 0.25}
+                >−</button>
+                <div className="zoom-percentage" onClick={() => setCanvasZoom(1)}>
+                    {Math.round(canvasZoom * 100)}%
+                </div>
+                <button
+                    onClick={() => setCanvasZoom(canvasZoom + 0.1)}
+                    title="Zoom In"
+                    disabled={canvasZoom >= 2}
+                >+</button>
             </div>
         </div>
     );

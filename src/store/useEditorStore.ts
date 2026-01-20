@@ -63,10 +63,19 @@ interface EditorState {
     pasteElement: () => void;
     moveElementUpDown: (id: string, direction: 'up' | 'down') => void;
 
+    // Zoom
+    canvasZoom: number;
+    setCanvasZoom: (zoom: number) => void;
+
     // Dialog State
     dialog: DialogOptions | null;
     showDialog: (options: DialogOptions) => void;
     closeDialog: () => void;
+
+    // UI State
+    propertiesPanelOpen: boolean;
+    propertiesPanelUserOverride: 'open' | 'close' | null;
+    togglePropertiesPanel: (open?: boolean) => void;
 }
 
 const DEFAULT_PAGE: PageSettings = {
@@ -89,7 +98,18 @@ export const useEditorStore = create<EditorState>()(
                 selectedElementId: null,
                 variables: {},
                 clipboard: null,
+                canvasZoom: 1,
                 dialog: null,
+                propertiesPanelOpen: false,
+                propertiesPanelUserOverride: null,
+
+                togglePropertiesPanel: (open) => set((state) => {
+                    const isOpen = typeof open === 'boolean' ? open : !state.propertiesPanelOpen;
+                    return {
+                        propertiesPanelOpen: isOpen,
+                        propertiesPanelUserOverride: isOpen ? 'open' : 'close',
+                    };
+                }),
 
                 setPageSettings: (settings) => set((state) => ({
                     document: {
@@ -466,6 +486,7 @@ export const useEditorStore = create<EditorState>()(
                             rootElementIds: newRootIds,
                         },
                         selectedElementId: id,
+                        propertiesPanelOpen: true,
                     } as Partial<EditorState>;
                 }),
 
@@ -584,6 +605,12 @@ export const useEditorStore = create<EditorState>()(
 
                     delete newElements[id];
 
+                    const isDeselected = state.selectedElementId === id;
+                    let panelOpen = state.propertiesPanelOpen;
+                    if (isDeselected && state.propertiesPanelUserOverride !== 'open') {
+                        panelOpen = false;
+                    }
+
                     return {
                         document: {
                             ...state.document,
@@ -591,6 +618,7 @@ export const useEditorStore = create<EditorState>()(
                             rootElementIds: state.document.rootElementIds.filter(rid => rid !== id)
                         },
                         selectedElementId: state.selectedElementId === id ? null : state.selectedElementId,
+                        propertiesPanelOpen: panelOpen
                     };
                 }),
 
@@ -917,7 +945,26 @@ export const useEditorStore = create<EditorState>()(
                     };
                 }),
 
-                selectElement: (id) => set({ selectedElementId: id }),
+                selectElement: (id) => set((state) => {
+                    let panelOpen = state.propertiesPanelOpen;
+
+                    // Only force open if selecting a NEW/different element
+                    if (id && id !== state.selectedElementId) {
+                        panelOpen = true;
+                    } else if (!id) {
+                        // If deselecting, respect manual override
+                        if (state.propertiesPanelUserOverride === 'open') {
+                            panelOpen = true;
+                        } else {
+                            panelOpen = false;
+                        }
+                    }
+
+                    return {
+                        selectedElementId: id,
+                        propertiesPanelOpen: panelOpen
+                    };
+                }),
 
                 resetDocument: () => set({
                     document: {
@@ -926,6 +973,8 @@ export const useEditorStore = create<EditorState>()(
                         rootElementIds: [],
                     },
                     selectedElementId: null,
+                    propertiesPanelOpen: false,
+                    propertiesPanelUserOverride: null,
                 }),
 
                 loadTemplate: (template) => {
@@ -937,6 +986,8 @@ export const useEditorStore = create<EditorState>()(
                                 rootElementIds: [],
                             },
                             selectedElementId: null,
+                            propertiesPanelOpen: false,
+                            propertiesPanelUserOverride: null,
                         });
                     } else if (template === 'default') {
                         const id1 = `heading-${Math.random().toString(36).substr(2, 9)}`;
@@ -965,6 +1016,8 @@ export const useEditorStore = create<EditorState>()(
                                 rootElementIds: [id1, tableId, id2],
                             },
                             selectedElementId: null,
+                            propertiesPanelOpen: false,
+                            propertiesPanelUserOverride: null,
                         });
                     }
                 },
@@ -972,11 +1025,15 @@ export const useEditorStore = create<EditorState>()(
                 loadDocument: (document) => set({
                     document: JSON.parse(JSON.stringify(document)),
                     selectedElementId: null,
+                    propertiesPanelOpen: false,
+                    propertiesPanelUserOverride: null,
                 }),
 
                 setVariables: (vars: Record<string, string>) => set((state) => ({
                     variables: { ...state.variables, ...vars }
                 })),
+
+                setCanvasZoom: (zoom: number) => set({ canvasZoom: Math.max(0.25, Math.min(2, zoom)) }),
 
                 insertModule: (moduleName: string) => set((state) => {
                     const moduleFunc = MODULE_REGISTRY[moduleName as keyof typeof MODULE_REGISTRY];

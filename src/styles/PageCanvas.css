@@ -66,3 +66,59 @@
 .floating-json-btn:active {
     transform: translateY(0);
 }
+
+/* Canvas Zoom Controls */
+.canvas-zoom-controls {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    gap: 2px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+}
+
+.canvas-zoom-controls button {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    font-size: 18px;
+    color: #1e293b;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.canvas-zoom-controls button:hover {
+    background-color: #f1f5f9;
+}
+
+.canvas-zoom-controls button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.zoom-percentage {
+    padding: 0 12px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+    min-width: 50px;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.zoom-percentage:hover {
+    color: #3b82f6;
+}

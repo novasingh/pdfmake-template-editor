@@ -31,11 +31,35 @@
 }
 
 .sidebar-container.hidden {
-    margin-left: -280px;
+    /* marging-left is handled dynamically in TSX to support resizable width */
 }
 
 .properties-container.hidden {
-    margin-right: -320px;
+    /* margin-right is handled dynamically in TSX to support resizable width */
+}
+
+/* Resizers */
+.resizer {
+    width: 4px;
+    background: transparent;
+    cursor: col-resize;
+    z-index: 20;
+    transition: background 0.2s;
+    flex-shrink: 0;
+}
+
+.resizer:hover,
+.resizer:active {
+    background: var(--brand-primary);
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+}
+
+.sidebar-resizer {
+    margin-right: -2px;
+}
+
+.properties-resizer {
+    margin-left: -2px;
 }
 
 .canvas-wrapper-outer {
@@ -51,7 +75,7 @@
 }
 
 /* Mobile specific positioning */
-@media (max-width: 1023px) {
+@media (max-width: 1199px) {
 
     .sidebar-container,
     .properties-container {
@@ -62,6 +86,14 @@
         max-width: 90vw;
         background: white;
         box-shadow: 0 0 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar-container {
+        left: 0;
+    }
+
+    .properties-container {
+        right: 0;
     }
 
     .sidebar-container.hidden {
@@ -120,4 +152,48 @@
     color: var(--brand-primary);
     pointer-events: none;
     white-space: nowrap;
+}
+
+.resolution-warning {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 40px;
+    text-align: center;
+}
+
+.warning-content {
+    max-width: 400px;
+    background: white;
+    padding: 48px;
+    border-radius: 24px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.warning-icon {
+    font-size: 64px;
+    display: block;
+    margin-bottom: 24px;
+}
+
+.warning-content h1 {
+    font-size: 24px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+}
+
+.warning-content p {
+    color: #64748b;
+    line-height: 1.6;
+    font-size: 16px;
 }
