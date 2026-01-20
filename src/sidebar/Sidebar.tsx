@@ -2,12 +2,48 @@ import React, { useState } from 'react';
 import { useEditorStore } from '../store/useEditorStore';
 import '../styles/Sidebar.css';
 import DraggableBlock from './DraggableBlock';
-import { ElementType, Alignment } from '../types/editor';
+import { ElementType } from '../types/editor';
 import { useLocalization } from '../hooks/useLocalization';
+
+const BlockSection: React.FC<{
+    title: string;
+    blocks: { type: ElementType; label: string; moduleName?: string }[];
+    t: (key: string, def: string) => string;
+    isOpen: boolean;
+    onToggle: () => void;
+}> = ({ title, blocks, t, isOpen, onToggle }) => (
+    <div className={`sidebar-section ${isOpen ? 'is-open' : ''}`}>
+        <h3 className="section-title" onClick={onToggle}>
+            {t(title, title)}
+            <span className="section-arrow">
+                <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+            </span>
+        </h3>
+        <div className="section-content">
+            <div className="block-grid">
+                {blocks.map((block, idx) => (
+                    <DraggableBlock
+                        key={`${block.type}-${idx}`}
+                        type={block.type}
+                        label={t(block.label, block.label)}
+                        moduleName={block.moduleName}
+                    />
+                ))}
+            </div>
+        </div>
+    </div>
+);
 
 const Sidebar: React.FC = () => {
     const { t } = useLocalization();
     const [activeTab, setActiveTab] = useState<'blocks' | 'page'>('blocks');
+    const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+        'Standard Blocks': true,
+        'Business Blocks': true,
+        'Compliance': false,
+    });
     const { document: doc, setPageSettings } = useEditorStore();
     const { page } = doc;
 
@@ -71,31 +107,27 @@ const Sidebar: React.FC = () => {
             <div className="sidebar-content">
                 {activeTab === 'blocks' && (
                     <div className="blocks-tab">
-                        <h3>{t('Standard Blocks', 'Standard Blocks')}</h3>
-                        <div className="block-grid">
-                            {standardBlocks.map((block) => (
-                                <DraggableBlock key={block.type} type={block.type} label={t(block.label, block.label)} />
-                            ))}
-                        </div>
-
-                        <h3 style={{ marginTop: '20px' }}>{t('Business Blocks', 'Business Blocks')}</h3>
-                        <div className="block-grid">
-                            {businessBlocks.map((block) => (
-                                <DraggableBlock key={block.type} type={block.type} label={t(block.label, block.label)} />
-                            ))}
-                        </div>
-
-                        <h3 style={{ marginTop: '20px' }}>{t('Australian Compliance', 'Australian Compliance')}</h3>
-                        <div className="block-grid">
-                            {complianceBlocks.map((block, idx) => (
-                                <DraggableBlock
-                                    key={`${block.type}-${idx}`}
-                                    type={block.type}
-                                    label={t(block.label, block.label)}
-                                    moduleName={block.moduleName}
-                                />
-                            ))}
-                        </div>
+                        <BlockSection
+                            title="Standard Blocks"
+                            blocks={standardBlocks}
+                            t={t}
+                            isOpen={!!openSections['Standard Blocks']}
+                            onToggle={() => setOpenSections(prev => ({ ...prev, 'Standard Blocks': !prev['Standard Blocks'] }))}
+                        />
+                        <BlockSection
+                            title="Business Blocks"
+                            blocks={businessBlocks}
+                            t={t}
+                            isOpen={!!openSections['Business Blocks']}
+                            onToggle={() => setOpenSections(prev => ({ ...prev, 'Business Blocks': !prev['Business Blocks'] }))}
+                        />
+                        <BlockSection
+                            title="Compliance"
+                            blocks={complianceBlocks}
+                            t={t}
+                            isOpen={!!openSections['Compliance']}
+                            onToggle={() => setOpenSections(prev => ({ ...prev, 'Compliance': !prev['Compliance'] }))}
+                        />
                     </div>
                 )}
 

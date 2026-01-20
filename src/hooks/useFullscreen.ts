@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 export const useFullscreen = () => {
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -19,16 +19,11 @@ export const useFullscreen = () => {
         }
     }, []);
 
-    // Listen for fullscreen change events (e.g. user pressing Esc)
-    // In a real app we'd add an event listener here, but for now this simple toggle is sufficient
-    // as state might get out of sync if Esc is pressed. Ideally:
-    /*
     useEffect(() => {
         const onFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
         document.addEventListener('fullscreenchange', onFullscreenChange);
         return () => document.removeEventListener('fullscreenchange', onFullscreenChange);
     }, []);
-    */
 
     return { isFullscreen, toggleFullscreen };
 };

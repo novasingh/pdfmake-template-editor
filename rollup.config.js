@@ -10,13 +10,15 @@ export default {
       file: 'dist/index.js',
       format: 'cjs',
       sourcemap: true,
-      inlineDynamicImports: true
+      inlineDynamicImports: true,
+      exports: 'named'
     },
     {
       file: 'dist/index.esm.js',
       format: 'esm',
       sourcemap: true,
-      inlineDynamicImports: true
+      inlineDynamicImports: true,
+      exports: 'named'
     }
   ],
   external: ['react', 'react-dom', 'pdfmake', 'zustand', 'html-to-image', '@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities', '@dnd-kit/modifiers'],

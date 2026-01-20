@@ -45,16 +45,15 @@ const CanvasBlock: React.FC<CanvasBlockProps> = ({ element }) => {
         if (!m) return undefined;
         // pdfmake: [left, top, right, bottom]
         // css: [top, right, bottom, left]
-        return `${m[1]}px ${m[2]}px ${m[3]}px ${m[0]}px`;
+        return `${m[1]}pt ${m[2]}pt ${m[3]}pt ${m[0]}pt`;
     };
 
     const style: React.CSSProperties = {
         transform: CSS.Transform.toString(transform),
         transition,
         opacity: isDragging ? 0.5 : 1,
-        padding: mapMargins(element.style.padding) || '8px',
+        padding: mapMargins(element.style.padding),
         margin: mapMargins(element.style.margin),
-        marginBottom: element.style.margin ? `${element.style.margin[3]}px` : '8px',
         backgroundColor: element.style.background || 'transparent',
         cursor: isEditing ? 'text' : 'pointer',
         position: 'relative',
@@ -137,9 +136,7 @@ const CanvasBlock: React.FC<CanvasBlockProps> = ({ element }) => {
                     }}>
                         <div style={{
                             width: div.width || '100%',
-                            borderTop: `${div.thickness || 1}px ${div.lineStyle || 'solid'} ${div.color || '#e2e8f0'}`,
-                            marginTop: '10px',
-                            marginBottom: '10px'
+                            borderTop: `${div.thickness || 1}pt ${div.lineStyle || 'solid'} ${div.color || '#e2e8f0'}`,
                         }} />
                     </div>
                 );
@@ -157,8 +154,8 @@ const CanvasBlock: React.FC<CanvasBlockProps> = ({ element }) => {
                             style={{
                                 width: img.width || '100%',
                                 height: img.height || 'auto',
-                                border: img.borderWidth ? `${img.borderWidth}px ${img.borderStyle || 'solid'} ${img.borderColor || '#000'}` : 'none',
-                                borderRadius: img.borderRadius ? `${img.borderRadius}px` : '0',
+                                border: img.borderWidth ? `${img.borderWidth}pt ${img.borderStyle || 'solid'} ${img.borderColor || '#000'}` : 'none',
+                                borderRadius: img.borderRadius ? `${img.borderRadius}pt` : '0',
                                 maxWidth: '100%'
                             }}
                         />
@@ -180,8 +177,8 @@ const CanvasBlock: React.FC<CanvasBlockProps> = ({ element }) => {
             case 'client-info': {
                 const info = element as any;
                 const borderStyle = info.showLeftBorder
-                    ? { borderLeft: `${info.borderWidth || 3}px solid ${info.borderColor || '#3b82f6'}`, paddingLeft: '10px' }
-                    : { paddingLeft: '0px' };
+                    ? { borderLeft: `${info.borderWidth || 3}pt solid ${info.borderColor || '#3b82f6'}`, paddingLeft: `${info.borderPadding ?? 10}pt` }
+                    : { paddingLeft: '0pt' };
 
                 return (
                     <div style={{
@@ -191,7 +188,7 @@ const CanvasBlock: React.FC<CanvasBlockProps> = ({ element }) => {
                         whiteSpace: 'pre-line'
                     }}>
                         <div style={{
-                            fontSize: `${info.headingStyle?.fontSize || 10}px`,
+                            fontSize: `${info.headingStyle?.fontSize || 10}pt`,
                             color: info.headingStyle?.color || '#64748b',
                             fontWeight: info.headingStyle?.fontWeight || 'bold',
                             textTransform: 'uppercase'
@@ -212,7 +209,7 @@ const CanvasBlock: React.FC<CanvasBlockProps> = ({ element }) => {
                         whiteSpace: 'pre-line'
                     }}>
                         <div style={{
-                            fontSize: `${info.headingStyle?.fontSize || 10}px`,
+                            fontSize: `${info.headingStyle?.fontSize || 10}pt`,
                             color: info.headingStyle?.color || '#64748b',
                             fontWeight: info.headingStyle?.fontWeight || 'bold',
                         }}>
@@ -225,8 +222,8 @@ const CanvasBlock: React.FC<CanvasBlockProps> = ({ element }) => {
             }
             case 'signature':
                 return (
-                    <div style={{ marginTop: '20px', borderTop: '1px solid #000', width: '200px', paddingTop: '5px' }}>
-                        <div style={{ fontSize: '11px' }}>Authorized Signature</div>
+                    <div style={{ borderTop: '1pt solid #000', width: '150pt', paddingTop: '5pt' }}>
+                        <div style={{ fontSize: '11pt' }}>Authorized Signature</div>
                     </div>
                 );
             case 'date-field': {
@@ -275,14 +272,14 @@ const CanvasBlock: React.FC<CanvasBlockProps> = ({ element }) => {
                         justifyContent: element.style.alignment === 'center' ? 'center' : element.style.alignment === 'right' ? 'flex-end' : 'flex-start'
                     }}>
                         <div style={{
-                            width: `${qr.size || 100}px`,
-                            height: `${qr.size || 100}px`,
+                            width: `${qr.size || 100}pt`,
+                            height: `${qr.size || 100}pt`,
                             background: '#f8fafc',
-                            border: '1px solid #e2e8f0',
+                            border: '1pt solid #e2e8f0',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            fontSize: '10px',
+                            fontSize: '10pt',
                             color: '#94a3b8'
                         }}>
                             QR CODE
@@ -298,19 +295,19 @@ const CanvasBlock: React.FC<CanvasBlockProps> = ({ element }) => {
                         justifyContent: element.style.alignment === 'center' ? 'center' : element.style.alignment === 'right' ? 'flex-end' : 'flex-start'
                     }}>
                         <div style={{
-                            width: `${bc.width || 120}px`,
-                            height: `${bc.height || 40}px`,
+                            width: `${bc.width || 120}pt`,
+                            height: `${bc.height || 40}pt`,
                             background: '#f8fafc',
-                            border: '1px solid #e2e8f0',
+                            border: '1pt solid #e2e8f0',
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            fontSize: '10px',
+                            fontSize: '10pt',
                             color: '#94a3b8'
                         }}>
                             <div>|| ||| | || ||</div>
-                            {bc.displayValue !== false && <div style={{ fontSize: '8px' }}>{bc.data || '12345678'}</div>}
+                            {bc.displayValue !== false && <div style={{ fontSize: '8pt' }}>{bc.data || '12345678'}</div>}
                         </div>
                     </div>
                 );

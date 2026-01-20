@@ -101,21 +101,31 @@ const InfoProperties: React.FC<InfoPropertiesProps> = ({ element, onUpdate, onSt
                     </div>
 
                     {(element as any).showLeftBorder && (
-                        <div className="prop-grid" style={{ marginTop: '12px' }}>
-                            <div className="prop-group">
-                                <span>Thickness (px)</span>
+                        <div style={{ marginTop: '12px' }}>
+                            <div className="prop-grid">
+                                <div className="prop-group">
+                                    <span>Thickness (pt)</span>
+                                    <input
+                                        type="number"
+                                        value={(element as any).borderWidth || 3}
+                                        onChange={(e) => onUpdate({ borderWidth: parseInt(e.target.value, 10) } as any)}
+                                    />
+                                </div>
+                                <div className="prop-group">
+                                    <span>Border Color</span>
+                                    <input
+                                        type="color"
+                                        value={(element as any).borderColor || '#3b82f6'}
+                                        onChange={(e) => onUpdate({ borderColor: e.target.value } as any)}
+                                    />
+                                </div>
+                            </div>
+                            <div className="prop-group" style={{ marginTop: '12px' }}>
+                                <span>Internal Spacing (pt)</span>
                                 <input
                                     type="number"
-                                    value={(element as any).borderWidth || 3}
-                                    onChange={(e) => onUpdate({ borderWidth: parseInt(e.target.value, 10) } as any)}
-                                />
-                            </div>
-                            <div className="prop-group">
-                                <span>Border Color</span>
-                                <input
-                                    type="color"
-                                    value={(element as any).borderColor || '#3b82f6'}
-                                    onChange={(e) => onUpdate({ borderColor: e.target.value } as any)}
+                                    value={(element as any).borderPadding ?? 10}
+                                    onChange={(e) => onUpdate({ borderPadding: parseInt(e.target.value, 10) } as any)}
                                 />
                             </div>
                         </div>

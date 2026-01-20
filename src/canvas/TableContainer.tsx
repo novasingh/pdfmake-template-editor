@@ -40,9 +40,10 @@ const DroppableTableCell: React.FC<DroppableTableCellProps> = ({ cell, rowIndex,
 
         const onMouseMove = (moveEvent: MouseEvent) => {
             const diff = moveEvent.pageX - startX;
-            const newWidth = Math.max(20, startWidth + diff);
+            const newWidthPx = Math.max(20, startWidth + diff);
+            const newWidthPt = newWidthPx * 0.75; // Convert px to pt (72/96)
             const newWidths = [...currentWidths];
-            newWidths[colIndex] = newWidth;
+            newWidths[colIndex] = newWidthPt;
             updateTableWidths(parentElement.id, newWidths);
         };
 
@@ -62,8 +63,8 @@ const DroppableTableCell: React.FC<DroppableTableCellProps> = ({ cell, rowIndex,
             rowSpan={cell.rowSpan}
             colSpan={cell.colSpan}
             style={{
-                padding: `${parentElement.cellPadding ?? 8}px`,
-                border: `${parentElement.borderWidth ?? 1}px solid ${parentElement.borderColor || '#e2e8f0'}`,
+                padding: `${parentElement.cellPadding ?? 5}pt`,
+                border: `${parentElement.borderWidth ?? 1}pt solid ${parentElement.borderColor || '#e2e8f0'}`,
                 backgroundColor: cell.backgroundColor || (isHeader ? (parentElement.headerColor || '#f8fafc') :
                     (isOver ? '#eff6ff' :
                         (parentElement.alternateRowColor && rowIndex % 2 !== 0 ? parentElement.alternateRowColor : 'transparent'))),
@@ -103,17 +104,28 @@ const TableContainer: React.FC<TableContainerProps> = ({ element }) => {
         <div className="table-container-wrapper">
             {/* Column Management Controls */}
             <div className="col-controls">
-                {Array.from({ length: element.cols }).map((_, cIdx) => (
-                    <div key={cIdx} style={{ display: 'flex', gap: '2px', flex: element.widths?.[cIdx] === '*' ? '1' : 'none', width: typeof element.widths?.[cIdx] === 'number' ? `${element.widths[cIdx]}px` : 'auto', justifyContent: 'center' }}>
-                        <button className="table-btn delete" onClick={() => removeTableColumn(element.id, cIdx)} title="Remove Column">-</button>
-                        <button className="table-btn" onClick={() => addTableColumn(element.id)} title="Add Column Right">+</button>
-                    </div>
-                ))}
+                {Array.from({ length: element.cols }).map((_, cIdx) => {
+                    const widthPt = element.widths?.[cIdx];
+                    const widthPx = typeof widthPt === 'number' ? widthPt * 1.333333 : 0;
+
+                    return (
+                        <div key={cIdx} style={{
+                            display: 'flex',
+                            gap: '2px',
+                            flex: widthPt === '*' ? '1' : 'none',
+                            width: widthPx > 0 ? `${widthPx}px` : 'auto',
+                            justifyContent: 'center'
+                        }}>
+                            <button className="table-btn delete" onClick={() => removeTableColumn(element.id, cIdx)} title="Remove Column">-</button>
+                            <button className="table-btn" onClick={() => addTableColumn(element.id)} title="Add Column Right">+</button>
+                        </div>
+                    );
+                })}
             </div>
 
             <table className="table-managed" style={{
                 borderCollapse: 'collapse',
-                border: `${element.borderWidth ?? 1}px solid ${element.borderColor || '#e2e8f0'}`,
+                border: `${element.borderWidth ?? 1}pt solid ${element.borderColor || '#e2e8f0'}`,
             }}>
                 <tbody>
                     {element.body.map((row, rIdx) => (

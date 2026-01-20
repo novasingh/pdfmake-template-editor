@@ -44,7 +44,7 @@
 
 .sidebar-content {
     flex: 1;
-    padding: 24px 20px;
+    padding: 4px 10px;
     overflow-y: auto;
     overflow-x: hidden;
 }
@@ -67,17 +67,53 @@
     background: #cbd5e1;
 }
 
-.sidebar-content h3 {
+.sidebar-section {
+    margin-bottom: 8px;
+}
+
+.section-title {
     font-size: 11px;
     font-weight: 800;
     text-transform: uppercase;
     color: var(--text-rich-muted);
     letter-spacing: 0.1em;
-    margin: 24px 0 16px;
+    margin: 16px 0 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    padding: 8px 4px;
+    border-radius: 4px;
+    transition: background 0.2s;
 }
 
-.sidebar-content h3:first-child {
-    margin-top: 0;
+.section-title:hover {
+    background: rgba(0, 0, 0, 0.03);
+    color: var(--text-rich-main);
+}
+
+.section-arrow {
+    transition: transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    opacity: 0.5;
+}
+
+.is-open .section-arrow {
+    transform: rotate(180deg);
+}
+
+.section-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, padding 0.3s ease;
+    padding: 0 4px;
+}
+
+.is-open .section-content {
+    max-height: 1000px;
+    /* Large enough to fit content */
+    padding: 8px 4px 16px;
 }
 
 /* Touch targets for mobile/tablet */

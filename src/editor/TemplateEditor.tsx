@@ -11,15 +11,11 @@ import {
     useSensors,
     DragStartEvent,
     DragEndEvent,
-    DragOverEvent,
     CollisionDetection,
-    getFirstCollision,
 } from '@dnd-kit/core';
 import {
-    arrayMove,
     SortableContext,
     sortableKeyboardCoordinates,
-    verticalListSortingStrategy
 } from '@dnd-kit/sortable';
 
 import Sidebar from '../sidebar/Sidebar';
@@ -36,7 +32,6 @@ import '../styles/TemplateEditor.css';
 import {
     TemplateEditorProps,
     DocumentSchema,
-    EditorConfig
 } from '../types/editor';
 
 const TemplateEditor: React.FC<TemplateEditorProps> = ({

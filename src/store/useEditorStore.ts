@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { formatCurrency, parseCurrency } from '../utils/formatUtils';
+import { parseCurrency } from '../utils/formatUtils';
 import { persist } from 'zustand/middleware';
 import { temporal } from 'zundo';
 import {
@@ -12,7 +12,9 @@ import {
     TableElement,
     TableCell
 } from '../types/editor';
-import { MODULE_REGISTRY, ModuleDefinition } from '../templates/modules';
+import { MODULE_REGISTRY } from '../templates/modules';
+import { getElementDefaults } from './elementDefaults';
+import { calculateInvoiceTotals } from './storeUtils';
 
 export interface DialogOptions {
     type: 'alert' | 'confirm' | 'prompt';
@@ -126,244 +128,8 @@ export const useEditorStore = create<EditorState>()(
                 })),
 
                 addElement: (type: ElementType, parentId?: string, indexOrRow?: number, colIndex?: number) => set((state) => {
-                    const id = `${type}-${Math.random().toString(36).substr(2, 9)}`;
-
-                    let newElement: EditorElement;
-
-                    const baseProps = { id, style: { fontSize: 12, margin: [0, 0, 0, 10] as [number, number, number, number] } };
-
-                    switch (type) {
-                        case 'heading':
-                            newElement = { ...baseProps, type: 'heading', content: 'New Heading', style: { ...baseProps.style, fontSize: 24, fontWeight: 'bold' } };
-                            break;
-                        case 'paragraph':
-                            newElement = { ...baseProps, type: 'paragraph', content: 'New paragraph text...' };
-                            break;
-                        case 'divider':
-                            newElement = {
-                                ...baseProps,
-                                type: 'divider',
-                                color: '#e2e8f0',
-                                thickness: 1,
-                                width: '100%',
-                                lineStyle: 'solid'
-                            };
-                            break;
-                        case 'image':
-                            newElement = {
-                                ...baseProps,
-                                type: 'image',
-                                src: 'https://placehold.co/200x100',
-                                width: 200,
-                                borderWidth: 0,
-                                borderColor: '#000000',
-                                borderStyle: 'solid',
-                                borderRadius: 0
-                            };
-                            break;
-                        case 'columns':
-                            newElement = {
-                                ...baseProps,
-                                type: 'columns',
-                                columns: [
-                                    { width: '50%', content: [] },
-                                    { width: '50%', content: [] }
-                                ],
-                                columnGap: 10,
-                                borderWidth: 0,
-                                borderColor: '#e2e8f0',
-                                borderStyle: 'none',
-                                borderRadius: 0,
-                                backgroundColor: 'transparent',
-                                verticalAlign: 'top',
-                                showColumnBorders: false,
-                                columnBorderWidth: 1,
-                                columnBorderColor: '#e2e8f0'
-                            };
-                            break;
-                        case 'table':
-                            newElement = {
-                                ...baseProps,
-                                type: 'table',
-                                rows: 2,
-                                cols: 2,
-                                headerRow: true,
-                                body: [[{ content: [] }, { content: [] }], [{ content: [] }, { content: [] }]]
-                            };
-                            break;
-                        case 'invoice-items':
-                            newElement = {
-                                ...baseProps,
-                                type: 'table',
-                                rows: 3,
-                                cols: 4,
-                                headerRow: true,
-                                headerColor: '#1e293b',
-                                body: [
-                                    [
-                                        { content: ['h-desc'] }, // Placeholder-like IDs for logic
-                                        { content: ['h-qty'] },
-                                        { content: ['h-price'] },
-                                        { content: ['h-total'] }
-                                    ],
-                                    [
-                                        { content: ['r1-desc'] },
-                                        { content: ['r1-qty'] },
-                                        { content: ['r1-price'] },
-                                        { content: ['r1-total'] }
-                                    ],
-                                    [
-                                        { content: ['r2-desc'] },
-                                        { content: ['r2-qty'] },
-                                        { content: ['r2-price'] },
-                                        { content: ['r2-total'] }
-                                    ]
-                                ]
-                            } as any;
-                            break;
-                        case 'invoice-summary':
-                            newElement = {
-                                ...baseProps,
-                                type: 'table',
-                                rows: 4,
-                                cols: 2,
-                                headerRow: false,
-                                body: [
-                                    [{ content: ['s-sub-l'] }, { content: ['s-sub-v'] }],
-                                    [{ content: ['s-gst-l'] }, { content: ['s-gst-v'] }],
-                                    [{ content: ['s-disc-l'] }, { content: ['s-disc-v'] }],
-                                    [{ content: ['s-total-l'] }, { content: ['s-total-v'] }]
-                                ],
-                                borderColor: '#ffffff', // No borders by default
-                                borderWidth: 0,
-                            } as any;
-                            break;
-                        case 'price-table':
-                            newElement = {
-                                ...baseProps,
-                                type: 'table',
-                                rows: 4,
-                                cols: 3,
-                                headerRow: true,
-                                headerColor: '#3b82f6',
-                                body: Array.from({ length: 4 }, () =>
-                                    Array.from({ length: 3 }, () => ({ content: [] }))
-                                )
-                            } as any;
-                            break;
-                        case 'payment-terms':
-                            newElement = {
-                                ...baseProps,
-                                type: 'paragraph',
-                                content: 'Payment Terms: Please pay within 30 days of invoice date. Bank: XXXX, Account: XXXXXXXX'
-                            } as any;
-                            break;
-                        case 'client-info':
-                            newElement = {
-                                ...baseProps,
-                                type: 'client-info',
-                                headingValue: 'BILL TO',
-                                headingStyle: { fontSize: 10, fontWeight: 'bold', color: '#64748b' },
-                                showLeftBorder: true,
-                                borderWidth: 3,
-                                borderColor: '#3b82f6',
-                                style: { ...baseProps.style, fontSize: 11 }
-                            } as any;
-                            break;
-                        case 'business-info':
-                            newElement = {
-                                ...baseProps,
-                                type: 'business-info',
-                                headingValue: 'YOUR BUSINESS',
-                                headingStyle: { fontSize: 10, fontWeight: 'bold', color: '#64748b' },
-                                style: { ...baseProps.style, alignment: 'right', fontSize: 11 }
-                            } as any;
-                            break;
-                        case 'signature':
-                            newElement = { ...baseProps, type: 'signature' };
-                            break;
-                        case 'date-field':
-                            newElement = {
-                                ...baseProps,
-                                type: 'date-field',
-                                label: 'Date',
-                                dateValue: new Date().toISOString().split('T')[0],
-                                dateFormat: 'DD/MM/YYYY',
-                                showLabel: true
-                            } as any;
-                            break;
-                        case 'auto-number':
-                            newElement = {
-                                ...baseProps,
-                                type: 'auto-number',
-                                label: 'Invoice No.',
-                                prefix: 'INV-',
-                                suffix: '',
-                                startValue: 1,
-                                paddingDigits: 4
-                            } as any;
-                            break;
-                        case 'variable':
-                            newElement = {
-                                ...baseProps,
-                                type: 'variable',
-                                variableName: 'customerName',
-                                placeholder: '[Select Name]',
-                                label: 'Customer Name:'
-                            } as any;
-                            break;
-                        case 'qrcode':
-                            newElement = {
-                                ...baseProps,
-                                type: 'qrcode',
-                                data: 'https://example.com',
-                                size: 100,
-                                errorLevel: 'M'
-                            } as any;
-                            break;
-                        case 'barcode':
-                            newElement = {
-                                ...baseProps,
-                                type: 'barcode',
-                                data: '12345678',
-                                barcodeType: 'Code128',
-                                width: 100,
-                                height: 40,
-                                displayValue: true
-                            } as any;
-                            break;
-                        case 'list':
-                            newElement = {
-                                ...baseProps,
-                                type: 'list',
-                                listType: 'unordered',
-                                items: ['Item 1', 'Item 2', 'Item 3'],
-                                bulletStyle: 'disc'
-                            } as any;
-                            break;
-                        case 'abn-field':
-                            newElement = {
-                                ...baseProps,
-                                type: 'abn-field',
-                                abnValue: '',
-                                label: 'ABN:',
-                                format: 'XX XXX XXX XXX'
-                            } as any;
-                            break;
-                        case 'bank-details':
-                            newElement = {
-                                ...baseProps,
-                                type: 'bank-details',
-                                bankName: '',
-                                accountName: '',
-                                bsb: '',
-                                accountNumber: ''
-                            } as any;
-                            break;
-                        default:
-                            // Default to paragraph if unknown
-                            newElement = { ...baseProps, type: 'paragraph', content: '' };
-                    }
+                    let newElement = getElementDefaults(type) as EditorElement;
+                    const id = newElement.id;
 
                     const newElements: Record<string, EditorElement> = {
                         ...state.document.elements,
@@ -381,10 +147,11 @@ export const useEditorStore = create<EditorState>()(
                         return tid;
                     };
 
+                    // Specialized composite blocks
                     switch (type) {
                         case 'invoice-items':
                             newElement = {
-                                ...baseProps,
+                                ...newElement,
                                 type: 'table',
                                 rows: 3,
                                 cols: 4,
@@ -414,7 +181,7 @@ export const useEditorStore = create<EditorState>()(
                             break;
                         case 'invoice-summary':
                             newElement = {
-                                ...baseProps,
+                                ...newElement,
                                 type: 'table',
                                 rows: 4,
                                 cols: 2,
@@ -427,12 +194,12 @@ export const useEditorStore = create<EditorState>()(
                                 ],
                                 borderColor: '#ffffff',
                                 borderWidth: 0,
-                                style: { ...baseProps.style, alignment: 'right' }
+                                style: { ...newElement.style, alignment: 'right' }
                             } as any;
                             break;
                         case 'price-table':
                             newElement = {
-                                ...baseProps,
+                                ...newElement,
                                 type: 'table',
                                 rows: 3,
                                 cols: 3,
@@ -459,7 +226,7 @@ export const useEditorStore = create<EditorState>()(
                             break;
                     }
 
-                    newElements[id] = newElement as any;
+                    newElements[id] = newElement;
                     let newRootIds = [...state.document.rootElementIds];
                     let updatedElements = newElements;
 
@@ -491,83 +258,12 @@ export const useEditorStore = create<EditorState>()(
                 }),
 
                 updateElement: (id, updates) => set((state) => {
-                    const nextElements = {
+                    const elements = {
                         ...state.document.elements,
-                        [id]: { ...state.document.elements[id], ...updates } as any
+                        [id]: { ...state.document.elements[id], ...updates } as EditorElement
                     };
 
-                    // Trigger auto-calculation if a qty or rate was updated
-                    const updatedElement = nextElements[id];
-                    if (updatedElement.role === 'item-qty' || updatedElement.role === 'item-rate') {
-                        // Find the table row this element belongs to
-                        let tableId: string | null = null;
-                        let rowIndex: number | null = null;
-
-                        Object.entries(nextElements).forEach(([tid, el]) => {
-                            if (el.type === 'table') {
-                                const table = el as TableElement;
-                                table.body.forEach((row, rIdx) => {
-                                    row.forEach(cell => {
-                                        if (cell.content.includes(id)) {
-                                            tableId = tid;
-                                            rowIndex = rIdx;
-                                        }
-                                    });
-                                });
-                            }
-                        });
-
-                        if (tableId && rowIndex !== null) {
-                            const table = nextElements[tableId] as TableElement;
-                            const row = table.body[rowIndex];
-
-                            let qtyValue = 0;
-                            let rateValue = 0;
-                            let amountElementId: string | null = null;
-
-                            row.forEach(cell => {
-                                cell.content.forEach(cid => {
-                                    const child = nextElements[cid];
-                                    if (child.role === 'item-qty') {
-                                        qtyValue = parseFloat((child as any).content) || 0;
-                                    } else if (child.role === 'item-rate') {
-                                        const val = (child as any).content || '0';
-                                        rateValue = parseFloat(val.replace(/[^0-9.-]/g, '')) || 0;
-                                    } else if (child.role === 'item-amount') {
-                                        amountElementId = cid;
-                                    }
-                                });
-                            });
-
-                            if (amountElementId) {
-                                const total = qtyValue * rateValue;
-                                const amountEl = nextElements[amountElementId] as any;
-                                amountEl.content = formatCurrency(total);
-                            }
-
-                            // Now trigger summary calculation
-                            let subtotal = 0;
-                            Object.values(nextElements).forEach(el => {
-                                if (el.role === 'item-amount') {
-                                    const val = (el as any).content || '0';
-                                    subtotal += parseCurrency(val);
-                                }
-                            });
-
-                            const gst = subtotal * 0.10;
-                            const grandTotal = subtotal + gst;
-
-                            Object.values(nextElements).forEach(el => {
-                                if (el.role === 'summary-subtotal') {
-                                    (el as any).content = formatCurrency(subtotal);
-                                } else if (el.role === 'summary-gst') {
-                                    (el as any).content = formatCurrency(gst);
-                                } else if (el.role === 'summary-total') {
-                                    (el as any).content = formatCurrency(grandTotal);
-                                }
-                            });
-                        }
-                    }
+                    const nextElements = calculateInvoiceTotals(elements, id);
 
                     return {
                         document: {
@@ -636,8 +332,6 @@ export const useEditorStore = create<EditorState>()(
                     }
 
                     return state;
-
-                    return state;
                 }),
 
                 moveElement: (elementId, targetParentId, targetIndex, targetColIndex) => set((state) => {
@@ -652,8 +346,6 @@ export const useEditorStore = create<EditorState>()(
                             newRootIds.splice(rootIdx, 1);
                             return;
                         }
-
-                        // Remove from columns
 
                         // Remove from columns
                         Object.values(newElements).forEach((el) => {

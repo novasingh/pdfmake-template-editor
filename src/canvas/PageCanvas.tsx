@@ -1,6 +1,6 @@
 import React from 'react';
 import { useEditorStore } from '../store/useEditorStore';
-import { A4_DIMENSIONS, mmToPx } from '../utils/dimensions';
+import { A4_DIMENSIONS, mmToPt } from '../utils/dimensions';
 import '../styles/PageCanvas.css';
 import { useDroppable } from '@dnd-kit/core';
 import {
@@ -20,9 +20,13 @@ const PageCanvas: React.FC = () => {
 
 
     const canvasStyle: React.CSSProperties = {
-        width: A4_DIMENSIONS.widthPx,
-        height: A4_DIMENSIONS.heightPx,
-        padding: mmToPx(page.padding),
+        width: `${A4_DIMENSIONS.widthPt}pt`,
+        minWidth: `${A4_DIMENSIONS.widthPt}pt`,
+        maxWidth: `${A4_DIMENSIONS.widthPt}pt`,
+        height: `${A4_DIMENSIONS.heightPt}pt`,
+        minHeight: `${A4_DIMENSIONS.heightPt}pt`,
+        maxHeight: `${A4_DIMENSIONS.heightPt}pt`,
+        padding: `${mmToPt(page.padding)}pt`,
         backgroundColor: page.backgroundColor || 'white',
         boxShadow: '0 0 20px rgba(0,0,0,0.15)',
         position: 'relative',
@@ -32,14 +36,15 @@ const PageCanvas: React.FC = () => {
         transform: `scale(${canvasZoom})`,
         transformOrigin: 'top center',
         transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+        boxSizing: 'border-box',
     };
 
     const marginGuideStyle: React.CSSProperties = {
         position: 'absolute',
-        top: mmToPx(page.margins.top),
-        right: mmToPx(page.margins.right),
-        bottom: mmToPx(page.margins.bottom),
-        left: mmToPx(page.margins.left),
+        top: `${mmToPt(page.margins.top)}pt`,
+        right: `${mmToPt(page.margins.right)}pt`,
+        bottom: `${mmToPt(page.margins.bottom)}pt`,
+        left: `${mmToPt(page.margins.left)}pt`,
         border: '1px dashed #cbd5e1',
         pointerEvents: 'none',
     };
@@ -69,8 +74,8 @@ const PageCanvas: React.FC = () => {
             return (
                 <div style={{
                     position: 'absolute',
-                    top: mmToPx(page.padding), left: mmToPx(page.padding),
-                    right: mmToPx(page.padding), bottom: mmToPx(page.padding),
+                    top: `${mmToPt(page.padding)}pt`, left: `${mmToPt(page.padding)}pt`,
+                    right: `${mmToPt(page.padding)}pt`, bottom: `${mmToPt(page.padding)}pt`,
                     display: 'flex',
                     ...posStyle,
                     opacity: watermark.opacity ?? 0.1,
@@ -79,7 +84,7 @@ const PageCanvas: React.FC = () => {
                 }}>
                     <div style={{
                         transform: watermark.position === 'center' ? 'rotate(-45deg)' : 'none',
-                        fontSize: `${watermark.fontSize || 60}px`,
+                        fontSize: `${watermark.fontSize || 60}pt`,
                         fontWeight: watermark.fontWeight || 'bold',
                         color: watermark.color || '#000',
                         fontFamily: watermark.fontFamily || 'sans-serif',
@@ -95,8 +100,8 @@ const PageCanvas: React.FC = () => {
             return (
                 <div style={{
                     position: 'absolute',
-                    top: mmToPx(page.padding), left: mmToPx(page.padding),
-                    right: mmToPx(page.padding), bottom: mmToPx(page.padding),
+                    top: `${mmToPt(page.padding)}pt`, left: `${mmToPt(page.padding)}pt`,
+                    right: `${mmToPt(page.padding)}pt`, bottom: `${mmToPt(page.padding)}pt`,
                     display: 'flex',
                     ...posStyle,
                     opacity: watermark.opacity ?? 0.1,
@@ -140,10 +145,10 @@ const PageCanvas: React.FC = () => {
                         position: 'relative',
                         zIndex: 2,
                         height: '100%',
-                        paddingTop: mmToPx(page.margins.top),
-                        paddingRight: mmToPx(page.margins.right),
-                        paddingBottom: mmToPx(page.margins.bottom),
-                        paddingLeft: mmToPx(page.margins.left),
+                        paddingTop: `${mmToPt(page.margins.top)}pt`,
+                        paddingRight: `${mmToPt(page.margins.right)}pt`,
+                        paddingBottom: `${mmToPt(page.margins.bottom)}pt`,
+                        paddingLeft: `${mmToPt(page.margins.left)}pt`,
                         boxSizing: 'border-box'
                     }}
                 >

@@ -1,11 +1,14 @@
 import TemplateEditor from './editor/TemplateEditor';
 import { useEditorStore } from './store/useEditorStore';
 import { exportToPdfMake } from './exporters/pdfmakeMapper';
+import { LocalizationProvider, useLocalization } from './hooks/useLocalization';
 
 export {
   TemplateEditor,
   useEditorStore,
-  exportToPdfMake
+  exportToPdfMake,
+  LocalizationProvider,
+  useLocalization
 };
 
 export type {
@@ -16,5 +19,3 @@ export type {
   ElementType,
   BaseStyle
 } from './types/editor';
-
-export default TemplateEditor;

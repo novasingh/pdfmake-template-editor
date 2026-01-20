@@ -160,6 +160,7 @@ export interface BusinessInfoElement extends BaseElement {
     showLeftBorder?: boolean;
     borderWidth?: number;
     borderColor?: string;
+    borderPadding?: number;
 }
 
 export interface DateFieldElement extends BaseElement {

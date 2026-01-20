@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "description": "A drag-and-drop PDF template editor that generates pdfmake JSON. ",
   "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",

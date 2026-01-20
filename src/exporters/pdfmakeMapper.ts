@@ -40,12 +40,14 @@ export const exportToPdfMake = (doc: DocumentSchema, variables: Record<string, s
 
         switch (element.type) {
             case 'heading':
-            case 'paragraph':
+            case 'paragraph': {
+                const isHeading = element.type === 'heading';
                 return {
-                    text: (element as any).content,
+                    text: (element as any).content || (isHeading ? 'Heading' : 'Paragraph text...'),
                     ...mapStyle(element.style),
-                    fontSize: element.type === 'heading' ? (element.style.fontSize || 24) : (element.style.fontSize || 12),
+                    fontSize: element.style.fontSize || (isHeading ? 24 : 12),
                 };
+            }
 
             case 'divider': {
                 const div = element as any;
@@ -81,8 +83,8 @@ export const exportToPdfMake = (doc: DocumentSchema, variables: Record<string, s
                 const img = element as any;
                 return {
                     image: img.src,
-                    width: typeof img.width === 'string' && img.width.endsWith('%') ? pageWidth * (parseFloat(img.width) / 100) : (img.width || 150),
-                    height: img.height === 'auto' ? undefined : img.height,
+                    width: typeof img.width === 'string' && img.width.endsWith('%') ? pageWidth * (parseFloat(img.width) / 100) : (img.width || pageWidth),
+                    height: img.height === 'auto' || !img.height ? undefined : img.height,
                     ...mapStyle(element.style),
                 };
             }
@@ -180,17 +182,17 @@ export const exportToPdfMake = (doc: DocumentSchema, variables: Record<string, s
                     return {
                         table: {
                             widths: ['*'],
-                            body: [[{ stack, border: [true, false, false, false], padding: [10, 2, 0, 2] }]]
+                            body: [[{ stack, border: [true, false, false, false] }]]
                         },
                         layout: {
                             hLineWidth: () => 0,
                             vLineWidth: (i: number) => (i === 0 ? (info.borderWidth || 3) : 0),
                             hLineColor: () => 'white',
                             vLineColor: () => info.borderColor || '#3b82f6',
-                            paddingLeft: () => 0,
+                            paddingLeft: () => info.borderPadding ?? 10,
                             paddingRight: () => 0,
-                            paddingTop: () => 0,
-                            paddingBottom: () => 0,
+                            paddingTop: () => 2,
+                            paddingBottom: () => 2,
                         },
                         ...mapStyle(element.style),
                     };
@@ -225,18 +227,20 @@ export const exportToPdfMake = (doc: DocumentSchema, variables: Record<string, s
             case 'signature':
                 return {
                     stack: [
-                        { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 200, y2: 0, lineWidth: 1 }] },
-                        { text: 'Authorized Signature', fontSize: 10, margin: [0, 5, 0, 0] }
+                        { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 150, y2: 0, lineWidth: 1 }] },
+                        { text: 'Authorized Signature', fontSize: (element.style.fontSize || 10), margin: [0, 5, 0, 0] }
                     ],
                     ...mapStyle(element.style),
-                    margin: [0, 20, 0, 0],
                 };
 
             case 'date-field': {
                 const df = element as any;
-                const dateText = df.showLabel !== false ? `${df.label || 'Date'}: ${df.dateValue || ''}` : (df.dateValue || '');
+                const labelText = df.showLabel !== false ? `${df.label || 'Date'}: ` : '';
                 return {
-                    text: dateText,
+                    text: [
+                        { text: labelText, bold: true },
+                        { text: df.dateValue || 'DD/MM/YYYY' }
+                    ],
                     ...mapStyle(element.style),
                 };
             }
@@ -247,7 +251,7 @@ export const exportToPdfMake = (doc: DocumentSchema, variables: Record<string, s
                 const numberText = `${an.prefix || ''}${value}${an.suffix || ''}`;
                 return {
                     stack: [
-                        an.label ? { text: an.label, fontSize: (element.style.fontSize || 11) * 0.8, color: '#64748b' } : null,
+                        an.label ? { text: an.label, fontSize: (element.style.fontSize || 11) * 0.8, color: '#64748b', margin: [0, 0, 0, 2] } : null,
                         { text: numberText, ...mapStyle(element.style) }
                     ].filter(Boolean)
                 };
@@ -296,6 +300,7 @@ export const exportToPdfMake = (doc: DocumentSchema, variables: Record<string, s
                     [listProp]: le.items,
                     type: marker,
                     ...mapStyle(element.style),
+                    markerColor: element.style.color,
                 };
             }
 
@@ -312,13 +317,24 @@ export const exportToPdfMake = (doc: DocumentSchema, variables: Record<string, s
 
             case 'bank-details': {
                 const bd = element as any;
+                const bankStack = [
+                    { text: bd.bankName || 'Bank Name', bold: true, margin: [0, 0, 0, 2] },
+                    { text: `Account: ${bd.accountName || ''}`, fontSize: (element.style.fontSize || 10) },
+                    { text: `BSB: ${bd.bsb || ''} | Acc: ${bd.accountNumber || ''}`, fontSize: (element.style.fontSize || 10) }
+                ];
+
                 return {
-                    stack: [
-                        { text: bd.bankName || 'Bank Name', bold: true },
-                        { text: `Account: ${bd.accountName || ''}` },
-                        { text: `BSB: ${bd.bsb || ''} | Acc: ${bd.accountNumber || ''}` }
-                    ],
-                    fillColor: '#f8fafc',
+                    table: {
+                        widths: ['*'],
+                        body: [[{ stack: bankStack, padding: [8, 5, 8, 5], border: [true, true, true, true] }]]
+                    },
+                    layout: {
+                        hLineWidth: () => 1,
+                        vLineWidth: () => 1,
+                        hLineColor: () => '#e2e8f0',
+                        vLineColor: () => '#e2e8f0',
+                        fillColor: () => element.style.background || '#f8fafc',
+                    },
                     ...mapStyle(element.style)
                 };
             }

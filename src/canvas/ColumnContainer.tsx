@@ -17,7 +17,7 @@ interface DroppableColumnProps {
 const DroppableColumn: React.FC<DroppableColumnProps> = ({ column, columnIndex, parentElement }) => {
     const { document: doc } = useEditorStore();
     const dropId = `${parentElement.id}-col-${columnIndex}`;
-    
+
     const { setNodeRef, isOver } = useDroppable({
         id: dropId,
         data: {
@@ -28,19 +28,19 @@ const DroppableColumn: React.FC<DroppableColumnProps> = ({ column, columnIndex, 
     });
 
     const columnBorderStyle = parentElement.showColumnBorders
-        ? `${parentElement.columnBorderWidth ?? 1}px solid ${parentElement.columnBorderColor ?? '#e2e8f0'}`
-        : isOver 
-            ? '1px dashed #3b82f6' 
+        ? `${parentElement.columnBorderWidth ?? 1}pt solid ${parentElement.columnBorderColor ?? '#e2e8f0'}`
+        : isOver
+            ? '1px dashed #3b82f6'
             : '1px dashed #e2e8f0';
 
     return (
         <div
             ref={setNodeRef}
             style={{
-                flex: `0 0 calc(${column.width} - ${((parentElement.columnGap ?? 10) * (parentElement.columns.length - 1)) / parentElement.columns.length}px)`,
+                flex: `0 0 calc(${column.width} - ${((parentElement.columnGap ?? 10) * (parentElement.columns.length - 1)) / parentElement.columns.length}pt)`,
                 width: column.width,
                 border: columnBorderStyle,
-                padding: '4px',
+                padding: '0',
                 minHeight: '40px',
                 backgroundColor: isOver ? '#eff6ff' : 'transparent',
                 textAlign: parentElement.style.alignment ?? 'left',
@@ -74,24 +74,24 @@ interface ColumnContainerProps {
 const ColumnContainer: React.FC<ColumnContainerProps> = ({ element }) => {
     const containerStyle: React.CSSProperties = {
         display: 'flex',
-        gap: `${element.columnGap ?? 10}px`,
+        gap: `${element.columnGap ?? 10}pt`,
         width: '100%',
         minHeight: '50px',
-        padding: element.style.padding 
-            ? `${element.style.padding[1]}px ${element.style.padding[2]}px ${element.style.padding[3]}px ${element.style.padding[0]}px`
+        padding: element.style.padding
+            ? `${element.style.padding[1]}pt ${element.style.padding[2]}pt ${element.style.padding[3]}pt ${element.style.padding[0]}pt`
             : '0',
         margin: element.style.margin
-            ? `${element.style.margin[1]}px ${element.style.margin[2]}px ${element.style.margin[3]}px ${element.style.margin[0]}px`
+            ? `${element.style.margin[1]}pt ${element.style.margin[2]}pt ${element.style.margin[3]}pt ${element.style.margin[0]}pt`
             : '0',
         border: element.borderWidth && element.borderStyle !== 'none'
-            ? `${element.borderWidth}px ${element.borderStyle ?? 'solid'} ${element.borderColor ?? '#e2e8f0'}`
+            ? `${element.borderWidth}pt ${element.borderStyle ?? 'solid'} ${element.borderColor ?? '#e2e8f0'}`
             : 'none',
-        borderRadius: `${element.borderRadius ?? 0}px`,
+        borderRadius: `${element.borderRadius ?? 0}pt`,
         backgroundColor: element.backgroundColor ?? 'transparent',
-        alignItems: element.verticalAlign === 'middle' 
-            ? 'center' 
-            : element.verticalAlign === 'bottom' 
-                ? 'flex-end' 
+        alignItems: element.verticalAlign === 'middle'
+            ? 'center'
+            : element.verticalAlign === 'bottom'
+                ? 'flex-end'
                 : 'flex-start',
         boxSizing: 'border-box',
     };
