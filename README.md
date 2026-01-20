@@ -5,12 +5,27 @@ A powerful, drag-and-drop PDF template editor for React that generates `pdfmake`
 ## ✨ Features
 
 - **Drag & Drop Interface**: Built with `@dnd-kit` for a smooth, intuitive layout experience.
+  - Smart collision detection for precise drop positioning
+  - Drop above/below existing elements
+  - Move elements between containers (columns, tables, root)
 - **Rich Component Library**:
   - Headings & Paragraphs
   - Images (with resizing and borders)
   - Tables (with dynamic row/column management)
   - Dividers (custom styles and colors)
+  - **Columns** (multi-column layouts with full customization)
   - Specialized Business Modules (Client Info, Business Info, Signature Blocks)
+- **Advanced Column Properties**:
+  - Configurable number of columns (1-6)
+  - Equal width toggle with automatic distribution
+  - Individual column width control (percentage or fixed)
+  - Column gap spacing
+  - Border settings (width, color, style, radius)
+  - Background color
+  - Vertical alignment (top, middle, bottom)
+  - Content alignment
+  - Individual column borders option
+  - Margin and padding controls
 - **Advanced Branding**:
   - Customizable headings (text, font size, weight, color).
   - Branding borders for business modules.
