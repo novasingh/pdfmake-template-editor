@@ -23,7 +23,7 @@ interface EditorHeaderProps {
 }
 
 const EditorHeader: React.FC<EditorHeaderProps> = ({ onToggleSidebar, onToggleProperties }) => {
-    const { document: doc, loadTemplate, loadDocument } = useEditorStore();
+    const { document: doc, loadTemplate, loadDocument, showDialog } = useEditorStore();
     const [isJsonOpen, setIsJsonOpen] = useState(false);
     const [showTemplateDropdown, setShowTemplateDropdown] = useState(false);
     const [showSaveDropdown, setShowSaveDropdown] = useState(false);
@@ -39,27 +39,51 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({ onToggleSidebar, onTogglePr
     };
 
     const handleLoadTemplate = (type: 'blank' | 'default') => {
-        if (confirm(`Are you sure you want to load a ${type} template? This will clear your current work.`)) {
-            loadTemplate(type);
-        }
+        showDialog({
+            type: 'confirm',
+            title: 'Load Template',
+            message: `Are you sure you want to load a ${type} template? This will clear your current work.`,
+            confirmLabel: 'Load',
+            onConfirm: () => {
+                loadTemplate(type);
+            }
+        });
         setShowTemplateDropdown(false);
     };
 
     const handleLoadPrebuiltTemplate = (template: Template) => {
-        if (confirm(`Load "${template.metadata.name}"? This will replace your current work.`)) {
-            loadDocument(template.document);
-        }
+        showDialog({
+            type: 'confirm',
+            title: 'Load Pre-built Template',
+            message: `Load "${template.metadata.name}"? This will replace your current work.`,
+            confirmLabel: 'Load',
+            onConfirm: () => {
+                loadDocument(template.document);
+            }
+        });
         setShowTemplateDropdown(false);
     };
 
     const handleSaveAsTemplate = async () => {
-        const name = prompt('Enter template name:', 'My Template');
-        if (name) {
-            const thumbnail = await captureThumbnail('page-canvas');
-            const template = createTemplate(doc, name, { thumbnail });
-            saveTemplateToStorage(template);
-            alert(`Template "${name}" saved to browser storage!`);
-        }
+        showDialog({
+            type: 'prompt',
+            title: 'Save Template',
+            message: 'Enter template name:',
+            defaultValue: 'My Template',
+            confirmLabel: 'Save',
+            onConfirm: async (name) => {
+                if (name) {
+                    const thumbnail = await captureThumbnail('page-canvas');
+                    const template = createTemplate(doc, name, { thumbnail });
+                    saveTemplateToStorage(template);
+                    showDialog({
+                        type: 'alert',
+                        title: 'Success',
+                        message: `Template "${name}" saved to browser storage!`
+                    });
+                }
+            }
+        });
         setShowSaveDropdown(false);
     };
 
@@ -80,11 +104,22 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({ onToggleSidebar, onTogglePr
 
         const template = await readTemplateFile(file);
         if (template) {
-            if (confirm(`Load template "${template.metadata.name}"? This will replace your current work.`)) {
-                loadDocument(template.document);
-            }
+            showDialog({
+                type: 'confirm',
+                title: 'Import Template',
+                message: `Load template "${template.metadata.name}"? This will replace your current work.`,
+                confirmLabel: 'Import',
+                onConfirm: () => {
+                    loadDocument(template.document);
+                    setShowTemplateDropdown(false);
+                }
+            });
         } else {
-            alert('Failed to load template. Please check the file format.');
+            showDialog({
+                type: 'alert',
+                title: 'Error',
+                message: 'Failed to load template. Please check the file format.'
+            });
         }
 
         // Reset input

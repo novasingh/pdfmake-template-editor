@@ -27,6 +27,7 @@ import PageCanvas from '../canvas/PageCanvas';
 import PropertiesPanel from '../properties/PropertiesPanel';
 import EditorHeader from './EditorHeader';
 import { useEditorStore } from '../store/useEditorStore';
+import CustomDialog from '../components/CustomDialog';
 
 import '../styles/TemplateEditor.css';
 
@@ -85,7 +86,7 @@ const TemplateEditor: React.FC<TemplateEditorProps> = () => {
     const customCollisionDetection: CollisionDetection = React.useCallback((args) => {
         // First, use pointerWithin to detect if we're inside a container (column or table cell)
         const pointerCollisions = pointerWithin(args);
-        
+
         // Check if any of the pointer collisions are column containers or table cells
         const containerCollisions = pointerCollisions.filter(collision => {
             const id = collision.id as string;
@@ -99,7 +100,7 @@ const TemplateEditor: React.FC<TemplateEditorProps> = () => {
 
         // Next, check for collisions with sortable root elements using closestCenter
         const closestCenterCollisions = closestCenter(args);
-        
+
         // Filter to get only collisions with root-level elements
         const sortableCollisions = closestCenterCollisions.filter(collision => {
             const id = collision.id as string;
@@ -148,12 +149,12 @@ const TemplateEditor: React.FC<TemplateEditorProps> = () => {
                 // Calculate the drop position based on where the element is dropped
                 if (overId !== 'page-canvas' && doc.rootElementIds.includes(overId)) {
                     const overIndex = doc.rootElementIds.indexOf(overId);
-                    
+
                     const overRect = over.rect;
                     const isBelow = overRect && event.activatorEvent instanceof MouseEvent
                         ? (event.activatorEvent as MouseEvent).clientY > (overRect.top + overRect.height / 2)
                         : delta.y > 0;
-                    
+
                     if (isBelow) {
                         addElement(type, undefined, overIndex + 1);
                     } else {
@@ -183,7 +184,7 @@ const TemplateEditor: React.FC<TemplateEditorProps> = () => {
                 // Reorder within root elements
                 const overIndex = doc.rootElementIds.indexOf(overId);
                 const activeInRoot = doc.rootElementIds.includes(activeId);
-                
+
                 if (activeInRoot) {
                     // Simple reorder within root
                     reorderElements(activeId, overId);
@@ -193,7 +194,7 @@ const TemplateEditor: React.FC<TemplateEditorProps> = () => {
                     const isBelow = overRect && event.activatorEvent instanceof MouseEvent
                         ? (event.activatorEvent as MouseEvent).clientY > (overRect.top + overRect.height / 2)
                         : delta.y > 0;
-                    
+
                     moveElement(activeId, null, isBelow ? overIndex + 1 : overIndex);
                 }
             }
@@ -255,6 +256,7 @@ const TemplateEditor: React.FC<TemplateEditorProps> = () => {
                     {renderDragOverlay()}
                 </DragOverlay>
             </DndContext>
+            <CustomDialog />
         </div>
     );
 };

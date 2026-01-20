@@ -105,6 +105,29 @@ const TableProperties: React.FC<TablePropertiesProps> = ({
             </div>
 
             <div className="prop-section">
+                <label>Column Widths</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    {Array.from({ length: table.cols }).map((_, i) => (
+                        <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <span style={{ fontSize: '11px', width: '40px' }}>Col {i + 1}:</span>
+                            <input
+                                type="text"
+                                value={table.widths?.[i] ?? '*'}
+                                placeholder="*, auto, or px"
+                                onChange={(e) => {
+                                    const newWidths = [...(table.widths || Array(table.cols).fill('*'))];
+                                    const val = e.target.value;
+                                    newWidths[i] = isNaN(Number(val)) ? val : Number(val);
+                                    onUpdate({ widths: newWidths });
+                                }}
+                                style={{ flex: 1 }}
+                            />
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <div className="prop-section">
                 <label>Manage Structure</label>
                 <div className="prop-grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                     <button className="secondary-btn" onClick={() => onAddRow(element.id)}>+ Row</button>

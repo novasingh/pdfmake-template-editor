@@ -12,6 +12,17 @@ import {
     TableCell
 } from '../types/editor';
 
+export interface DialogOptions {
+    type: 'alert' | 'confirm' | 'prompt';
+    title?: string;
+    message: string;
+    defaultValue?: string;
+    confirmLabel?: string;
+    cancelLabel?: string;
+    onConfirm?: (value?: string) => void;
+    onCancel?: () => void;
+}
+
 interface EditorState {
     document: DocumentSchema;
     selectedElementId: string | null;
@@ -31,11 +42,18 @@ interface EditorState {
     addTableColumn: (tableId: string) => void;
     removeTableColumn: (tableId: string, colIndex: number) => void;
     updateTableCell: (tableId: string, rowIndex: number, colIndex: number, updates: Partial<TableCell>) => void;
+    mergeTableCells: (tableId: string, rowIndex: number, colIndex: number, rowSpan: number, colSpan: number) => void;
+    updateTableWidths: (tableId: string, widths: (number | string)[]) => void;
     cloneElement: (id: string) => void;
     selectElement: (id: string | null) => void;
     resetDocument: () => void;
     loadTemplate: (template: 'blank' | 'default') => void;
     loadDocument: (document: DocumentSchema) => void;
+
+    // Dialog State
+    dialog: DialogOptions | null;
+    showDialog: (options: DialogOptions) => void;
+    closeDialog: () => void;
 }
 
 const DEFAULT_PAGE: PageSettings = {
@@ -44,6 +62,8 @@ const DEFAULT_PAGE: PageSettings = {
     height: 297,
     margins: { top: 10, right: 10, bottom: 10, left: 10 },
     padding: 0,
+    header: { show: false, height: 50, elements: [] },
+    footer: { show: false, height: 50, elements: [] },
 };
 
 export const useEditorStore = create<EditorState>()(
@@ -55,6 +75,7 @@ export const useEditorStore = create<EditorState>()(
                 rootElementIds: [],
             },
             selectedElementId: null,
+            dialog: null,
 
             setPageSettings: (settings) => set((state) => ({
                 document: {
@@ -389,7 +410,37 @@ export const useEditorStore = create<EditorState>()(
                 let newRootIds = [...state.document.rootElementIds];
                 let updatedElements = newElements;
 
-                if (parentId && updatedElements[parentId]) {
+                if (parentId === 'header') {
+                    const newHeader = { ...state.document.page.header!, elements: [...state.document.page.header!.elements] };
+                    if (typeof indexOrRow === 'number') {
+                        newHeader.elements.splice(indexOrRow, 0, id);
+                    } else {
+                        newHeader.elements.push(id);
+                    }
+                    return {
+                        document: {
+                            ...state.document,
+                            elements: updatedElements,
+                            page: { ...state.document.page, header: newHeader }
+                        },
+                        selectedElementId: id,
+                    } as Partial<EditorState>;
+                } else if (parentId === 'footer') {
+                    const newFooter = { ...state.document.page.footer!, elements: [...state.document.page.footer!.elements] };
+                    if (typeof indexOrRow === 'number') {
+                        newFooter.elements.splice(indexOrRow, 0, id);
+                    } else {
+                        newFooter.elements.push(id);
+                    }
+                    return {
+                        document: {
+                            ...state.document,
+                            elements: updatedElements,
+                            page: { ...state.document.page, footer: newFooter }
+                        },
+                        selectedElementId: id,
+                    } as Partial<EditorState>;
+                } else if (parentId && updatedElements[parentId]) {
                     const parent = { ...updatedElements[parentId] };
                     if (parent.type === 'columns' && typeof indexOrRow === 'number') {
                         parent.columns[indexOrRow].content.push(id);
@@ -526,6 +577,21 @@ export const useEditorStore = create<EditorState>()(
                     }
                 });
 
+                // Remove from header/footer
+                const newPage = { ...state.document.page };
+                if (newPage.header) {
+                    newPage.header = {
+                        ...newPage.header,
+                        elements: newPage.header.elements.filter(rid => rid !== id)
+                    };
+                }
+                if (newPage.footer) {
+                    newPage.footer = {
+                        ...newPage.footer,
+                        elements: newPage.footer.elements.filter(rid => rid !== id)
+                    };
+                }
+
                 delete newElements[id];
 
                 return {
@@ -533,6 +599,7 @@ export const useEditorStore = create<EditorState>()(
                         ...state.document,
                         elements: newElements,
                         rootElementIds: state.document.rootElementIds.filter(rid => rid !== id),
+                        page: newPage
                     },
                     selectedElementId: state.selectedElementId === id ? null : state.selectedElementId,
                 };
@@ -755,6 +822,56 @@ export const useEditorStore = create<EditorState>()(
                 };
             }),
 
+            mergeTableCells: (tableId, rowIndex, colIndex, rowSpan, colSpan) => set((state) => {
+                const elements = { ...state.document.elements };
+                const table = elements[tableId] as TableElement;
+                if (!table || table.type !== 'table') return state;
+
+                const newBody = [...table.body];
+
+                // Set span on the target cell
+                newBody[rowIndex] = [...newBody[rowIndex]];
+                newBody[rowIndex][colIndex] = {
+                    ...newBody[rowIndex][colIndex],
+                    rowSpan,
+                    colSpan
+                };
+
+                // Clear content of "covered" cells? 
+                // Actually, the renderer will skip them, but it's cleaner to handle it here if needed.
+                // For now, setting the span is enough as the renderer handles the "isCovered" logic.
+
+                elements[tableId] = {
+                    ...table,
+                    body: newBody
+                } as any;
+
+                return {
+                    document: {
+                        ...state.document,
+                        elements
+                    }
+                };
+            }),
+
+            updateTableWidths: (tableId, widths) => set((state) => {
+                const elements = { ...state.document.elements };
+                const table = elements[tableId] as TableElement;
+                if (!table || table.type !== 'table') return state;
+
+                elements[tableId] = {
+                    ...table,
+                    widths
+                } as any;
+
+                return {
+                    document: {
+                        ...state.document,
+                        elements
+                    }
+                };
+            }),
+
             cloneElement: (id: string) => set((state) => {
                 const elements = { ...state.document.elements };
                 const originalElement = elements[id];
@@ -866,6 +983,9 @@ export const useEditorStore = create<EditorState>()(
                 document: JSON.parse(JSON.stringify(document)), // Deep clone to avoid mutations
                 selectedElementId: null,
             }),
+
+            showDialog: (options: DialogOptions) => set({ dialog: options }),
+            closeDialog: () => set({ dialog: null }),
         }),
         {
             name: 'pdfmake-editor-storage',

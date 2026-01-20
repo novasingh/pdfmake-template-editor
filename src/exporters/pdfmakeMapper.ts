@@ -131,7 +131,8 @@ export const exportToPdfMake = (doc: DocumentSchema): any => {
                 return {
                     table: {
                         headerRows: table.headerRow ? 1 : 0,
-                        widths: Array(colsCount).fill('*'),
+                        widths: table.widths || Array(colsCount).fill('*'),
+                        heights: table.heights,
                         body: table.body.map((row: any[], rIdx: number) =>
                             row.map((cell: any) => {
                                 const isHeader = table.headerRow && rIdx === 0;

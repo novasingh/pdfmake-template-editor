@@ -42,6 +42,21 @@ export interface WatermarkSettings {
     borderRadius?: number;
 }
 
+export interface HeaderSettings {
+    show: boolean;
+    height: number; // pts
+    elements: string[]; // IDs of elements in header
+}
+
+export interface FooterSettings {
+    show: boolean;
+    height: number; // pts
+    elements: string[]; // IDs of elements in footer
+    showPageNumbers?: boolean;
+    pageNumberFormat?: 'Page X of Y' | 'X/Y' | 'X';
+    alignment?: Alignment;
+}
+
 export interface PageSettings {
     size: PageSize;
     width: number; // mm
@@ -50,6 +65,8 @@ export interface PageSettings {
     padding: number;
     backgroundColor?: string;
     watermark?: WatermarkSettings;
+    header?: HeaderSettings;
+    footer?: FooterSettings;
 }
 
 export type ElementType =
@@ -139,6 +156,8 @@ export interface TableElement extends BaseElement {
     headerRow: boolean;
     headerColor?: string;
     alternateRowColor?: string;
+    widths?: (number | string)[];
+    heights?: (number | string)[];
     cellPadding?: number;
     borderWidth?: number;
     borderColor?: string;

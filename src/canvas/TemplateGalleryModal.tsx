@@ -9,7 +9,7 @@ interface TemplateGalleryModalProps {
 }
 
 const TemplateGalleryModal: React.FC<TemplateGalleryModalProps> = ({ isOpen, onClose }) => {
-    const { loadDocument } = useEditorStore();
+    const { loadDocument, showDialog } = useEditorStore();
     const [templates, setTemplates] = React.useState<Template[]>([]);
 
     React.useEffect(() => {
@@ -21,18 +21,30 @@ const TemplateGalleryModal: React.FC<TemplateGalleryModalProps> = ({ isOpen, onC
     if (!isOpen) return null;
 
     const handleLoad = (template: Template) => {
-        if (confirm(`Load template "${template.metadata.name}"? This will replace your current work.`)) {
-            loadDocument(template.document);
-            onClose();
-        }
+        showDialog({
+            type: 'confirm',
+            title: 'Load Template',
+            message: `Load template "${template.metadata.name}"? This will replace your current work.`,
+            confirmLabel: 'Load',
+            onConfirm: () => {
+                loadDocument(template.document);
+                onClose();
+            }
+        });
     };
 
     const handleDelete = (e: React.MouseEvent, id: string) => {
         e.stopPropagation();
-        if (confirm('Are you sure you want to delete this template from your browser?')) {
-            deleteTemplateFromStorage(id);
-            setTemplates(getTemplatesFromStorage());
-        }
+        showDialog({
+            type: 'confirm',
+            title: 'Delete Template',
+            message: 'Are you sure you want to delete this template from your browser?',
+            confirmLabel: 'Delete',
+            onConfirm: () => {
+                deleteTemplateFromStorage(id);
+                setTemplates(getTemplatesFromStorage());
+            }
+        });
     };
 
     return (

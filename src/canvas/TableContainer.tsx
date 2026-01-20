@@ -4,6 +4,7 @@ import { useEditorStore } from '../store/useEditorStore';
 import CanvasBlock from './CanvasBlock';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import '../styles/TableContainer.css';
 
 interface DroppableTableCellProps {
     cell: TableCell;
@@ -13,7 +14,7 @@ interface DroppableTableCellProps {
 }
 
 const DroppableTableCell: React.FC<DroppableTableCellProps> = ({ cell, rowIndex, colIndex, parentElement }) => {
-    const { document: doc } = useEditorStore();
+    const { document: doc, updateTableWidths } = useEditorStore();
     const dropId = `${parentElement.id}-cell-${rowIndex}-${colIndex}`;
 
     const { setNodeRef, isOver } = useDroppable({
@@ -28,6 +29,33 @@ const DroppableTableCell: React.FC<DroppableTableCellProps> = ({ cell, rowIndex,
 
     const isHeader = parentElement.headerRow && rowIndex === 0;
 
+    const [isResizing, setIsResizing] = React.useState(false);
+
+    const handleResizeStart = (e: React.MouseEvent) => {
+        e.preventDefault();
+        setIsResizing(true);
+        const startX = e.pageX;
+        const currentWidths = parentElement.widths || Array(parentElement.cols).fill('*');
+        const startWidth = (e.currentTarget.parentElement as HTMLElement).offsetWidth;
+
+        const onMouseMove = (moveEvent: MouseEvent) => {
+            const diff = moveEvent.pageX - startX;
+            const newWidth = Math.max(20, startWidth + diff);
+            const newWidths = [...currentWidths];
+            newWidths[colIndex] = newWidth;
+            updateTableWidths(parentElement.id, newWidths);
+        };
+
+        const onMouseUp = () => {
+            setIsResizing(false);
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        };
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    };
+
     return (
         <td
             ref={setNodeRef}
@@ -41,6 +69,7 @@ const DroppableTableCell: React.FC<DroppableTableCellProps> = ({ cell, rowIndex,
                         (parentElement.alternateRowColor && rowIndex % 2 !== 0 ? parentElement.alternateRowColor : 'transparent'))),
                 minWidth: '20px',
                 verticalAlign: 'top',
+                position: 'relative'
             }}
         >
             <SortableContext
@@ -53,6 +82,12 @@ const DroppableTableCell: React.FC<DroppableTableCellProps> = ({ cell, rowIndex,
                         <CanvasBlock key={childId} element={doc.elements[childId]} />
                     ))}
             </SortableContext>
+
+            {/* Column Resize Handle */}
+            <div
+                className={`col-resize-handle ${isResizing ? 'active' : ''}`}
+                onMouseDown={handleResizeStart}
+            />
         </td>
     );
 };
@@ -62,58 +97,79 @@ interface TableContainerProps {
 }
 
 const TableContainer: React.FC<TableContainerProps> = ({ element }) => {
+    const { addTableRow, removeTableRow, addTableColumn, removeTableColumn } = useEditorStore();
+
     return (
-        <table style={{
-            width: '100%',
-            borderCollapse: 'collapse',
-            border: `${element.borderWidth ?? 1}px solid ${element.borderColor || '#e2e8f0'}`,
-        }}>
-            <tbody>
-                {element.body.map((row, rIdx) => (
-                    <tr key={rIdx}>
-                        {row.map((cell, cIdx) => {
-                            // Check if this cell is covered by a previous rowSpan/colSpan merge
-                            let isCovered = false;
-                            for (let r = 0; r <= rIdx; r++) {
-                                for (let c = 0; c <= (r === rIdx ? cIdx - 1 : element.cols - 1); c++) {
-                                    const prevCell = element.body[r][c];
-                                    if (prevCell.rowSpan && prevCell.rowSpan > 1) {
-                                        if (rIdx >= r && rIdx < r + prevCell.rowSpan && cIdx === c) {
-                                            isCovered = true;
+        <div className="table-container-wrapper">
+            {/* Column Management Controls */}
+            <div className="col-controls">
+                {Array.from({ length: element.cols }).map((_, cIdx) => (
+                    <div key={cIdx} style={{ display: 'flex', gap: '2px', flex: element.widths?.[cIdx] === '*' ? '1' : 'none', width: typeof element.widths?.[cIdx] === 'number' ? `${element.widths[cIdx]}px` : 'auto', justifyContent: 'center' }}>
+                        <button className="table-btn delete" onClick={() => removeTableColumn(element.id, cIdx)} title="Remove Column">-</button>
+                        <button className="table-btn" onClick={() => addTableColumn(element.id)} title="Add Column Right">+</button>
+                    </div>
+                ))}
+            </div>
+
+            <table className="table-managed" style={{
+                borderCollapse: 'collapse',
+                border: `${element.borderWidth ?? 1}px solid ${element.borderColor || '#e2e8f0'}`,
+            }}>
+                <tbody>
+                    {element.body.map((row, rIdx) => (
+                        <tr key={rIdx} className="tr-wrapper">
+                            {/* Row Management Controls */}
+                            <td style={{ width: '0', padding: '0', border: 'none', position: 'relative' }}>
+                                <div className="row-controls" style={{ top: '50%', transform: 'translateY(-50%)' }}>
+                                    <button className="table-btn delete" onClick={() => removeTableRow(element.id, rIdx)} title="Remove Row">-</button>
+                                    <button className="table-btn" onClick={() => addTableRow(element.id)} title="Add Row Below">+</button>
+                                </div>
+                            </td>
+
+                            {row.map((cell, cIdx) => {
+                                // Check if this cell is covered by a previous rowSpan/colSpan merge
+                                let isCovered = false;
+                                for (let r = 0; r <= rIdx; r++) {
+                                    for (let c = 0; c <= (r === rIdx ? cIdx - 1 : element.cols - 1); c++) {
+                                        const prevCell = element.body[r][c];
+                                        if (prevCell.rowSpan && prevCell.rowSpan > 1) {
+                                            if (rIdx >= r && rIdx < r + prevCell.rowSpan && cIdx === c) {
+                                                isCovered = true;
+                                            }
                                         }
-                                    }
-                                    if (prevCell.colSpan && prevCell.colSpan > 1) {
-                                        if (rIdx === r && cIdx >= c && cIdx < c + prevCell.colSpan) {
-                                            isCovered = true;
+                                        if (prevCell.colSpan && prevCell.colSpan > 1) {
+                                            if (rIdx === r && cIdx >= c && cIdx < c + prevCell.colSpan) {
+                                                isCovered = true;
+                                            }
                                         }
-                                    }
-                                    // Complex case: both rowSpan and colSpan
-                                    if (prevCell.rowSpan && prevCell.colSpan && (prevCell.rowSpan > 1 || prevCell.colSpan > 1)) {
-                                        if (rIdx >= r && rIdx < r + prevCell.rowSpan &&
-                                            cIdx >= c && cIdx < c + prevCell.colSpan &&
-                                            (rIdx !== r || cIdx !== c)) {
-                                            isCovered = true;
+                                        // Complex case: both rowSpan and colSpan
+                                        if (prevCell.rowSpan && prevCell.colSpan && (prevCell.rowSpan > 1 || prevCell.colSpan > 1)) {
+                                            if (rIdx >= r && rIdx < r + prevCell.rowSpan &&
+                                                cIdx >= c && cIdx < c + prevCell.colSpan &&
+                                                (rIdx !== r || cIdx !== c)) {
+                                                isCovered = true;
+                                            }
                                         }
                                     }
                                 }
-                            }
 
-                            if (isCovered) return null;
+                                if (isCovered) return null;
 
-                            return (
-                                <DroppableTableCell
-                                    key={`${element.id}-cell-${rIdx}-${cIdx}`}
-                                    cell={cell}
-                                    rowIndex={rIdx}
-                                    colIndex={cIdx}
-                                    parentElement={element}
-                                />
-                            );
-                        })}
-                    </tr>
-                ))}
-            </tbody>
-        </table>
+                                return (
+                                    <DroppableTableCell
+                                        key={`${element.id}-cell-${rIdx}-${cIdx}`}
+                                        cell={cell}
+                                        rowIndex={rIdx}
+                                        colIndex={cIdx}
+                                        parentElement={element}
+                                    />
+                                );
+                            })}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
     );
 };
 
