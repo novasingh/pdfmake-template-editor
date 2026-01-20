@@ -20,6 +20,7 @@ export interface BaseStyle {
     fontSize?: number;
     fontWeight?: FontWeight;
     color?: string;
+    background?: string;
     alignment?: Alignment;
     margin?: [number, number, number, number]; // [left, top, right, bottom]
     padding?: [number, number, number, number];
@@ -42,20 +43,6 @@ export interface WatermarkSettings {
     borderRadius?: number;
 }
 
-export interface HeaderSettings {
-    show: boolean;
-    height: number; // pts
-    elements: string[]; // IDs of elements in header
-}
-
-export interface FooterSettings {
-    show: boolean;
-    height: number; // pts
-    elements: string[]; // IDs of elements in footer
-    showPageNumbers?: boolean;
-    pageNumberFormat?: 'Page X of Y' | 'X/Y' | 'X';
-    alignment?: Alignment;
-}
 
 export interface PageSettings {
     size: PageSize;
@@ -65,8 +52,6 @@ export interface PageSettings {
     padding: number;
     backgroundColor?: string;
     watermark?: WatermarkSettings;
-    header?: HeaderSettings;
-    footer?: FooterSettings;
 }
 
 export type ElementType =
@@ -88,7 +73,9 @@ export type ElementType =
     | 'variable'
     | 'qrcode'
     | 'barcode'
-    | 'list';
+    | 'list'
+    | 'abn-field'
+    | 'bank-details';
 
 export interface BaseElement {
     id: string;
@@ -222,6 +209,22 @@ export interface ListElement extends BaseElement {
     bulletStyle?: 'disc' | 'circle' | 'square' | 'number' | 'letter';
 }
 
+export interface ABNFieldElement extends BaseElement {
+    type: 'abn-field';
+    abnValue?: string;
+    label?: string;
+    format?: 'XX XXX XXX XXX' | 'XXXXXXXXXXX';
+}
+
+export interface BankDetailsElement extends BaseElement {
+    type: 'bank-details';
+    bankName?: string;
+    accountName?: string;
+    bsb?: string;
+    accountNumber?: string;
+}
+
+
 export type EditorElement =
     | TextElement
     | ImageElement
@@ -234,7 +237,9 @@ export type EditorElement =
     | VariableElement
     | QRCodeElement
     | BarcodeElement
-    | ListElement;
+    | ListElement
+    | ABNFieldElement
+    | BankDetailsElement;
 
 export interface DocumentSchema {
     page: PageSettings;

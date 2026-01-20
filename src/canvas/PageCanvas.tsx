@@ -13,12 +13,11 @@ const PageCanvas: React.FC = () => {
     const { document: doc, selectElement } = useEditorStore();
     const { page, rootElementIds, elements } = doc;
 
-    const { setNodeRef } = useDroppable({
+    const { setNodeRef: setCanvasRef } = useDroppable({
         id: 'page-canvas',
-        data: {
-            isCanvas: true,
-        }
+        data: { isCanvas: true }
     });
+
 
     const canvasStyle: React.CSSProperties = {
         width: A4_DIMENSIONS.widthPx,
@@ -121,7 +120,6 @@ const PageCanvas: React.FC = () => {
     return (
         <div className="canvas-container" onClick={() => selectElement(null)}>
             <div
-                ref={setNodeRef}
                 className="page-workspace"
                 style={canvasStyle}
                 onClick={(e) => e.stopPropagation()}
@@ -132,17 +130,20 @@ const PageCanvas: React.FC = () => {
                 {/* Watermark */}
                 {renderWatermark()}
 
-                {/* Droppable Content Area */}
-                <div className="content-area" style={{
-                    height: '100%',
-                    position: 'relative',
-                    zIndex: 2,
-                    paddingTop: mmToPx(page.margins.top),
-                    paddingRight: mmToPx(page.margins.right),
-                    paddingBottom: mmToPx(page.margins.bottom),
-                    paddingLeft: mmToPx(page.margins.left),
-                    boxSizing: 'border-box'
-                }}>
+                <div
+                    ref={setCanvasRef}
+                    className="content-area"
+                    style={{
+                        position: 'relative',
+                        zIndex: 2,
+                        height: '100%',
+                        paddingTop: mmToPx(page.margins.top),
+                        paddingRight: mmToPx(page.margins.right),
+                        paddingBottom: mmToPx(page.margins.bottom),
+                        paddingLeft: mmToPx(page.margins.left),
+                        boxSizing: 'border-box'
+                    }}
+                >
                     <SortableContext
                         items={rootElementIds}
                         strategy={verticalListSortingStrategy}

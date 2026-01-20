@@ -36,7 +36,7 @@ export interface TemplateEditorProps {
 }
 
 const TemplateEditor: React.FC<TemplateEditorProps> = () => {
-    const { document: doc, reorderElements, addElement, moveElement, selectedElementId, selectElement } = useEditorStore();
+    const { document: doc, reorderElements, addElement, insertModule, moveElement, selectedElementId, selectElement } = useEditorStore();
     const [activeId, setActiveId] = React.useState<string | null>(null);
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
     const [isPropertiesOpen, setIsPropertiesOpen] = React.useState(true);
@@ -140,6 +140,14 @@ const TemplateEditor: React.FC<TemplateEditorProps> = () => {
         // Handle dropping a NEW element from the sidebar
         if (active.data.current?.isSidebarItem) {
             const type = active.data.current.type;
+            const isModule = active.data.current.isModule;
+            const moduleName = active.data.current.moduleName;
+
+            if (isModule && moduleName) {
+                insertModule(moduleName);
+                setActiveId(null);
+                return;
+            }
 
             if (overData?.isColumnContainer) {
                 addElement(type, overData.parentId, overData.colIndex);

@@ -11,6 +11,7 @@ import {
     TableElement,
     TableCell
 } from '../types/editor';
+import { MODULE_REGISTRY, ModuleDefinition } from '../templates/modules';
 
 export interface DialogOptions {
     type: 'alert' | 'confirm' | 'prompt';
@@ -50,6 +51,11 @@ interface EditorState {
     loadTemplate: (template: 'blank' | 'default') => void;
     loadDocument: (document: DocumentSchema) => void;
 
+    // Variables & Modules
+    variables: Record<string, string>;
+    setVariables: (vars: Record<string, string>) => void;
+    insertModule: (moduleName: string) => void;
+
     // Dialog State
     dialog: DialogOptions | null;
     showDialog: (options: DialogOptions) => void;
@@ -62,8 +68,6 @@ const DEFAULT_PAGE: PageSettings = {
     height: 297,
     margins: { top: 10, right: 10, bottom: 10, left: 10 },
     padding: 0,
-    header: { show: false, height: 50, elements: [] },
-    footer: { show: false, height: 50, elements: [] },
 };
 
 export const useEditorStore = create<EditorState>()(
@@ -75,6 +79,7 @@ export const useEditorStore = create<EditorState>()(
                 rootElementIds: [],
             },
             selectedElementId: null,
+            variables: {},
             dialog: null,
 
             setPageSettings: (settings) => set((state) => ({
@@ -307,6 +312,25 @@ export const useEditorStore = create<EditorState>()(
                             bulletStyle: 'disc'
                         } as any;
                         break;
+                    case 'abn-field':
+                        newElement = {
+                            ...baseProps,
+                            type: 'abn-field',
+                            abnValue: '',
+                            label: 'ABN:',
+                            format: 'XX XXX XXX XXX'
+                        } as any;
+                        break;
+                    case 'bank-details':
+                        newElement = {
+                            ...baseProps,
+                            type: 'bank-details',
+                            bankName: '',
+                            accountName: '',
+                            bsb: '',
+                            accountNumber: ''
+                        } as any;
+                        break;
                     default:
                         // Default to paragraph if unknown
                         newElement = { ...baseProps, type: 'paragraph', content: '' };
@@ -410,37 +434,7 @@ export const useEditorStore = create<EditorState>()(
                 let newRootIds = [...state.document.rootElementIds];
                 let updatedElements = newElements;
 
-                if (parentId === 'header') {
-                    const newHeader = { ...state.document.page.header!, elements: [...state.document.page.header!.elements] };
-                    if (typeof indexOrRow === 'number') {
-                        newHeader.elements.splice(indexOrRow, 0, id);
-                    } else {
-                        newHeader.elements.push(id);
-                    }
-                    return {
-                        document: {
-                            ...state.document,
-                            elements: updatedElements,
-                            page: { ...state.document.page, header: newHeader }
-                        },
-                        selectedElementId: id,
-                    } as Partial<EditorState>;
-                } else if (parentId === 'footer') {
-                    const newFooter = { ...state.document.page.footer!, elements: [...state.document.page.footer!.elements] };
-                    if (typeof indexOrRow === 'number') {
-                        newFooter.elements.splice(indexOrRow, 0, id);
-                    } else {
-                        newFooter.elements.push(id);
-                    }
-                    return {
-                        document: {
-                            ...state.document,
-                            elements: updatedElements,
-                            page: { ...state.document.page, footer: newFooter }
-                        },
-                        selectedElementId: id,
-                    } as Partial<EditorState>;
-                } else if (parentId && updatedElements[parentId]) {
+                if (parentId && updatedElements[parentId]) {
                     const parent = { ...updatedElements[parentId] };
                     if (parent.type === 'columns' && typeof indexOrRow === 'number') {
                         parent.columns[indexOrRow].content.push(id);
@@ -577,20 +571,7 @@ export const useEditorStore = create<EditorState>()(
                     }
                 });
 
-                // Remove from header/footer
-                const newPage = { ...state.document.page };
-                if (newPage.header) {
-                    newPage.header = {
-                        ...newPage.header,
-                        elements: newPage.header.elements.filter(rid => rid !== id)
-                    };
-                }
-                if (newPage.footer) {
-                    newPage.footer = {
-                        ...newPage.footer,
-                        elements: newPage.footer.elements.filter(rid => rid !== id)
-                    };
-                }
+                // Remove from parent container
 
                 delete newElements[id];
 
@@ -598,30 +579,28 @@ export const useEditorStore = create<EditorState>()(
                     document: {
                         ...state.document,
                         elements: newElements,
-                        rootElementIds: state.document.rootElementIds.filter(rid => rid !== id),
-                        page: newPage
+                        rootElementIds: state.document.rootElementIds.filter(rid => rid !== id)
                     },
                     selectedElementId: state.selectedElementId === id ? null : state.selectedElementId,
                 };
             }),
 
             reorderElements: (activeId, overId) => set((state) => {
-                const oldIndex = state.document.rootElementIds.indexOf(activeId);
-                const newIndex = state.document.rootElementIds.indexOf(overId);
+                const doc = state.document;
 
-                // Only reorder if both elements are in root
-                if (oldIndex === -1 || newIndex === -1) return state;
+                // Try root elements
+                const oldRootIndex = doc.rootElementIds.indexOf(activeId);
+                const newRootIndex = doc.rootElementIds.indexOf(overId);
+                if (oldRootIndex !== -1 && newRootIndex !== -1) {
+                    const newRootIds = [...doc.rootElementIds];
+                    newRootIds.splice(oldRootIndex, 1);
+                    newRootIds.splice(newRootIndex, 0, activeId);
+                    return { document: { ...doc, rootElementIds: newRootIds } };
+                }
 
-                const newRootIds = [...state.document.rootElementIds];
-                newRootIds.splice(oldIndex, 1);
-                newRootIds.splice(newIndex, 0, activeId);
+                return state;
 
-                return {
-                    document: {
-                        ...state.document,
-                        rootElementIds: newRootIds,
-                    }
-                };
+                return state;
             }),
 
             moveElement: (elementId, targetParentId, targetIndex, targetColIndex) => set((state) => {
@@ -636,6 +615,8 @@ export const useEditorStore = create<EditorState>()(
                         newRootIds.splice(rootIdx, 1);
                         return;
                     }
+
+                    // Remove from columns
 
                     // Remove from columns
                     Object.values(newElements).forEach((el) => {
@@ -980,8 +961,32 @@ export const useEditorStore = create<EditorState>()(
             },
 
             loadDocument: (document) => set({
-                document: JSON.parse(JSON.stringify(document)), // Deep clone to avoid mutations
+                document: JSON.parse(JSON.stringify(document)),
                 selectedElementId: null,
+            }),
+
+            setVariables: (vars: Record<string, string>) => set((state) => ({
+                variables: { ...state.variables, ...vars }
+            })),
+
+            insertModule: (moduleName: string) => set((state) => {
+                const moduleFunc = MODULE_REGISTRY[moduleName as keyof typeof MODULE_REGISTRY];
+                if (!moduleFunc) {
+                    console.error(`Module ${moduleName} not found in registry.`);
+                    return state;
+                }
+
+                const moduleDef = moduleFunc();
+                const newElements = { ...state.document.elements, ...moduleDef.elements };
+                const newRootIds = [...state.document.rootElementIds, ...moduleDef.rootIds];
+
+                return {
+                    document: {
+                        ...state.document,
+                        elements: newElements,
+                        rootElementIds: newRootIds
+                    }
+                };
             }),
 
             showDialog: (options: DialogOptions) => set({ dialog: options }),

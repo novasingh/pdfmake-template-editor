@@ -1,0 +1,87 @@
+---
+title: Australian Compliance Integration
+description: Guide for dynamic data injection and modular blocks for Australian documents.
+---
+
+# Australian Standard Compliance Guide
+
+This guide explains how to use the modular system and dynamic parameters for Australian standard compliance.
+
+## 1. Parameters System (Dynamic Data Injection)
+
+The editor supports a global `variables` state for injecting dynamic data into templates. This is ideal for passing data from your SDK/API to the editor.
+
+### Using Variables in the UI
+
+1.  Add a **Variable Block** to your template.
+2.  Configure the **Variable Name** (e.g., `customerName`).
+3.  Inject data via the store:
+
+```typescript
+import { useEditorStore } from '@organization/pdfmake-editor';
+
+const MyComponent = () => {
+    const setVariables = useEditorStore(state => state.setVariables);
+
+    const handleInjectData = () => {
+        setVariables({
+            customerName: 'Acme Corp Pty Ltd',
+            invoiceNumber: 'INV-2026-001',
+            date: '20/01/2026'
+        });
+    };
+
+    return <button onClick={handleInjectData}>Inject Customer Data</button>;
+};
+```
+
+### Supported Variable Blocks
+-   **Text Blocks**: Use the `{variableName}` syntax in paragraph/heading content (planned).
+-   **Dedicated Variable Block**: A specific block for dynamic fields with optional labels.
+
+---
+
+## 2. Modular Blocks (Reusable Groups)
+
+Modules allow you to programmatically insert pre-defined groups of blocks (e.g., ATO-compliant headers or bank details).
+
+### Available Modules
+
+| Module Name | Description | Includes |
+| :--- | :--- | :--- |
+| `AU_BUSINESS_HEADER` | Right-aligned business header | Business Info + ABN Field |
+| `AU_BANK_DETAILS` | Standard Australian bank section | Heading + Bank Details block |
+| `AU_TAX_SUMMARY` | Tax calculation table | Subtotal, GST (10%), Total |
+
+### Inserting a Module
+
+```typescript
+const { insertModule } = useEditorStore();
+
+// Insert the Tax Summary block at the end of the document
+insertModule('AU_TAX_SUMMARY');
+```
+
+---
+
+## 3. ATO Compliance Features
+
+### ABN Field
+The dedicated `ABN Field` ensures that the Australian Business Number is present and correctly formatted. You can configure the label and the display format.
+
+### Bank Details
+The `Bank Details` block provides a structured way to display payment instructions, which is a requirement for most professional invoices in Australia.
+
+### Automated GST 10%
+Tables can be configured with calculation roles:
+-   `item-qty`: Maps to a quantity field.
+-   `item-rate`: Maps to a unit price field.
+-   `summary-subtotal`: Auto-calculates the sum of items.
+-   `summary-gst`: Auto-calculates 10% of the subtotal.
+-   `summary-total`: Auto-calculates Subtotal + GST.
+
+---
+
+## 4. Example Integration Flow
+
+The typical flow involves rendering the editor, setting variables, and optionally inserting modules to initialize the document structure.

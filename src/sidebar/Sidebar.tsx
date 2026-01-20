@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useEditorStore } from '../store/useEditorStore';
 import '../styles/Sidebar.css';
 import DraggableBlock from './DraggableBlock';
-import { ElementType } from '../types/editor';
+import { ElementType, Alignment } from '../types/editor';
 
 const Sidebar: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'blocks' | 'page'>('blocks');
@@ -34,12 +34,21 @@ const Sidebar: React.FC = () => {
         { type: 'signature', label: 'Signature' },
     ];
 
+    const complianceBlocks = [
+        { type: 'abn-field' as ElementType, label: 'ABN Field' },
+        { type: 'bank-details' as ElementType, label: 'Bank Details' },
+        { type: 'table' as ElementType, label: 'AU Header', moduleName: 'AU_BUSINESS_HEADER' },
+        { type: 'table' as ElementType, label: 'Bank Details (Mod)', moduleName: 'AU_BANK_DETAILS' },
+        { type: 'table' as ElementType, label: 'Tax Summary', moduleName: 'AU_TAX_SUMMARY' },
+    ];
+
     const handleMarginChange = (key: keyof typeof page.margins, value: string) => {
         const numValue = parseInt(value, 10) || 0;
         setPageSettings({
             margins: { ...page.margins, [key]: numValue }
         });
     };
+
 
     return (
         <div className="sidebar">
@@ -72,6 +81,18 @@ const Sidebar: React.FC = () => {
                         <div className="block-grid">
                             {businessBlocks.map((block) => (
                                 <DraggableBlock key={block.type} type={block.type} label={block.label} />
+                            ))}
+                        </div>
+
+                        <h3 style={{ marginTop: '20px' }}>Australian Compliance</h3>
+                        <div className="block-grid">
+                            {complianceBlocks.map((block, idx) => (
+                                <DraggableBlock
+                                    key={`${block.type}-${idx}`}
+                                    type={block.type}
+                                    label={block.label}
+                                    moduleName={block.moduleName}
+                                />
                             ))}
                         </div>
                     </div>
@@ -146,6 +167,7 @@ const Sidebar: React.FC = () => {
                                 onChange={(e) => setPageSettings({ backgroundColor: e.target.value })}
                             />
                         </div>
+
 
                         <div className="prop-group watermark-section">
                             <h3 style={{ fontSize: '12px', margin: '20px 0 10px', color: '#1e293b' }}>Watermark Settings</h3>

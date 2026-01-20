@@ -15,8 +15,9 @@
 .content-area {
     position: relative;
     z-index: 10;
-    height: 100%;
+    min-height: 100px;
 }
+
 
 .floating-json-btn,
 .floating-pdf-btn {

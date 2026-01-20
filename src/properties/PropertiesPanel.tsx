@@ -13,6 +13,8 @@ import VariableProperties from './components/VariableProperties';
 import QRCodeProperties from './components/QRCodeProperties';
 import ListProperties from './components/ListProperties';
 import BarcodeProperties from './components/BarcodeProperties';
+import ABNProperties from './components/ABNProperties';
+import BankDetailsProperties from './components/BankDetailsProperties';
 import '../styles/PropertiesPanel.css';
 
 const PropertiesPanel: React.FC = () => {
@@ -150,6 +152,22 @@ const PropertiesPanel: React.FC = () => {
             case 'list':
                 return (
                     <ListProperties
+                        element={element as any}
+                        onUpdate={handleUpdate as any}
+                        onStyleChange={handleStyleChange}
+                    />
+                );
+            case 'abn-field':
+                return (
+                    <ABNProperties
+                        element={element as any}
+                        onUpdate={handleUpdate as any}
+                        onStyleChange={handleStyleChange}
+                    />
+                );
+            case 'bank-details':
+                return (
+                    <BankDetailsProperties
                         element={element as any}
                         onUpdate={handleUpdate as any}
                         onStyleChange={handleStyleChange}

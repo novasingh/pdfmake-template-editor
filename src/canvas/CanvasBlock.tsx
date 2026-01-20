@@ -21,6 +21,7 @@ const CanvasBlock: React.FC<CanvasBlockProps> = ({ element }) => {
     } = useEditorStore();
     const [isEditing, setIsEditing] = React.useState(false);
     const [editValue, setEditValue] = React.useState('');
+    const variables = useEditorStore(state => state.variables);
 
     // All hooks must be called before any conditional returns
     const {
@@ -40,17 +41,27 @@ const CanvasBlock: React.FC<CanvasBlockProps> = ({ element }) => {
 
     const isSelected = selectedElementId === element.id;
 
+    const mapMargins = (m?: [number, number, number, number]) => {
+        if (!m) return undefined;
+        // pdfmake: [left, top, right, bottom]
+        // css: [top, right, bottom, left]
+        return `${m[1]}px ${m[2]}px ${m[3]}px ${m[0]}px`;
+    };
+
     const style: React.CSSProperties = {
         transform: CSS.Transform.toString(transform),
         transition,
         opacity: isDragging ? 0.5 : 1,
-        padding: '8px',
-        marginBottom: '8px',
+        padding: mapMargins(element.style.padding) || '8px',
+        margin: mapMargins(element.style.margin),
+        marginBottom: element.style.margin ? `${element.style.margin[3]}px` : '8px',
+        backgroundColor: element.style.background || 'transparent',
         cursor: isEditing ? 'text' : 'pointer',
         position: 'relative',
-        ...element.style as any,
-        textAlign: (element.style as any).alignment,
+        color: element.style.color,
+        textAlign: element.style.alignment as any,
         fontSize: element.style.fontSize ? `${element.style.fontSize}pt` : undefined,
+        fontWeight: element.style.fontWeight as any,
     };
 
     const handleClick = (e: React.MouseEvent) => {
@@ -240,17 +251,18 @@ const CanvasBlock: React.FC<CanvasBlockProps> = ({ element }) => {
             }
             case 'variable': {
                 const v = element as any;
+                const injectedValue = variables[v.variableName];
                 return (
                     <div style={{ fontSize: 'inherit', fontWeight: 'inherit', textAlign: 'inherit' }}>
                         {v.label && <span>{v.label} </span>}
                         <span style={{
-                            background: '#f1f5f9',
+                            background: injectedValue ? '#ecfdf5' : '#f1f5f9',
                             padding: '2px 4px',
                             borderRadius: '4px',
-                            border: '1px dashed #cbd5e1',
-                            color: '#475569'
+                            border: injectedValue ? '1px solid #10b981' : '1px dashed #cbd5e1',
+                            color: injectedValue ? '#065f46' : '#475569'
                         }}>
-                            {v.placeholder || `{${v.variableName}}`}
+                            {injectedValue || v.placeholder || `{${v.variableName}}`}
                         </span>
                     </div>
                 );
@@ -322,6 +334,31 @@ const CanvasBlock: React.FC<CanvasBlockProps> = ({ element }) => {
                             <li key={i}>{item}</li>
                         ))}
                     </ListTag>
+                );
+            }
+            case 'abn-field': {
+                const abn = element as any;
+                return (
+                    <div style={{ fontSize: 'inherit', fontWeight: 'inherit', textAlign: 'inherit' }}>
+                        {abn.label && <span style={{ marginRight: '5px' }}>{abn.label}</span>}
+                        <span style={{ fontWeight: 'bold' }}>{abn.abnValue || '00 000 000 000'}</span>
+                    </div>
+                );
+            }
+            case 'bank-details': {
+                const bd = element as any;
+                return (
+                    <div style={{
+                        fontSize: 'inherit',
+                        fontWeight: 'inherit',
+                        textAlign: 'inherit',
+                        border: element.style.background ? 'none' : '1px solid #e2e8f0', // Only show border if no background
+                        borderRadius: '4px',
+                    }}>
+                        <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>{bd.bankName || 'Bank Name'}</div>
+                        <div>Account: {bd.accountName || 'Account Name'}</div>
+                        <div>BSB: {bd.bsb || '000-000'} | Acc: {bd.accountNumber || '00000000'}</div>
+                    </div>
                 );
             }
             default:

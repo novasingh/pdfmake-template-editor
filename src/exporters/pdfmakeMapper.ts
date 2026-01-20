@@ -13,6 +13,7 @@ const mapStyle = (style: BaseStyle) => {
         fontSize: style.fontSize,
         bold: style.fontWeight === 'bold' || style.fontWeight === '600' || style.fontWeight === '700',
         color: style.color,
+        background: style.background,
         alignment: style.alignment,
         margin: style.margin,
     };
@@ -21,7 +22,7 @@ const mapStyle = (style: BaseStyle) => {
 /**
  * Recursively maps our internal schema to pdfmake document definition
  */
-export const exportToPdfMake = (doc: DocumentSchema): any => {
+export const exportToPdfMake = (doc: DocumentSchema, variables: Record<string, string> = {}): any => {
     // Helper to calculate available width (A4 is ~595pt wide)
     const getPageWidth = () => {
         const sizes: Record<string, [number, number]> = {
@@ -254,7 +255,8 @@ export const exportToPdfMake = (doc: DocumentSchema): any => {
 
             case 'variable': {
                 const v = element as any;
-                const varText = v.label ? `${v.label} ${v.placeholder || `{${v.variableName}}`}` : (v.placeholder || `{${v.variableName}}`);
+                const value = variables[v.variableName] || v.placeholder || `{${v.variableName}}`;
+                const varText = v.label ? `${v.label} ${value}` : value;
                 return {
                     text: varText,
                     ...mapStyle(element.style),
@@ -294,6 +296,30 @@ export const exportToPdfMake = (doc: DocumentSchema): any => {
                     [listProp]: le.items,
                     type: marker,
                     ...mapStyle(element.style),
+                };
+            }
+
+            case 'abn-field': {
+                const abn = element as any;
+                return {
+                    text: [
+                        { text: abn.label ? `${abn.label} ` : '', ...mapStyle(element.style) },
+                        { text: abn.abnValue || '00 000 000 000', ...mapStyle(element.style), bold: true, fontSize: (element.style.fontSize || 12) }
+                    ],
+                    ...mapStyle(element.style)
+                };
+            }
+
+            case 'bank-details': {
+                const bd = element as any;
+                return {
+                    stack: [
+                        { text: bd.bankName || 'Bank Name', bold: true },
+                        { text: `Account: ${bd.accountName || ''}` },
+                        { text: `BSB: ${bd.bsb || ''} | Acc: ${bd.accountNumber || ''}` }
+                    ],
+                    fillColor: '#f8fafc',
+                    ...mapStyle(element.style)
                 };
             }
 
@@ -371,7 +397,7 @@ export const exportToPdfMake = (doc: DocumentSchema): any => {
             opacity: doc.page.watermark.opacity ?? 0.1,
             bold: doc.page.watermark.fontWeight === 'bold',
             fontSize: doc.page.watermark.fontSize || 60,
-        } : undefined
+        } : undefined,
     };
 
     // Remove text watermark from background if using native watermark

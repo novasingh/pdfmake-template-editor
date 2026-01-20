@@ -9,12 +9,12 @@ interface JsonPreviewModalProps {
 }
 
 const JsonPreviewModal: React.FC<JsonPreviewModalProps> = ({ isOpen, onClose }) => {
-    const { document: doc } = useEditorStore();
+    const { document: doc, variables } = useEditorStore();
     const [copyStatus, setCopyStatus] = useState<'idle' | 'copied'>('idle');
 
     if (!isOpen) return null;
 
-    const pdfMakeJson = exportToPdfMake(doc);
+    const pdfMakeJson = exportToPdfMake(doc, variables);
     const jsonString = JSON.stringify(pdfMakeJson, null, 2);
 
     const handleCopy = () => {

@@ -5,14 +5,17 @@ import { ElementType } from '../types/editor';
 interface DraggableBlockProps {
     type: ElementType;
     label: string;
+    moduleName?: string;
 }
 
-const DraggableBlock: React.FC<DraggableBlockProps> = ({ type, label }) => {
+const DraggableBlock: React.FC<DraggableBlockProps> = ({ type, label, moduleName }) => {
     const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-        id: `sidebar-${type}`,
+        id: moduleName ? `sidebar-module-${moduleName}` : `sidebar-${type}`,
         data: {
             type,
+            moduleName,
             isSidebarItem: true,
+            isModule: !!moduleName,
         },
     });
 

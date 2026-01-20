@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { exportToPdfMake } from '../exporters/pdfmakeMapper';
+import { useEditorStore } from '../store/useEditorStore';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 import { DocumentSchema } from '../types/editor';
@@ -11,8 +12,9 @@ if (pdfFonts && (pdfFonts as any).pdfMake) {
 
 export const usePDFExport = () => {
     const exportPDF = useCallback((doc: DocumentSchema, filename: string = 'document.pdf') => {
+        const { variables } = useEditorStore.getState();
         try {
-            const docDefinition = exportToPdfMake(doc);
+            const docDefinition = exportToPdfMake(doc, variables);
             (pdfMake as any).createPdf(docDefinition).download(filename);
         } catch (error) {
             console.error('PDF Generation failed:', error);
