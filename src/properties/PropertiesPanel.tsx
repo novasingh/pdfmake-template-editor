@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 import { useEditorStore } from '../store/useEditorStore';
 import { EditorElement } from '../types/editor';
+import { useLocalization } from '../hooks/useLocalization';
 import TextProperties from './components/TextProperties';
 import DividerProperties from './components/DividerProperties';
 import ImageProperties from './components/ImageProperties';
@@ -8,16 +9,17 @@ import TableProperties from './components/TableProperties';
 import InfoProperties from './components/InfoProperties';
 import ColumnProperties from './components/ColumnProperties';
 import DateProperties from './components/DateProperties';
-import AutoNumberProperties from './components/AutoNumberProperties';
 import VariableProperties from './components/VariableProperties';
 import QRCodeProperties from './components/QRCodeProperties';
-import ListProperties from './components/ListProperties';
 import BarcodeProperties from './components/BarcodeProperties';
+import ListProperties from './components/ListProperties';
+import AutoNumberProperties from './components/AutoNumberProperties';
 import ABNProperties from './components/ABNProperties';
 import BankDetailsProperties from './components/BankDetailsProperties';
 import '../styles/PropertiesPanel.css';
 
 const PropertiesPanel: React.FC = () => {
+    const { t } = useLocalization();
     const {
         selectedElementId,
         document: doc,
@@ -46,7 +48,7 @@ const PropertiesPanel: React.FC = () => {
     if (!element) {
         return (
             <div className="properties-panel empty">
-                <p>Select an element on the canvas to edit its properties.</p>
+                <p>{t('Select an element on the canvas to edit its properties.', 'Select an element on the canvas to edit its properties.')}</p>
             </div>
         );
     }
@@ -174,14 +176,14 @@ const PropertiesPanel: React.FC = () => {
                     />
                 );
             default:
-                return <p>No properties available for this element.</p>;
+                return <p>{t('No properties available for this element.', 'No properties available for this element.')}</p>;
         }
     };
 
     return (
         <div className="properties-panel">
             <div className="panel-header">
-                <h2>{element.type.toUpperCase()} Properties</h2>
+                <h2>{t(element.type.toUpperCase(), element.type.toUpperCase())} {t('Properties', 'Properties')}</h2>
             </div>
 
             <div className="panel-content">
@@ -191,7 +193,7 @@ const PropertiesPanel: React.FC = () => {
                     className="delete-btn"
                     onClick={() => removeElement(element.id)}
                 >
-                    Delete Block
+                    {t('Delete Block', 'Delete Block')}
                 </button>
             </div>
         </div>

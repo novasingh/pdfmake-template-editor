@@ -38,6 +38,12 @@ A powerful, drag-and-drop PDF template editor for React that generates `pdfmake`
 - **Instant Export**:
   - Real-time `pdfmake` JSON preview.
   - One-click "Download PDF" directly from the browser.
+- **Multi-language Support**:
+  - 7 built-in locales: English, Chinese, Spanish, German, Russian, Japanese, and French.
+  - Full support for custom translation dictionaries via the `labels` property.
+- **UI Configuration**:
+  - Granular control over header button visibility (Hide Save, Undo, JSON, etc.).
+  - Custom brand colors and border radius.
 
 ## 🚀 Getting Started
 
@@ -96,7 +102,18 @@ const MyEditor = () => {
     fontFamily?: string;
     borderRadius?: string;
   },
-  labels?: Record<string, string>; // Replace any UI text
+  locale?: 'en' | 'zh' | 'es' | 'de' | 'ru' | 'ja' | 'fr'; // Built-in locales
+  labels?: Record<string, string>; // Replace any UI text (custom translations)
+  hideHeaderButtons?: {
+    template?: boolean;
+    save?: boolean;
+    undo?: boolean;
+    redo?: boolean;
+    help?: boolean;
+    fullscreen?: boolean;
+    exportPdf?: boolean;
+    json?: boolean;
+  };
 }
 ```
 

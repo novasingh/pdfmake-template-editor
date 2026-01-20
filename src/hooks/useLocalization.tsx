@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useMemo } from 'react';
+import { LOCALES } from '../locales/locales';
 
 interface LocalizationContextType {
     locale: string;
@@ -10,7 +11,6 @@ const LocalizationContext = createContext<LocalizationContextType | undefined>(u
 export const useLocalization = () => {
     const context = useContext(LocalizationContext);
     if (!context) {
-        // Fallback for when no provider is present (e.g. testing)
         return {
             locale: 'en',
             t: (key: string, defaultValue: string) => defaultValue
@@ -33,20 +33,21 @@ export const LocalizationProvider: React.FC<LocalizationProviderProps> = ({
     const value = useMemo(() => ({
         locale,
         t: (key: string, defaultValue: string) => {
-            // Check for direct label override first
-            if (labels[key]) return labels[key];
+            // 1. Check for manual label override (e.g. from config.labels)
+            if (labels && labels[key]) return labels[key];
 
-            // In a real app, you might have pre-built dictionaries for different locales here
-            // const dictionary = DICTIONARIES[locale] || DICTIONARIES['en'];
-            // if (dictionary[key]) return dictionary[key];
+            // 2. Check for built-in translation
+            const dict = LOCALES[locale] || LOCALES['en'];
+            if (dict && dict[key]) return dict[key];
 
+            // 3. Fallback to default
             return defaultValue;
         }
     }), [locale, labels]);
 
     return (
-        <LocalizationContext.Provider value= { value } >
-        { children }
+        <LocalizationContext.Provider value={value}>
+            {children}
         </LocalizationContext.Provider>
     );
 };

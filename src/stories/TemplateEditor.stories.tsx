@@ -118,6 +118,31 @@ export const EventHandling: Story = {
  * Demonstrates the use of hideHeaderButtons to create a cleaner, more focused UI.
  * In this example, we hide almost everything except for Save and PDF Export.
  */
+export const LocalizedEditor: Story = {
+    args: {
+        initialData: invoiceTemplateAU.document,
+        config: {
+            locale: 'es'
+        }
+    }
+};
+
+export const CustomLabels: Story = {
+    args: {
+        initialData: invoiceTemplateAU.document,
+        config: {
+            "locale": "jp",
+
+            "labels": {
+                "Templates": "My Library",
+                "Print PDF": "Export Document",
+                "Undo": "Back",
+                "Redo": "Forward"
+            }
+        }
+    }
+};
+
 export const MinimalistHeader: Story = {
     args: {
         initialData: invoiceTemplateAU.document,

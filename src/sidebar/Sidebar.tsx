@@ -134,7 +134,7 @@ const Sidebar: React.FC = () => {
                 {activeTab === 'page' && (
                     <div className="page-props-tab">
                         <div className="prop-group">
-                            <label>Page Size</label>
+                            <label>{t('Page Size', 'Page Size')}</label>
                             <select
                                 value={page.size}
                                 onChange={(e) => setPageSettings({ size: e.target.value as any })}
@@ -146,10 +146,10 @@ const Sidebar: React.FC = () => {
                         </div>
 
                         <div className="prop-group">
-                            <label>Margins (mm)</label>
+                            <label>{t('Margins (mm)', 'Margins (mm)')}</label>
                             <div className="margin-grid">
                                 <div>
-                                    <span>Top</span>
+                                    <span>{t('Top', 'Top')}</span>
                                     <input
                                         type="number"
                                         value={page.margins.top}
@@ -157,7 +157,7 @@ const Sidebar: React.FC = () => {
                                     />
                                 </div>
                                 <div>
-                                    <span>Bottom</span>
+                                    <span>{t('Bottom', 'Bottom')}</span>
                                     <input
                                         type="number"
                                         value={page.margins.bottom}
@@ -165,7 +165,7 @@ const Sidebar: React.FC = () => {
                                     />
                                 </div>
                                 <div>
-                                    <span>Left</span>
+                                    <span>{t('Left', 'Left')}</span>
                                     <input
                                         type="number"
                                         value={page.margins.left}
@@ -173,7 +173,7 @@ const Sidebar: React.FC = () => {
                                     />
                                 </div>
                                 <div>
-                                    <span>Right</span>
+                                    <span>{t('Right', 'Right')}</span>
                                     <input
                                         type="number"
                                         value={page.margins.right}
@@ -184,7 +184,7 @@ const Sidebar: React.FC = () => {
                         </div>
 
                         <div className="prop-group">
-                            <label>Page Padding (mm)</label>
+                            <label>{t('Page Padding (mm)', 'Page Padding (mm)')}</label>
                             <input
                                 type="number"
                                 value={page.padding}
@@ -193,7 +193,7 @@ const Sidebar: React.FC = () => {
                         </div>
 
                         <div className="prop-group">
-                            <label>Background Color</label>
+                            <label>{t('Background Color', 'Background Color')}</label>
                             <input
                                 type="color"
                                 value={page.backgroundColor || '#ffffff'}
@@ -203,7 +203,7 @@ const Sidebar: React.FC = () => {
 
 
                         <div className="prop-group watermark-section">
-                            <h3 style={{ fontSize: '12px', margin: '20px 0 10px', color: '#1e293b' }}>Watermark Settings</h3>
+                            <h3 style={{ fontSize: '12px', margin: '20px 0 10px', color: '#1e293b' }}>{t('Watermark Settings', 'Watermark Settings')}</h3>
 
                             <div className="radio-group" style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
                                 <label style={{ display: 'flex', alignItems: 'center', gap: '5px', textTransform: 'none', fontSize: '13px' }}>
@@ -213,7 +213,7 @@ const Sidebar: React.FC = () => {
                                         checked={page.watermark?.type === 'text'}
                                         onChange={() => setPageSettings({ watermark: { ...(page.watermark || {}), type: 'text', textValue: page.watermark?.textValue || 'DRAFT' } as any })}
                                     />
-                                    Text
+                                    {t('Text', 'Text')}
                                 </label>
                                 <label style={{ display: 'flex', alignItems: 'center', gap: '5px', textTransform: 'none', fontSize: '13px' }}>
                                     <input
@@ -222,14 +222,14 @@ const Sidebar: React.FC = () => {
                                         checked={page.watermark?.type === 'image'}
                                         onChange={() => setPageSettings({ watermark: { ...(page.watermark || {}), type: 'image' } as any })}
                                     />
-                                    Image
+                                    {t('Image', 'Image')}
                                 </label>
                             </div>
 
                             {page.watermark?.type === 'text' && (
                                 <div className="wm-text-props">
                                     <div className="prop-group">
-                                        <span>Content</span>
+                                        <span>{t('Content', 'Content')}</span>
                                         <input
                                             type="text"
                                             value={page.watermark.textValue || ''}
@@ -238,7 +238,7 @@ const Sidebar: React.FC = () => {
                                     </div>
                                     <div className="wm-grid-2">
                                         <div>
-                                            <span>Size</span>
+                                            <span>{t('Size', 'Size')}</span>
                                             <input
                                                 type="number"
                                                 value={page.watermark.fontSize || 60}
@@ -246,7 +246,7 @@ const Sidebar: React.FC = () => {
                                             />
                                         </div>
                                         <div>
-                                            <span>Color</span>
+                                            <span>{t('Color', 'Color')}</span>
                                             <input
                                                 type="color"
                                                 value={page.watermark.color || '#000000'}
@@ -260,7 +260,7 @@ const Sidebar: React.FC = () => {
                             {page.watermark?.type === 'image' && (
                                 <div className="wm-image-props">
                                     <div className="prop-group">
-                                        <span>Image URL / Base64</span>
+                                        <span>{t('Image URL / Base64', 'Image URL / Base64')}</span>
                                         <textarea
                                             rows={2}
                                             value={page.watermark.imageUrl || ''}
@@ -271,7 +271,7 @@ const Sidebar: React.FC = () => {
                                     </div>
                                     <div className="wm-grid-2">
                                         <div>
-                                            <span>Width</span>
+                                            <span>{t('Width', 'Width')}</span>
                                             <input
                                                 type="number"
                                                 value={page.watermark.width || 200}
@@ -279,7 +279,7 @@ const Sidebar: React.FC = () => {
                                             />
                                         </div>
                                         <div>
-                                            <span>Height</span>
+                                            <span>{t('Height', 'Height')}</span>
                                             <input
                                                 type="number"
                                                 value={page.watermark.height || 200}
@@ -289,7 +289,7 @@ const Sidebar: React.FC = () => {
                                     </div>
                                     <div className="wm-grid-2">
                                         <div>
-                                            <span>Border Px</span>
+                                            <span>{t('Border Px', 'Border Px')}</span>
                                             <input
                                                 type="number"
                                                 value={page.watermark.borderWidth || 0}
@@ -297,7 +297,7 @@ const Sidebar: React.FC = () => {
                                             />
                                         </div>
                                         <div>
-                                            <span>Radius</span>
+                                            <span>{t('Radius', 'Radius')}</span>
                                             <input
                                                 type="number"
                                                 value={page.watermark.borderRadius || 0}
@@ -306,7 +306,7 @@ const Sidebar: React.FC = () => {
                                         </div>
                                     </div>
                                     <div className="prop-group">
-                                        <span>Border Color</span>
+                                        <span>{t('Border Color', 'Border Color')}</span>
                                         <input
                                             type="color"
                                             value={page.watermark.borderColor || '#000000'}
@@ -319,7 +319,7 @@ const Sidebar: React.FC = () => {
                             {page.watermark && (
                                 <div className="wm-common-props" style={{ marginTop: '15px' }}>
                                     <div className="prop-group">
-                                        <label>Alignment</label>
+                                        <label>{t('Alignment', 'Alignment')}</label>
                                         <div className="pos-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px', marginTop: '5px' }}>
                                             {(['top-left', 'top-center', 'top-right', 'center-left', 'center', 'center-right', 'bottom-left', 'bottom-center', 'bottom-right'] as any[]).map(pos => (
                                                 <button
@@ -335,7 +335,7 @@ const Sidebar: React.FC = () => {
                                         </div>
                                     </div>
                                     <div className="prop-group">
-                                        <label>Opacity ({Math.round((page.watermark.opacity || 0.1) * 100)}%)</label>
+                                        <label>{t('Opacity', 'Opacity')} ({Math.round((page.watermark.opacity || 0.1) * 100)}%)</label>
                                         <input
                                             type="range"
                                             min="0"

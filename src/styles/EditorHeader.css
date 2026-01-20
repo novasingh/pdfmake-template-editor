@@ -84,6 +84,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    flex-wrap: nowrap;
 }
 
 .header-btn {
@@ -97,6 +98,8 @@
     cursor: pointer;
     transition: var(--transition-smooth);
     border: 1px solid transparent;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .header-btn.primary {

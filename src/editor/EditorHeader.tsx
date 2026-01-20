@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useEditorStore } from '../store/useEditorStore';
 import { useFullscreen } from '../hooks/useFullscreen';
 import { usePDFExport } from '../hooks/usePDFExport';
+import { useLocalization } from '../hooks/useLocalization';
 import JsonPreviewModal from '../canvas/JsonPreviewModal';
 import {
     invoiceTemplateAU,
@@ -45,6 +46,7 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({
     onExport,
     hideButtons = {}
 }) => {
+    const { t } = useLocalization();
     const { document: doc, loadTemplate, loadDocument, showDialog } = useEditorStore();
     const [isJsonOpen, setIsJsonOpen] = useState(false);
     const [showTemplateDropdown, setShowTemplateDropdown] = useState(false);
@@ -64,9 +66,9 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({
     const handleLoadTemplate = (type: 'blank' | 'default') => {
         showDialog({
             type: 'confirm',
-            title: 'Load Template',
-            message: `Are you sure you want to load a ${type} template? This will clear your current work.`,
-            confirmLabel: 'Load',
+            title: t('Load Template', 'Load Template'),
+            message: t('Are you sure you want to load a blank template? This will clear your current work.', 'Are you sure you want to load a blank template? This will clear your current work.'),
+            confirmLabel: t('Load', 'Load'),
             onConfirm: () => {
                 loadTemplate(type);
             }
@@ -77,9 +79,9 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({
     const handleLoadPrebuiltTemplate = (template: Template) => {
         showDialog({
             type: 'confirm',
-            title: 'Load Pre-built Template',
-            message: `Load "${template.metadata.name}"? This will replace your current work.`,
-            confirmLabel: 'Load',
+            title: t('Load Pre-built Template', 'Load Pre-built Template'),
+            message: `${t('Load', 'Load')} "${template.metadata.name}"? ${t('This will replace your current work.', 'This will replace your current work.')}`,
+            confirmLabel: t('Load', 'Load'),
             onConfirm: () => {
                 loadDocument(template.document);
             }
@@ -90,10 +92,10 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({
     const handleSaveAsTemplate = async () => {
         showDialog({
             type: 'prompt',
-            title: 'Save Template',
-            message: 'Enter template name:',
-            defaultValue: 'My Template',
-            confirmLabel: 'Save',
+            title: t('Save Template', 'Save Template'),
+            message: t('Enter template name:', 'Enter template name:'),
+            defaultValue: t('My Template', 'My Template'),
+            confirmLabel: t('Save', 'Save'),
             onConfirm: async (name) => {
                 if (name) {
                     const thumbnail = await captureThumbnail('page-canvas');
@@ -101,8 +103,8 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({
                     saveTemplateToStorage(template);
                     showDialog({
                         type: 'alert',
-                        title: 'Success',
-                        message: `Template "${name}" saved to browser storage!`
+                        title: t('Success', 'Success'),
+                        message: `${t('Template', 'Template')} "${name}" ${t('saved to browser storage!', 'saved to browser storage!')}`
                     });
                 }
             }
@@ -129,9 +131,9 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({
         if (template) {
             showDialog({
                 type: 'confirm',
-                title: 'Import Template',
-                message: `Load template "${template.metadata.name}"? This will replace your current work.`,
-                confirmLabel: 'Import',
+                title: t('Import Template', 'Import Template'),
+                message: `${t('Load', 'Load')} template "${template.metadata.name}"? ${t('This will replace your current work.', 'This will replace your current work.')}`,
+                confirmLabel: t('Import', 'Import'),
                 onConfirm: () => {
                     loadDocument(template.document);
                     setShowTemplateDropdown(false);
@@ -140,8 +142,8 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({
         } else {
             showDialog({
                 type: 'alert',
-                title: 'Error',
-                message: 'Failed to load template. Please check the file format.'
+                title: t('Error', 'Error'),
+                message: t('Failed to load template. Please check the file format.', 'Failed to load template. Please check the file format.')
             });
         }
 
@@ -156,7 +158,7 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({
                 <button
                     className={`header-btn icon-only ${isSidebarOpen ? 'active' : ''}`}
                     onClick={onToggleSidebar}
-                    title="Toggle Sidebar"
+                    title={t('Toggle Sidebar', 'Toggle Sidebar')}
                 >
                     <span>☰</span>
                 </button>
@@ -172,53 +174,53 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({
                                 setShowSaveDropdown(false);
                             }}
                         >
-                            <span>Templates</span>
+                            <span>{t('Templates', 'Templates')}</span>
                         </button>
 
                         {showTemplateDropdown && (
                             <div className="template-dropdown">
-                                <div className="dropdown-section-title">New</div>
+                                <div className="dropdown-section-title">{t('New', 'New')}</div>
                                 <div className="dropdown-item" onClick={() => handleLoadTemplate('blank')}>
                                     <div className="item-info">
-                                        <span className="item-title">Blank Template</span>
-                                        <span className="item-desc">Start from scratch</span>
+                                        <span className="item-title">{t('Blank Template', 'Blank Template')}</span>
+                                        <span className="item-desc">{t('Start from scratch', 'Start from scratch')}</span>
                                     </div>
                                 </div>
 
-                                <div className="dropdown-section-title">Pre-built (Australian)</div>
+                                <div className="dropdown-section-title">{t('Pre-built (Australian)', 'Pre-built (Australian)')}</div>
                                 <div className="dropdown-item" onClick={() => handleLoadPrebuiltTemplate(invoiceTemplateAU)}>
                                     <div className="item-info">
-                                        <span className="item-title">📄 Tax Invoice</span>
-                                        <span className="item-desc">ATO-compliant with GST</span>
+                                        <span className="item-title">📄 {t('Tax Invoice', 'Tax Invoice')}</span>
+                                        <span className="item-desc">{t('ATO-compliant with GST', 'ATO-compliant with GST')}</span>
                                     </div>
                                 </div>
                                 <div className="dropdown-item" onClick={() => handleLoadPrebuiltTemplate(quoteTemplateAU)}>
                                     <div className="item-info">
-                                        <span className="item-title">💼 Quote / Proposal</span>
-                                        <span className="item-desc">With terms & signature</span>
+                                        <span className="item-title">💼 {t('Quote / Proposal', 'Quote / Proposal')}</span>
+                                        <span className="item-desc">{t('With terms & signature', 'With terms & signature')}</span>
                                     </div>
                                 </div>
                                 <div className="dropdown-item" onClick={() => handleLoadPrebuiltTemplate(complianceTemplate)}>
                                     <div className="item-info">
-                                        <span className="item-title">✅ Compliance Certificate</span>
-                                        <span className="item-desc">Official document template</span>
+                                        <span className="item-title">✅ {t('Compliance Certificate', 'Compliance Certificate')}</span>
+                                        <span className="item-desc">{t('Official document template', 'Official document template')}</span>
                                     </div>
                                 </div>
 
-                                <div className="dropdown-section-title">Import / Browse</div>
+                                <div className="dropdown-section-title">{t('Import / Browse', 'Import / Browse')}</div>
                                 <div className="dropdown-item" onClick={() => {
                                     setIsGalleryOpen(true);
                                     setShowTemplateDropdown(false);
                                 }}>
                                     <div className="item-info">
-                                        <span className="item-title">🗂️ Browser Gallery</span>
-                                        <span className="item-desc">Browse your saved templates</span>
+                                        <span className="item-title">🗂️ {t('Browser Gallery', 'Browser Gallery')}</span>
+                                        <span className="item-desc">{t('Browse your saved templates', 'Browse your saved templates')}</span>
                                     </div>
                                 </div>
                                 <div className="dropdown-item" onClick={handleImportJSON}>
                                     <div className="item-info">
-                                        <span className="item-title">📁 Import from JSON</span>
-                                        <span className="item-desc">Load a saved template file</span>
+                                        <span className="item-title">📁 {t('Import from JSON', 'Import from JSON')}</span>
+                                        <span className="item-desc">{t('Load a saved template file', 'Load a saved template file')}</span>
                                     </div>
                                 </div>
                             </div>
@@ -239,21 +241,21 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({
                                 }
                             }}
                         >
-                            <span>Save</span>
+                            <span>{t('Save', 'Save')}</span>
                         </button>
 
                         {showSaveDropdown && (
                             <div className="template-dropdown">
                                 <div className="dropdown-item" onClick={handleSaveAsTemplate}>
                                     <div className="item-info">
-                                        <span className="item-title">💾 Save to Browser</span>
-                                        <span className="item-desc">Store in local storage</span>
+                                        <span className="item-title">💾 {t('Save to Browser', 'Save to Browser')}</span>
+                                        <span className="item-desc">{t('Store in local storage', 'Store in local storage')}</span>
                                     </div>
                                 </div>
                                 <div className="dropdown-item" onClick={handleExportJSON}>
                                     <div className="item-info">
-                                        <span className="item-title">📥 Export as JSON</span>
-                                        <span className="item-desc">Download template file</span>
+                                        <span className="item-title">📥 {t('Export as JSON', 'Export as JSON')}</span>
+                                        <span className="item-desc">{t('Download template file', 'Download template file')}</span>
                                     </div>
                                 </div>
                             </div>
@@ -267,18 +269,18 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({
                         <button
                             className="header-btn secondary"
                             onClick={() => (useEditorStore as any).temporal.getState().undo()}
-                            title="Undo (Ctrl+Z)"
+                            title={`${t('Undo', 'Undo')} (Ctrl+Z)`}
                         >
-                            <span>Undo</span>
+                            <span>{t('Undo', 'Undo')}</span>
                         </button>
                     )}
                     {!hideButtons.redo && (
                         <button
                             className="header-btn secondary"
                             onClick={() => (useEditorStore as any).temporal.getState().redo()}
-                            title="Redo (Ctrl+Y)"
+                            title={`${t('Redo', 'Redo')} (Ctrl+Y)`}
                         >
-                            <span>Redo</span>
+                            <span>{t('Redo', 'Redo')}</span>
                         </button>
                     )}
                 </div>
@@ -296,7 +298,7 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({
             <div className="header-center">
                 <div className="doc-title-container">
                     <span className="doc-status-dot" />
-                    <span className="doc-title">Untitled Template</span>
+                    <span className="doc-title">{t('Untitled Template', 'Untitled Template')}</span>
                 </div>
             </div>
 
@@ -308,29 +310,29 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({
                             className="header-btn secondary"
                             onClick={() => showDialog({
                                 type: 'alert',
-                                title: '⌨️ Keyboard Shortcuts',
+                                title: `⌨️ ${t('Keyboard Shortcuts', 'Keyboard Shortcuts')}`,
                                 message: `
-• Delete / Backspace : Remove selected element
-• Ctrl + D : Duplicate element
-• Ctrl + C : Copy element
-• Ctrl + V : Paste element
-• Ctrl + Z : Undo
-• Ctrl + Y : Redo
-• Arrow Up/Down : Move element
-• Escape : Deselect
+• ${t('Delete / Backspace', 'Delete / Backspace')} : ${t('Remove selected element', 'Remove selected element')}
+• Ctrl + D : ${t('Duplicate element', 'Duplicate element')}
+• Ctrl + C : ${t('Copy element', 'Copy element')}
+• Ctrl + V : ${t('Paste element', 'Paste element')}
+• Ctrl + Z : ${t('Undo', 'Undo')}
+• Ctrl + Y : ${t('Redo', 'Redo')}
+• ${t('Arrow Up/Down', 'Arrow Up/Down')} : ${t('Move element', 'Move element')}
+• ${t('Escape', 'Escape')} : ${t('Deselect', 'Deselect')}
                                 `,
                             })}
                         >
-                            <span>Help</span>
+                            <span>{t('Help', 'Help')}</span>
                         </button>
                     )}
                     {!hideButtons.fullscreen && (
                         <button
                             className={`header-btn secondary ${isFullscreen ? 'active' : ''}`}
                             onClick={toggleFullscreen}
-                            title="Toggle Fullscreen"
+                            title={t('Toggle Fullscreen', 'Toggle Fullscreen')}
                         >
-                            {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+                            {isFullscreen ? t('Exit Fullscreen', 'Exit Fullscreen') : t('Fullscreen', 'Fullscreen')}
                         </button>
                     )}
                     {!hideButtons.json && (
@@ -338,7 +340,7 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({
                             className="header-btn secondary"
                             onClick={() => setIsJsonOpen(true)}
                         >
-                            JSON
+                            {t('JSON', 'JSON')}
                         </button>
                     )}
                     {!hideButtons.exportPdf && (
@@ -346,7 +348,7 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({
                             className="header-btn primary"
                             onClick={handlePrint}
                         >
-                            <span>Print PDF</span>
+                            <span>{t('Print PDF', 'Print PDF')}</span>
                         </button>
                     )}
 
@@ -355,7 +357,7 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({
                     <button
                         className={`header-btn icon-only ${isPropertiesOpen ? 'active' : ''}`}
                         onClick={onToggleProperties}
-                        title="Toggle Properties"
+                        title={t('Toggle Properties', 'Toggle Properties')}
                     >
                         <span>⚙</span>
                     </button>
