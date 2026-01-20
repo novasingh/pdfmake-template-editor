@@ -1,0 +1,324 @@
+Phase 1: Core Infrastructure & Template System
+Goal: Enable saving, loading, and switching between templates.
+
+1.1 Template Save/Load
+[NEW] 
+src/templates/templateManager.ts
+Create a template manager to handle:
+
+Serialize current document to a template object
+Deserialize a template and load it into the editor
+Manage multiple templates
+[MODIFY] 
+useEditorStore.ts
+Add new actions:
+
+saveAsTemplate(name: string) => TemplateObject
+loadFromTemplate(template: TemplateObject) => void
+getTemplateJSON() => string
+[NEW] 
+src/templates/index.ts
+Export template utilities for NPM consumers.
+
+1.2 Pre-built Templates
+Create Australian-standard templates:
+
+[NEW] 
+src/templates/presets/invoice-au.ts
+Australian Tax Invoice template with:
+
+Company logo placeholder
+"TAX INVOICE" header
+ABN field
+Bill To / Ship To sections
+Line items table with Qty, Description, Unit Price, Total
+GST 10% calculation
+Bank details
+Due date
+[NEW] 
+src/templates/presets/quote-au.ts
+Quote/Proposal template with:
+
+Quote number
+Valid until date
+Scope of work section
+Pricing table
+Terms & Conditions
+Signature acceptance
+[NEW] 
+src/templates/presets/compliance.ts
+Compliance certificate template with:
+
+Certificate title
+Issuing authority
+Compliance details
+Date of issue
+Signature block
+Phase 2: Enhanced Drag & Drop Elements
+Goal: Add new block types for professional documents.
+
+2.1 Date Picker Block
+[MODIFY] 
+editor.ts
+Add to 
+ElementType
+:
+
+| 'date-field'
+Add new interface:
+
+export interface DateFieldElement extends BaseElement {
+    type: 'date-field';
+    label?: string;
+    dateValue?: string;
+    dateFormat?: 'DD/MM/YYYY' | 'MM/DD/YYYY' | 'YYYY-MM-DD' | 'DD MMM YYYY';
+    showLabel?: boolean;
+}
+[NEW] 
+DateProperties.tsx
+Property panel for date field with:
+
+Label text input
+Date value picker
+Format selector
+[MODIFY] 
+pdfmakeMapper.ts
+Add case for date-field to format and output the date.
+
+2.2 Auto-Number Block
+[MODIFY] 
+editor.ts
+| 'auto-number'
+export interface AutoNumberElement extends BaseElement {
+    type: 'auto-number';
+    prefix?: string;  // e.g., "INV-"
+    suffix?: string;
+    startValue?: number;
+    paddingDigits?: number;  // e.g., 4 for "0001"
+    label?: string;  // e.g., "Invoice Number"
+}
+2.3 Variable/Dynamic Field Block
+For data-driven templates:
+
+| 'variable'
+export interface VariableElement extends BaseElement {
+    type: 'variable';
+    variableName: string;  // e.g., "customerName", "companyABN"
+    placeholder?: string;
+    label?: string;
+}
+Predefined variables:
+
+{{customerName}}
+{{customerAddress}}
+{{companyName}}
+{{companyABN}}
+{{invoiceNumber}}
+{{invoiceDate}}
+{{dueDate}}
+{{totalAmount}}
+2.4 QR Code Block
+| 'qrcode'
+export interface QRCodeElement extends BaseElement {
+    type: 'qrcode';
+    data: string;  // URL or text to encode
+    size?: number;
+    errorLevel?: 'L' | 'M' | 'Q' | 'H';
+}
+Note: Use a library like qrcode for generation. pdfmake supports QR codes natively.
+
+2.5 List Block
+| 'list'
+export interface ListElement extends BaseElement {
+    type: 'list';
+    listType: 'ordered' | 'unordered';
+    items: string[];
+    bulletStyle?: 'disc' | 'circle' | 'square' | 'number' | 'letter';
+}
+Phase 3: Advanced Table Features
+Goal: Professional table editing capabilities.
+
+3.1 Table Enhancements
+[MODIFY] 
+TableProperties.tsx
+Add:
+
+Remove row button (per row)
+Remove column button (per column)
+Stripe rows toggle (alternate colors)
+Cell merge UI (advanced)
+[MODIFY] 
+TableContainer.tsx
+Add:
+
+Visual row/column remove buttons
+Drag handles for resizing (future)
+3.2 Enhanced Line Items Table
+[MODIFY] 
+useEditorStore.ts
+For invoice-items type, add:
+
+Auto-calculate row totals (Qty × Rate)
+Auto-calculate subtotal
+GST calculation (10% for Australia)
+Total with GST
+Phase 4: Header & Footer System
+Goal: Add dedicated header/footer zones.
+
+4.1 Page Structure
+[MODIFY] 
+editor.ts
+export interface PageSettings {
+    // existing...
+    header?: {
+        height: number;
+        elements: string[];
+    };
+    footer?: {
+        height: number;
+        elements: string[];
+        showPageNumbers?: boolean;
+        pageNumberFormat?: 'Page X of Y' | 'X/Y' | 'X';
+    };
+}
+[MODIFY] 
+PageCanvas.tsx
+Add visual zones for header and footer with their own droppable areas.
+
+Phase 5: Australian Standard Compliance
+Goal: Meet Australian invoice/quote requirements.
+
+5.1 Required Fields for Tax Invoice
+According to Australian Taxation Office (ATO):
+
+ABN (Australian Business Number) - 11 digits
+"Tax Invoice" label clearly stated
+Invoice Date
+Description of goods/services
+GST amount (if registered for GST)
+Total price including GST
+5.2 New Business Blocks
+[NEW] 
+ABN Block
+| 'abn-field'
+export interface ABNFieldElement extends BaseElement {
+    type: 'abn-field';
+    abnValue?: string;
+    label?: string;
+    format?: 'XX XXX XXX XXX' | 'XXXXXXXXXXX';
+}
+[NEW] 
+Bank Details Block
+| 'bank-details'
+export interface BankDetailsElement extends BaseElement {
+    type: 'bank-details';
+    bankName?: string;
+    accountName?: string;
+    bsb?: string;
+    accountNumber?: string;
+    showLabel?: boolean;
+}
+Phase 6: Responsive & Device Support
+Goal: Excellent experience on iPad Pro, tablets, and large screens.
+
+6.1 Touch Optimization
+[MODIFY] 
+TemplateEditor.css
+Add media queries for touch devices:
+
+@media (pointer: coarse) {
+    .drag-handle { min-width: 44px; min-height: 44px; }
+    .block-actions-toolbar button { padding: 12px 16px; }
+}
+[MODIFY] 
+CanvasBlock.tsx
+Add larger touch targets for drag handles and action buttons.
+
+6.2 Panel Resizing
+Add CSS resize support for sidebar and properties panels on large screens (>1440px).
+
+Phase 7: User Experience Improvements
+7.1 Undo/Redo System
+[MODIFY] 
+useEditorStore.ts
+Integrate with zustand/middleware for temporal state:
+
+import { temporal } from 'zundo';
+// Wrap store with temporal middleware
+// This enables undo() and redo() actions
+[MODIFY] 
+EditorHeader.tsx
+Add Undo/Redo buttons.
+
+7.2 Keyboard Shortcuts
+[NEW] 
+src/hooks/useKeyboardShortcuts.ts
+- Ctrl+Z: Undo
+- Ctrl+Y / Ctrl+Shift+Z: Redo
+- Delete/Backspace: Delete selected element
+- Ctrl+D: Duplicate selected element
+- Escape: Deselect
+- Arrow keys: Move element (future)
+Phase 8: Export & Preview Enhancements
+8.1 Live PDF Preview
+[NEW] 
+src/components/PDFPreview.tsx
+Side-by-side preview panel that generates PDF in real-time using pdfmake's createPdf().getBlob().
+
+8.2 Export Options
+[MODIFY] 
+EditorHeader.tsx
+Add export dropdown:
+
+Download PDF
+Download JSON Template
+Copy JSON to Clipboard
+Print
+Phase 9: NPM Package Polish
+9.1 Public API
+[MODIFY] 
+index.tsx
+Export clean public API:
+
+export { TemplateEditor } from './editor/TemplateEditor';
+export { useEditorStore } from './store/useEditorStore';
+export { exportToPdfMake } from './exporters/pdfmakeMapper';
+export type { DocumentSchema, EditorElement } from './types/editor';
+9.2 Props Interface
+interface TemplateEditorProps {
+    initialTemplate?: DocumentSchema;
+    onSave?: (doc: DocumentSchema) => void;
+    onExport?: (pdfmakeDoc: any) => void;
+    theme?: 'light' | 'dark';
+    locale?: 'en-AU' | 'en-US' | 'en-GB';
+    readOnly?: boolean;
+}
+Phase 10: Advanced Features (Future)
+These are stretch goals for later:
+
+Multi-page support: Page breaks, page-specific headers/footers
+Custom fonts: Load custom web fonts into pdfmake
+Image upload: Convert uploaded images to base64
+Conditional visibility: Show/hide elements based on variables
+Data binding: Connect to external data sources
+Collaboration: Real-time multi-user editing
+Verification Plan
+Automated Tests
+Unit tests for useEditorStore actions
+Integration tests for drag-and-drop
+Snapshot tests for pdfmake output
+Manual Verification
+Test all new blocks on canvas and in PDF output
+Test on iPad Pro (touch), tablet, and desktop
+Verify Australian compliance templates generate valid invoices
+Recommended Execution Order
+Phase 1: Template system (foundation for everything else)
+Phase 5: Australian compliance (core business requirement)
+Phase 2: New element types (date, auto-number, variable)
+Phase 3: Table enhancements
+Phase 4: Header/Footer
+Phase 7: Undo/Redo, keyboard shortcuts
+Phase 6: Responsive polish
+Phase 8: Export options
+Phase 9: NPM package polish
+Phase 10: Future features

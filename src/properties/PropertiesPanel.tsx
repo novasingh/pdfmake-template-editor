@@ -7,6 +7,12 @@ import ImageProperties from './components/ImageProperties';
 import TableProperties from './components/TableProperties';
 import InfoProperties from './components/InfoProperties';
 import ColumnProperties from './components/ColumnProperties';
+import DateProperties from './components/DateProperties';
+import AutoNumberProperties from './components/AutoNumberProperties';
+import VariableProperties from './components/VariableProperties';
+import QRCodeProperties from './components/QRCodeProperties';
+import ListProperties from './components/ListProperties';
+import BarcodeProperties from './components/BarcodeProperties';
 import '../styles/PropertiesPanel.css';
 
 const PropertiesPanel: React.FC = () => {
@@ -16,6 +22,8 @@ const PropertiesPanel: React.FC = () => {
         updateElement,
         addTableRow,
         addTableColumn,
+        removeTableRow,
+        removeTableColumn,
         removeElement
     } = useEditorStore();
 
@@ -75,6 +83,9 @@ const PropertiesPanel: React.FC = () => {
                         onUpdate={handleUpdate}
                         onAddRow={addTableRow}
                         onAddCol={addTableColumn}
+                        onRemoveRow={removeTableRow}
+                        onRemoveCol={removeTableColumn}
+                        onUpdateCell={useEditorStore.getState().updateTableCell}
                         onStyleChange={handleStyleChange}
                     />
                 );
@@ -93,6 +104,54 @@ const PropertiesPanel: React.FC = () => {
                     <InfoProperties
                         element={element}
                         onUpdate={handleUpdate}
+                        onStyleChange={handleStyleChange}
+                    />
+                );
+            case 'date-field':
+                return (
+                    <DateProperties
+                        element={element as any}
+                        onUpdate={handleUpdate as any}
+                        onStyleChange={handleStyleChange}
+                    />
+                );
+            case 'auto-number':
+                return (
+                    <AutoNumberProperties
+                        element={element as any}
+                        onUpdate={handleUpdate as any}
+                        onStyleChange={handleStyleChange}
+                    />
+                );
+            case 'variable':
+                return (
+                    <VariableProperties
+                        element={element as any}
+                        onUpdate={handleUpdate as any}
+                        onStyleChange={handleStyleChange}
+                    />
+                );
+            case 'qrcode':
+                return (
+                    <QRCodeProperties
+                        element={element as any}
+                        onUpdate={handleUpdate as any}
+                        onStyleChange={handleStyleChange}
+                    />
+                );
+            case 'barcode':
+                return (
+                    <BarcodeProperties
+                        element={element as any}
+                        onUpdate={handleUpdate as any}
+                        onStyleChange={handleStyleChange}
+                    />
+                );
+            case 'list':
+                return (
+                    <ListProperties
+                        element={element as any}
+                        onUpdate={handleUpdate as any}
                         onStyleChange={handleStyleChange}
                     />
                 );

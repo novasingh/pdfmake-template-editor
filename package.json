@@ -19,6 +19,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@types/pdfmake": "^0.2.12",
+    "html-to-image": "^1.11.13",
     "pdfmake": "^0.2.7",
     "react": "^16.8.0 || ^17.0.0 || ^18.0.0",
     "react-dom": "^18.2.0",

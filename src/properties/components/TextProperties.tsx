@@ -64,6 +64,22 @@ const TextProperties: React.FC<TextPropertiesProps> = ({ element, onUpdate, onSt
                     onChange={(e) => onStyleChange('color', e.target.value)}
                 />
             </div>
+
+            <div className="prop-section">
+                <label>Data Role (Auto-calc)</label>
+                <select
+                    value={element.role || ''}
+                    onChange={(e) => onUpdate({ role: e.target.value as any })}
+                >
+                    <option value="">None</option>
+                    <option value="item-qty">Qty (Quantity)</option>
+                    <option value="item-rate">Rate (Price)</option>
+                    <option value="item-amount">Amount (Row Total)</option>
+                    <option value="summary-subtotal">Summary: Subtotal</option>
+                    <option value="summary-gst">Summary: GST (10%)</option>
+                    <option value="summary-total">Summary: Total</option>
+                </select>
+            </div>
         </>
     );
 };

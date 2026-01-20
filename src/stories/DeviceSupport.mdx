@@ -1,0 +1,270 @@
+---
+title: Device Support
+description: Responsive design and device-specific optimizations
+---
+
+# Device Support & Responsive Design
+
+This document outlines the responsive design strategy for the pdfmake-template-editor.
+
+---
+
+## Supported Devices
+
+| Device | Screen Width | Support Level |
+|--------|--------------|---------------|
+| Mobile Phone | < 768px | ❌ Not Supported |
+| iPad Mini | 768px - 1023px | ⚠️ Limited |
+| iPad Pro 11" | 1024px - 1179px | ✅ Optimized |
+| iPad Pro 12.9" | 1180px - 1365px | ✅ Optimized |
+| Desktop | 1366px - 1919px | ✅ Optimized |
+| Large Desktop | 1920px+ | ✅ Optimized |
+
+---
+
+## Layout Breakpoints
+
+```css
+/* Tablet Start (show full editor) */
+@media (min-width: 1024px) {
+    .sidebar-container { display: block; }
+    .properties-container { display: block; }
+}
+
+/* Desktop (comfortable spacing) */
+@media (min-width: 1366px) {
+    .sidebar-container { width: 280px; }
+    .properties-container { width: 320px; }
+}
+
+/* Large Desktop (expanded panels) */
+@media (min-width: 1920px) {
+    .sidebar-container { width: 320px; }
+    .properties-container { width: 380px; }
+    .canvas-wrapper-outer { padding: 40px; }
+}
+```
+
+---
+
+## Touch Device Optimizations
+
+### Minimum Touch Target Size
+
+According to WCAG and Apple HIG, touch targets should be at least 44x44 pixels.
+
+```css
+@media (pointer: coarse) {
+    /* Larger drag handles */
+    .canvas-block {
+        min-height: 48px;
+    }
+    
+    /* Bigger action buttons */
+    .block-action-btn {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 12px 16px;
+    }
+    
+    /* Larger sidebar blocks */
+    .draggable-block {
+        padding: 16px;
+        font-size: 14px;
+    }
+    
+    /* Bigger input fields */
+    .properties-panel input,
+    .properties-panel select {
+        min-height: 44px;
+        font-size: 16px; /* Prevents iOS zoom */
+    }
+}
+```
+
+### Touch-Friendly Drag Handles
+
+```tsx
+// Add visible drag handle with adequate size
+<div className="drag-handle" style={{
+    width: 44,
+    height: 44,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    touchAction: 'none',
+}}>
+    <GripVerticalIcon size={24} />
+</div>
+```
+
+---
+
+## iPad Pro Specific
+
+### Landscape Orientation (Primary)
+
+```
+┌───────────────────────────────────────────────────────────┐
+│  Header                                                   │
+├──────────┬────────────────────────────┬──────────────────┤
+│ Sidebar  │        Canvas              │  Properties      │
+│  250px   │        (flex)              │    300px         │
+│          │                            │                  │
+│          │   ┌─────────────┐          │                  │
+│          │   │    A4 Page  │          │                  │
+│          │   │             │          │                  │
+│          │   └─────────────┘          │                  │
+│          │                            │                  │
+└──────────┴────────────────────────────┴──────────────────┘
+```
+
+### Portrait Orientation (Alternative)
+
+In portrait mode on iPad, show only one panel at a time:
+
+```
+┌────────────────────────────────┐
+│  Header  [Blocks] [Properties] │
+├────────────────────────────────┤
+│                                │
+│         Canvas                 │
+│    ┌─────────────┐             │
+│    │   A4 Page   │             │
+│    │             │             │
+│    └─────────────┘             │
+│                                │
+├────────────────────────────────┤
+│  Collapsible Panel (Sidebar    │
+│  or Properties based on toggle)│
+└────────────────────────────────┘
+```
+
+---
+
+## Desktop Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl + Z` | Undo |
+| `Ctrl + Y` / `Ctrl + Shift + Z` | Redo |
+| `Delete` / `Backspace` | Delete selected element |
+| `Ctrl + D` | Duplicate selected element |
+| `Ctrl + C` | Copy selected element |
+| `Ctrl + V` | Paste element |
+| `Escape` | Deselect / Close modal |
+| `Ctrl + S` | Save template |
+| `Ctrl + P` | Download PDF |
+
+---
+
+## Large Screen Enhancements
+
+### Resizable Panels
+
+On screens > 1440px, allow panel resizing:
+
+```tsx
+<ResizablePanel
+    defaultSize={280}
+    minSize={200}
+    maxSize={400}
+    direction="horizontal"
+>
+    <Sidebar />
+</ResizablePanel>
+```
+
+### Multi-Panel View
+
+Option to show additional panels like:
+- Layer/Element List
+- PDF Preview
+- History Panel
+
+---
+
+## Canvas Zoom & Pan
+
+### Zoom Controls
+
+```tsx
+interface ZoomControls {
+    zoom: number;         // Current zoom level (0.5 - 2.0)
+    setZoom: (z: number) => void;
+    zoomIn: () => void;   // +10%
+    zoomOut: () => void;  // -10%
+    fitToScreen: () => void;
+    actualSize: () => void;
+}
+```
+
+### Pinch-to-Zoom (Touch)
+
+```tsx
+import { usePinch } from '@use-gesture/react';
+
+const bind = usePinch(({ offset: [scale] }) => {
+    setZoom(Math.min(Math.max(scale, 0.5), 2.0));
+});
+```
+
+### Scroll/Pan
+
+Enable smooth scrolling when canvas is larger than viewport:
+
+```css
+.canvas-container {
+    overflow: auto;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+```
+
+---
+
+## Accessibility
+
+### Focus Management
+
+- Clear focus indicators on all interactive elements
+- Keyboard navigation through sidebar blocks
+- Focus trap in modals
+
+### Screen Reader Support
+
+- ARIA labels on buttons and controls
+- Role attributes on drag-and-drop elements
+- Live regions for status updates
+
+```tsx
+<button
+    aria-label="Delete heading block"
+    className="block-action-btn delete"
+    onClick={() => removeElement(element.id)}
+>
+    Delete
+</button>
+```
+
+---
+
+## Performance Considerations
+
+### Large Document Handling
+
+- Virtualize element list if > 50 elements
+- Lazy load images
+- Debounce property updates
+
+### Canvas Rendering
+
+- Use `transform` instead of top/left for animations
+- Minimize reflows during drag
+- Use `will-change` for frequently animated elements
+
+```css
+.canvas-block {
+    will-change: transform;
+}
+```

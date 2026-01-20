@@ -12,6 +12,7 @@ const Sidebar: React.FC = () => {
     const standardBlocks: { type: ElementType; label: string }[] = [
         { type: 'heading', label: 'Heading' },
         { type: 'paragraph', label: 'Paragraph' },
+        { type: 'list', label: 'List' },
         { type: 'divider', label: 'Divider' },
         { type: 'image', label: 'Image' },
         { type: 'table', label: 'Table' },
@@ -21,6 +22,11 @@ const Sidebar: React.FC = () => {
     const businessBlocks: { type: ElementType; label: string }[] = [
         { type: 'client-info', label: 'Client Info' },
         { type: 'business-info', label: 'Business Info' },
+        { type: 'date-field', label: 'Date Field' },
+        { type: 'auto-number', label: 'Auto Number' },
+        { type: 'variable', label: 'Dynamic Variable' },
+        { type: 'qrcode', label: 'QR Code' },
+        { type: 'barcode', label: 'Barcode' },
         { type: 'invoice-items', label: 'Invoice Items' },
         { type: 'invoice-summary', label: 'Totals Section' },
         { type: 'price-table', label: 'Pricing Table' },

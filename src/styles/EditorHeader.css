@@ -205,3 +205,19 @@
     font-size: 11px;
     color: var(--text-rich-muted);
 }
+
+/* Dropdown Section Titles */
+.dropdown-section-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-rich-muted);
+    padding: 8px 12px 4px;
+    margin-top: 4px;
+}
+
+.dropdown-section-title:first-child {
+    margin-top: 0;
+    padding-top: 4px;
+}

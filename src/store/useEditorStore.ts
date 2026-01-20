@@ -1,11 +1,15 @@
 import { create } from 'zustand';
+import { formatCurrency, parseCurrency } from '../utils/formatUtils';
 import { persist } from 'zustand/middleware';
 import {
     DocumentSchema,
     PageSettings,
     EditorElement,
+    BaseElement,
     ElementType,
-    BaseStyle
+    BaseStyle,
+    TableElement,
+    TableCell
 } from '../types/editor';
 
 interface EditorState {
@@ -23,11 +27,15 @@ interface EditorState {
     moveElement: (elementId: string, targetParentId: string | null, targetIndex?: number, targetColIndex?: number) => void;
 
     addTableRow: (tableId: string) => void;
+    removeTableRow: (tableId: string, rowIndex: number) => void;
     addTableColumn: (tableId: string) => void;
+    removeTableColumn: (tableId: string, colIndex: number) => void;
+    updateTableCell: (tableId: string, rowIndex: number, colIndex: number, updates: Partial<TableCell>) => void;
     cloneElement: (id: string) => void;
     selectElement: (id: string | null) => void;
     resetDocument: () => void;
     loadTemplate: (template: 'blank' | 'default') => void;
+    loadDocument: (document: DocumentSchema) => void;
 }
 
 const DEFAULT_PAGE: PageSettings = {
@@ -219,6 +227,65 @@ export const useEditorStore = create<EditorState>()(
                     case 'signature':
                         newElement = { ...baseProps, type: 'signature' };
                         break;
+                    case 'date-field':
+                        newElement = {
+                            ...baseProps,
+                            type: 'date-field',
+                            label: 'Date',
+                            dateValue: new Date().toISOString().split('T')[0],
+                            dateFormat: 'DD/MM/YYYY',
+                            showLabel: true
+                        } as any;
+                        break;
+                    case 'auto-number':
+                        newElement = {
+                            ...baseProps,
+                            type: 'auto-number',
+                            label: 'Invoice No.',
+                            prefix: 'INV-',
+                            suffix: '',
+                            startValue: 1,
+                            paddingDigits: 4
+                        } as any;
+                        break;
+                    case 'variable':
+                        newElement = {
+                            ...baseProps,
+                            type: 'variable',
+                            variableName: 'customerName',
+                            placeholder: '[Select Name]',
+                            label: 'Customer Name:'
+                        } as any;
+                        break;
+                    case 'qrcode':
+                        newElement = {
+                            ...baseProps,
+                            type: 'qrcode',
+                            data: 'https://example.com',
+                            size: 100,
+                            errorLevel: 'M'
+                        } as any;
+                        break;
+                    case 'barcode':
+                        newElement = {
+                            ...baseProps,
+                            type: 'barcode',
+                            data: '12345678',
+                            barcodeType: 'Code128',
+                            width: 100,
+                            height: 40,
+                            displayValue: true
+                        } as any;
+                        break;
+                    case 'list':
+                        newElement = {
+                            ...baseProps,
+                            type: 'list',
+                            listType: 'unordered',
+                            items: ['Item 1', 'Item 2', 'Item 3'],
+                            bulletStyle: 'disc'
+                        } as any;
+                        break;
                     default:
                         // Default to paragraph if unknown
                         newElement = { ...baseProps, type: 'paragraph', content: '' };
@@ -228,12 +295,13 @@ export const useEditorStore = create<EditorState>()(
                     ...state.document.elements,
                 };
 
-                const createText = (content: string, bold = false) => {
+                const createText = (content: string, bold = false, role?: BaseElement['role']) => {
                     const tid = `text-${Math.random().toString(36).substr(2, 9)}`;
                     newElements[tid] = {
                         id: tid,
                         type: 'paragraph',
                         content,
+                        role,
                         style: { fontSize: 10, fontWeight: bold ? 'bold' : 'normal', margin: [0, 0, 0, 0] }
                     } as any;
                     return tid;
@@ -257,15 +325,15 @@ export const useEditorStore = create<EditorState>()(
                                 ],
                                 [
                                     { content: [createText('Sample Item')] },
-                                    { content: [createText('1')] },
-                                    { content: [createText('$0.00')] },
-                                    { content: [createText('$0.00')] }
+                                    { content: [createText('1', false, 'item-qty')] },
+                                    { content: [createText('$0.00', false, 'item-rate')] },
+                                    { content: [createText('$0.00', false, 'item-amount')] }
                                 ],
                                 [
                                     { content: [createText('Another Item')] },
-                                    { content: [createText('2')] },
-                                    { content: [createText('$0.00')] },
-                                    { content: [createText('$0.00')] }
+                                    { content: [createText('2', false, 'item-qty')] },
+                                    { content: [createText('$0.00', false, 'item-rate')] },
+                                    { content: [createText('$0.00', false, 'item-amount')] }
                                 ]
                             ]
                         } as any;
@@ -278,10 +346,10 @@ export const useEditorStore = create<EditorState>()(
                             cols: 2,
                             headerRow: false,
                             body: [
-                                [{ content: [createText('Subtotal', true)] }, { content: [createText('$0.00')] }],
-                                [{ content: [createText('GST (18%)', true)] }, { content: [createText('$0.00')] }],
-                                [{ content: [createText('Discount', true)] }, { content: [createText('$0.00')] }],
-                                [{ content: [createText('Total', true)] }, { content: [createText('$0.00', true)] }]
+                                [{ content: [createText('Subtotal', true)] }, { content: [createText('$0.00', false, 'summary-subtotal')] }],
+                                [{ content: [createText('GST (10%)', true)] }, { content: [createText('$0.00', false, 'summary-gst')] }],
+                                [{ content: [createText('Discount', true)] }, { content: [createText('$0.00', false, 'summary-discount')] }],
+                                [{ content: [createText('Total', true)] }, { content: [createText('$0.00', true, 'summary-total')] }]
                             ],
                             borderColor: '#ffffff',
                             borderWidth: 0,
@@ -347,19 +415,96 @@ export const useEditorStore = create<EditorState>()(
                 } as Partial<EditorState>;
             }),
 
-            updateElement: (id, updates) => set((state) => ({
-                document: {
-                    ...state.document,
-                    elements: {
-                        ...state.document.elements,
-                        [id]: { ...state.document.elements[id], ...updates } as any
+            updateElement: (id, updates) => set((state) => {
+                const nextElements = {
+                    ...state.document.elements,
+                    [id]: { ...state.document.elements[id], ...updates } as any
+                };
+
+                // Trigger auto-calculation if a qty or rate was updated
+                const updatedElement = nextElements[id];
+                if (updatedElement.role === 'item-qty' || updatedElement.role === 'item-rate') {
+                    // Find the table row this element belongs to
+                    let tableId: string | null = null;
+                    let rowIndex: number | null = null;
+
+                    Object.entries(nextElements).forEach(([tid, el]) => {
+                        if (el.type === 'table') {
+                            const table = el as TableElement;
+                            table.body.forEach((row, rIdx) => {
+                                row.forEach(cell => {
+                                    if (cell.content.includes(id)) {
+                                        tableId = tid;
+                                        rowIndex = rIdx;
+                                    }
+                                });
+                            });
+                        }
+                    });
+
+                    if (tableId && rowIndex !== null) {
+                        const table = nextElements[tableId] as TableElement;
+                        const row = table.body[rowIndex];
+
+                        let qtyValue = 0;
+                        let rateValue = 0;
+                        let amountElementId: string | null = null;
+
+                        row.forEach(cell => {
+                            cell.content.forEach(cid => {
+                                const child = nextElements[cid];
+                                if (child.role === 'item-qty') {
+                                    qtyValue = parseFloat((child as any).content) || 0;
+                                } else if (child.role === 'item-rate') {
+                                    const val = (child as any).content || '0';
+                                    rateValue = parseFloat(val.replace(/[^0-9.-]/g, '')) || 0;
+                                } else if (child.role === 'item-amount') {
+                                    amountElementId = cid;
+                                }
+                            });
+                        });
+
+                        if (amountElementId) {
+                            const total = qtyValue * rateValue;
+                            const amountEl = nextElements[amountElementId] as any;
+                            amountEl.content = formatCurrency(total);
+                        }
+
+                        // Now trigger summary calculation
+                        let subtotal = 0;
+                        Object.values(nextElements).forEach(el => {
+                            if (el.role === 'item-amount') {
+                                const val = (el as any).content || '0';
+                                subtotal += parseCurrency(val);
+                            }
+                        });
+
+                        const gst = subtotal * 0.10;
+                        const grandTotal = subtotal + gst;
+
+                        Object.values(nextElements).forEach(el => {
+                            if (el.role === 'summary-subtotal') {
+                                (el as any).content = formatCurrency(subtotal);
+                            } else if (el.role === 'summary-gst') {
+                                (el as any).content = formatCurrency(gst);
+                            } else if (el.role === 'summary-total') {
+                                (el as any).content = formatCurrency(grandTotal);
+                            }
+                        });
                     }
                 }
-            }) as Partial<EditorState>),
+
+                return {
+                    document: {
+                        ...state.document,
+                        elements: nextElements
+                    }
+                };
+            }),
 
             removeElement: (id) => set((state) => {
                 const newElements = { ...state.document.elements };
-                
+
                 // Remove the element from any column's content array
                 Object.values(newElements).forEach((el) => {
                     if (el.type === 'columns') {
@@ -453,7 +598,7 @@ export const useEditorStore = create<EditorState>()(
                 // Add to new location
                 if (targetParentId && newElements[targetParentId]) {
                     const parent = newElements[targetParentId];
-                    
+
                     if (parent.type === 'columns' && typeof targetIndex === 'number') {
                         // Add to column
                         const columnsEl = parent as any;
@@ -505,15 +650,100 @@ export const useEditorStore = create<EditorState>()(
                 };
             }),
 
+            removeTableRow: (tableId: string, rowIndex: number) => set((state) => {
+                const elements = { ...state.document.elements };
+                const table = elements[tableId] as TableElement;
+                if (!table || table.type !== 'table') return state;
+
+                // Clone body and remove row
+                const newBody = [...table.body];
+                const [removedRow] = newBody.splice(rowIndex, 1);
+
+                // Collect IDs of elements that were only in this row to delete them
+                // Note: In this simple implementation, we assume elements are owned by cells.
+                // In a more robust system, we'd check if they exist elsewhere.
+                const idsToRemove: string[] = [];
+                removedRow.forEach((cell: TableCell) => {
+                    idsToRemove.push(...cell.content);
+                });
+
+                // Delete child elements
+                idsToRemove.forEach(id => delete elements[id]);
+
+                elements[tableId] = {
+                    ...table,
+                    rows: Math.max(0, table.rows - 1),
+                    body: newBody
+                } as any;
+
+                return {
+                    document: {
+                        ...state.document,
+                        elements
+                    }
+                };
+            }),
+
             addTableColumn: (tableId: string) => set((state) => {
                 const elements = { ...state.document.elements };
-                const table = elements[tableId];
+                const table = elements[tableId] as TableElement;
                 if (!table || table.type !== 'table') return state;
 
                 const newBody = table.body.map(row => [...row, { content: [] }]);
                 elements[tableId] = {
                     ...table,
                     cols: Number(table.cols) + 1,
+                    body: newBody
+                } as any;
+
+                return {
+                    document: {
+                        ...state.document,
+                        elements
+                    }
+                };
+            }),
+
+            removeTableColumn: (tableId: string, colIndex: number) => set((state) => {
+                const elements = { ...state.document.elements };
+                const table = elements[tableId] as TableElement;
+                if (!table || table.type !== 'table') return state;
+
+                const idsToRemove: string[] = [];
+                const newBody = table.body.map((row: TableCell[]) => {
+                    const newRow = [...row];
+                    const [removedCell] = newRow.splice(colIndex, 1);
+                    idsToRemove.push(...removedCell.content);
+                    return newRow;
+                });
+
+                idsToRemove.forEach(id => delete elements[id]);
+
+                elements[tableId] = {
+                    ...table,
+                    cols: Math.max(0, table.cols - 1),
+                    body: newBody
+                } as any;
+
+                return {
+                    document: {
+                        ...state.document,
+                        elements
+                    }
+                };
+            }),
+
+            updateTableCell: (tableId, rowIndex, colIndex, updates: Partial<TableCell>) => set((state) => {
+                const elements = { ...state.document.elements };
+                const table = elements[tableId] as TableElement;
+                if (!table || table.type !== 'table') return state;
+
+                const newBody = [...table.body];
+                newBody[rowIndex] = [...newBody[rowIndex]];
+                newBody[rowIndex][colIndex] = { ...newBody[rowIndex][colIndex], ...updates };
+
+                elements[tableId] = {
+                    ...table,
                     body: newBody
                 } as any;
 
@@ -631,6 +861,11 @@ export const useEditorStore = create<EditorState>()(
                     });
                 }
             },
+
+            loadDocument: (document) => set({
+                document: JSON.parse(JSON.stringify(document)), // Deep clone to avoid mutations
+                selectedElementId: null,
+            }),
         }),
         {
             name: 'pdfmake-editor-storage',

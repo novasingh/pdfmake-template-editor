@@ -65,12 +65,20 @@ export type ElementType =
     | 'invoice-items'
     | 'invoice-summary'
     | 'price-table'
-    | 'payment-terms';
+    | 'payment-terms'
+    | 'date-field'
+    | 'auto-number'
+    | 'variable'
+    | 'qrcode'
+    | 'barcode'
+    | 'list';
 
 export interface BaseElement {
     id: string;
     type: ElementType;
     style: BaseStyle;
+    role?: 'item-qty' | 'item-rate' | 'item-amount' | 'summary-subtotal' | 'summary-gst' | 'summary-total' | 'summary-discount';
+    currencyCode?: string; // e.g. 'AUD', 'USD'
 }
 
 export interface TextElement extends BaseElement {
@@ -119,6 +127,9 @@ export interface ColumnsElement extends BaseElement {
 
 export interface TableCell {
     content: string[]; // IDs of nested elements
+    rowSpan?: number;
+    colSpan?: number;
+    backgroundColor?: string;
 }
 
 export interface TableElement extends BaseElement {
@@ -127,6 +138,7 @@ export interface TableElement extends BaseElement {
     cols: number;
     headerRow: boolean;
     headerColor?: string;
+    alternateRowColor?: string;
     cellPadding?: number;
     borderWidth?: number;
     borderColor?: string;
@@ -144,13 +156,66 @@ export interface BusinessInfoElement extends BaseElement {
     borderColor?: string;
 }
 
+export interface DateFieldElement extends BaseElement {
+    type: 'date-field';
+    label?: string;
+    dateValue?: string;
+    dateFormat?: 'DD/MM/YYYY' | 'MM/DD/YYYY' | 'YYYY-MM-DD' | 'DD MMM YYYY';
+    showLabel?: boolean;
+}
+
+export interface AutoNumberElement extends BaseElement {
+    type: 'auto-number';
+    prefix?: string;
+    suffix?: string;
+    startValue?: number;
+    paddingDigits?: number;
+    label?: string;
+}
+
+export interface VariableElement extends BaseElement {
+    type: 'variable';
+    variableName: string;
+    placeholder?: string;
+    label?: string;
+}
+
+export interface QRCodeElement extends BaseElement {
+    type: 'qrcode';
+    data: string;
+    size?: number;
+    errorLevel?: 'L' | 'M' | 'Q' | 'H';
+}
+
+export interface BarcodeElement extends BaseElement {
+    type: 'barcode';
+    data: string;
+    barcodeType?: 'Code128' | 'Code39' | 'EAN13' | 'UPC';
+    width?: number;
+    height?: number;
+    displayValue?: boolean;
+}
+
+export interface ListElement extends BaseElement {
+    type: 'list';
+    listType: 'ordered' | 'unordered';
+    items: string[];
+    bulletStyle?: 'disc' | 'circle' | 'square' | 'number' | 'letter';
+}
+
 export type EditorElement =
     | TextElement
     | ImageElement
     | DividerElement
     | ColumnsElement
     | TableElement
-    | BusinessInfoElement;
+    | BusinessInfoElement
+    | DateFieldElement
+    | AutoNumberElement
+    | VariableElement
+    | QRCodeElement
+    | BarcodeElement
+    | ListElement;
 
 export interface DocumentSchema {
     page: PageSettings;

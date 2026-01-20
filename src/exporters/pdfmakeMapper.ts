@@ -89,7 +89,7 @@ export const exportToPdfMake = (doc: DocumentSchema): any => {
             case 'columns': {
                 const cols = element as any;
                 const columnGap = cols.columnGap ?? 10;
-                
+
                 const columnsContent = {
                     columns: cols.columns.map((col: any) => ({
                         width: col.width,
@@ -100,7 +100,7 @@ export const exportToPdfMake = (doc: DocumentSchema): any => {
                 };
 
                 // If the columns element has border or background, wrap it in a table for visual effect
-                if ((cols.borderWidth && cols.borderStyle !== 'none') || 
+                if ((cols.borderWidth && cols.borderStyle !== 'none') ||
                     (cols.backgroundColor && cols.backgroundColor !== 'transparent')) {
                     return {
                         table: {
@@ -133,11 +133,15 @@ export const exportToPdfMake = (doc: DocumentSchema): any => {
                         headerRows: table.headerRow ? 1 : 0,
                         widths: Array(colsCount).fill('*'),
                         body: table.body.map((row: any[], rIdx: number) =>
-                            row.map(cell => {
+                            row.map((cell: any) => {
                                 const isHeader = table.headerRow && rIdx === 0;
+                                const fillColor = cell.backgroundColor || (isHeader ? (table.headerColor || '#f8fafc') : (table.alternateRowColor && rIdx % 2 !== 0 ? table.alternateRowColor : undefined));
+
                                 return {
-                                    stack: cell.content.map(mapElement).filter(Boolean),
-                                    fillColor: isHeader ? (table.headerColor || '#f8fafc') : undefined
+                                    stack: (cell.content || []).map(mapElement).filter(Boolean),
+                                    fillColor,
+                                    rowSpan: cell.rowSpan,
+                                    colSpan: cell.colSpan,
                                 };
                             })
                         )
@@ -225,6 +229,72 @@ export const exportToPdfMake = (doc: DocumentSchema): any => {
                     ...mapStyle(element.style),
                     margin: [0, 20, 0, 0],
                 };
+
+            case 'date-field': {
+                const df = element as any;
+                const dateText = df.showLabel !== false ? `${df.label || 'Date'}: ${df.dateValue || ''}` : (df.dateValue || '');
+                return {
+                    text: dateText,
+                    ...mapStyle(element.style),
+                };
+            }
+
+            case 'auto-number': {
+                const an = element as any;
+                const value = (an.startValue || 1).toString().padStart(an.paddingDigits || 0, '0');
+                const numberText = `${an.prefix || ''}${value}${an.suffix || ''}`;
+                return {
+                    stack: [
+                        an.label ? { text: an.label, fontSize: (element.style.fontSize || 11) * 0.8, color: '#64748b' } : null,
+                        { text: numberText, ...mapStyle(element.style) }
+                    ].filter(Boolean)
+                };
+            }
+
+            case 'variable': {
+                const v = element as any;
+                const varText = v.label ? `${v.label} ${v.placeholder || `{${v.variableName}}`}` : (v.placeholder || `{${v.variableName}}`);
+                return {
+                    text: varText,
+                    ...mapStyle(element.style),
+                };
+            }
+
+            case 'qrcode': {
+                const qr = element as any;
+                return {
+                    qr: qr.data || ' ',
+                    fit: qr.size || 100,
+                    eccLevel: qr.errorLevel || 'M',
+                    ...mapStyle(element.style),
+                };
+            }
+
+            case 'barcode': {
+                const bc = element as any;
+                return {
+                    barcode: bc.data || ' ',
+                    width: bc.width || 100,
+                    height: bc.height || 40,
+                    type: bc.barcodeType || 'Code128',
+                    displayValue: bc.displayValue ?? true,
+                    ...mapStyle(element.style),
+                };
+            }
+
+            case 'list': {
+                const le = element as any;
+                const listProp = le.listType === 'ordered' ? 'ol' : 'ul';
+                const marker = le.bulletStyle === 'number' ? 'decimal' :
+                    le.bulletStyle === 'letter' ? 'lower-alpha' :
+                        le.bulletStyle;
+
+                return {
+                    [listProp]: le.items,
+                    type: marker,
+                    ...mapStyle(element.style),
+                };
+            }
 
             default:
                 return null;

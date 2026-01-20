@@ -1,8 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useEditorStore } from '../store/useEditorStore';
 import { useFullscreen } from '../hooks/useFullscreen';
 import { usePDFExport } from '../hooks/usePDFExport';
 import JsonPreviewModal from '../canvas/JsonPreviewModal';
+import {
+    invoiceTemplateAU,
+    quoteTemplateAU,
+    complianceTemplate,
+    createTemplate,
+    downloadTemplateAsFile,
+    readTemplateFile,
+    saveTemplateToStorage,
+    Template,
+} from '../templates';
+import { captureThumbnail } from '../utils/thumbnailUtils';
+import TemplateGalleryModal from '../canvas/TemplateGalleryModal';
 import '../styles/EditorHeader.css';
 
 interface EditorHeaderProps {
@@ -11,9 +23,12 @@ interface EditorHeaderProps {
 }
 
 const EditorHeader: React.FC<EditorHeaderProps> = ({ onToggleSidebar, onToggleProperties }) => {
-    const { document: doc, loadTemplate } = useEditorStore();
+    const { document: doc, loadTemplate, loadDocument } = useEditorStore();
     const [isJsonOpen, setIsJsonOpen] = useState(false);
     const [showTemplateDropdown, setShowTemplateDropdown] = useState(false);
+    const [showSaveDropdown, setShowSaveDropdown] = useState(false);
+    const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Custom hooks
     const { isFullscreen, toggleFullscreen } = useFullscreen();
@@ -30,34 +45,154 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({ onToggleSidebar, onTogglePr
         setShowTemplateDropdown(false);
     };
 
+    const handleLoadPrebuiltTemplate = (template: Template) => {
+        if (confirm(`Load "${template.metadata.name}"? This will replace your current work.`)) {
+            loadDocument(template.document);
+        }
+        setShowTemplateDropdown(false);
+    };
+
+    const handleSaveAsTemplate = async () => {
+        const name = prompt('Enter template name:', 'My Template');
+        if (name) {
+            const thumbnail = await captureThumbnail('page-canvas');
+            const template = createTemplate(doc, name, { thumbnail });
+            saveTemplateToStorage(template);
+            alert(`Template "${name}" saved to browser storage!`);
+        }
+        setShowSaveDropdown(false);
+    };
+
+    const handleExportJSON = async () => {
+        const thumbnail = await captureThumbnail('page-canvas');
+        const template = createTemplate(doc, 'Exported Template', { thumbnail });
+        downloadTemplateAsFile(template);
+        setShowSaveDropdown(false);
+    };
+
+    const handleImportJSON = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const template = await readTemplateFile(file);
+        if (template) {
+            if (confirm(`Load template "${template.metadata.name}"? This will replace your current work.`)) {
+                loadDocument(template.document);
+            }
+        } else {
+            alert('Failed to load template. Please check the file format.');
+        }
+
+        // Reset input
+        e.target.value = '';
+        setShowTemplateDropdown(false);
+    };
+
     return (
         <header className="editor-header">
             <div className="header-left">
                 <div className="template-dropdown-container">
                     <button
                         className="header-btn secondary"
-                        onClick={() => setShowTemplateDropdown(!showTemplateDropdown)}
+                        onClick={() => {
+                            setShowTemplateDropdown(!showTemplateDropdown);
+                            setShowSaveDropdown(false);
+                        }}
                     >
-                        <span>New Template</span>
+                        <span>Templates</span>
                     </button>
 
                     {showTemplateDropdown && (
                         <div className="template-dropdown">
+                            <div className="dropdown-section-title">New</div>
                             <div className="dropdown-item" onClick={() => handleLoadTemplate('blank')}>
                                 <div className="item-info">
                                     <span className="item-title">Blank Template</span>
                                     <span className="item-desc">Start from scratch</span>
                                 </div>
                             </div>
-                            <div className="dropdown-item" onClick={() => handleLoadTemplate('default')}>
+
+                            <div className="dropdown-section-title">Pre-built (Australian)</div>
+                            <div className="dropdown-item" onClick={() => handleLoadPrebuiltTemplate(invoiceTemplateAU)}>
                                 <div className="item-info">
-                                    <span className="item-title">Default Template</span>
-                                    <span className="item-desc">Sample invoice structure</span>
+                                    <span className="item-title">📄 Tax Invoice</span>
+                                    <span className="item-desc">ATO-compliant with GST</span>
+                                </div>
+                            </div>
+                            <div className="dropdown-item" onClick={() => handleLoadPrebuiltTemplate(quoteTemplateAU)}>
+                                <div className="item-info">
+                                    <span className="item-title">💼 Quote / Proposal</span>
+                                    <span className="item-desc">With terms & signature</span>
+                                </div>
+                            </div>
+                            <div className="dropdown-item" onClick={() => handleLoadPrebuiltTemplate(complianceTemplate)}>
+                                <div className="item-info">
+                                    <span className="item-title">✅ Compliance Certificate</span>
+                                    <span className="item-desc">Official document template</span>
+                                </div>
+                            </div>
+
+                            <div className="dropdown-section-title">Import / Browse</div>
+                            <div className="dropdown-item" onClick={() => {
+                                setIsGalleryOpen(true);
+                                setShowTemplateDropdown(false);
+                            }}>
+                                <div className="item-info">
+                                    <span className="item-title">🗂️ Browser Gallery</span>
+                                    <span className="item-desc">Browse your saved templates</span>
+                                </div>
+                            </div>
+                            <div className="dropdown-item" onClick={handleImportJSON}>
+                                <div className="item-info">
+                                    <span className="item-title">📁 Import from JSON</span>
+                                    <span className="item-desc">Load a saved template file</span>
                                 </div>
                             </div>
                         </div>
                     )}
                 </div>
+
+                <div className="template-dropdown-container">
+                    <button
+                        className="header-btn secondary"
+                        onClick={() => {
+                            setShowSaveDropdown(!showSaveDropdown);
+                            setShowTemplateDropdown(false);
+                        }}
+                    >
+                        <span>Save</span>
+                    </button>
+
+                    {showSaveDropdown && (
+                        <div className="template-dropdown">
+                            <div className="dropdown-item" onClick={handleSaveAsTemplate}>
+                                <div className="item-info">
+                                    <span className="item-title">💾 Save to Browser</span>
+                                    <span className="item-desc">Store in local storage</span>
+                                </div>
+                            </div>
+                            <div className="dropdown-item" onClick={handleExportJSON}>
+                                <div className="item-info">
+                                    <span className="item-title">📥 Export as JSON</span>
+                                    <span className="item-desc">Download template file</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Hidden file input for import */}
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".json"
+                    style={{ display: 'none' }}
+                    onChange={handleFileChange}
+                />
             </div>
 
             <div className="header-center">
@@ -93,8 +228,10 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({ onToggleSidebar, onTogglePr
             </div>
 
             <JsonPreviewModal isOpen={isJsonOpen} onClose={() => setIsJsonOpen(false)} />
+            <TemplateGalleryModal isOpen={isGalleryOpen} onClose={() => setIsGalleryOpen(false)} />
         </header>
     );
 };
 
 export default EditorHeader;
+

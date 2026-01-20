@@ -1,0 +1,145 @@
+---
+title: Feature Roadmap
+description: Comprehensive feature extension roadmap for pdfmake-template-editor
+---
+
+# PDFMake Template Editor - Feature Roadmap
+
+## Overview
+
+This document outlines the feature roadmap for extending the pdfmake-template-editor into a production-ready, feature-rich PDF template builder.
+
+## Current Features ✅
+
+### Drag & Drop System
+- @dnd-kit powered drag-and-drop
+- Smart collision detection
+- Move elements between containers (columns, tables, root)
+- Clone/delete elements
+
+### Block Types
+- **Standard**: Heading, Paragraph, Divider, Image, Table, Columns
+- **Business**: Client Info, Business Info, Invoice Items, Totals, Pricing Table, Payment Terms, Signature
+
+### Page Configuration
+- Page sizes: A4, Letter, Legal
+- Margins and padding controls
+- Background color
+- Watermarks (text/image) with 9 positions
+
+### Export
+- Real-time JSON preview
+- PDF download via pdfmake
+
+---
+
+## Phase 1: Template System
+
+| Feature | Description | Priority |
+|---------|-------------|----------|
+| Save/Load Templates | Serialize document to JSON template | High |
+| Template Presets | Invoice, Quote, Compliance (Australian) | High |
+| Import/Export JSON | Allow users to share templates | Medium |
+
+---
+
+## Phase 2: New Element Types
+
+| Block Type | Description |
+|------------|-------------|
+| `date-field` | Date with label and format options |
+| `auto-number` | Invoice/Quote number with prefix/suffix |
+| `variable` | Dynamic placeholder (customerName) |
+| `qrcode` | QR code for payment URLs |
+| `list` | Ordered/unordered lists |
+| `abn-field` | Australian Business Number |
+| `bank-details` | Bank account details block |
+
+---
+
+## Phase 3: Table Enhancements
+
+- Remove row/column buttons
+- Stripe (alternate) row colors
+- Auto-calculate line item totals
+- GST 10% calculation
+- Currency formatting
+
+---
+
+## Phase 4: Header & Footer
+
+- Dedicated header zone
+- Dedicated footer zone
+- Page numbers (Page X of Y)
+- Company logo in header
+
+---
+
+## Phase 5: Australian Compliance
+
+### Tax Invoice Requirements (ATO)
+1. ABN (Australian Business Number)
+2. "Tax Invoice" label
+3. Invoice date
+4. Description of goods/services
+5. GST amount
+6. Total including GST
+
+### Quote Requirements
+1. Quote validity period
+2. Terms & Conditions
+3. Acceptance signature
+
+---
+
+## Phase 6: Device Support
+
+| Device | Optimization |
+|--------|--------------|
+| iPad Pro | Touch-friendly drag handles (44px+ targets) |
+| Tablet | Collapsible panels, gesture support |
+| Desktop | Resizable panels, keyboard shortcuts |
+
+---
+
+## Phase 7: UX Improvements
+
+- Undo/Redo (Ctrl+Z, Ctrl+Y)
+- Keyboard shortcuts (Delete, Ctrl+D duplicate)
+- Right-click context menu
+- Copy/paste elements
+
+---
+
+## Phase 8: Export Options
+
+- Download PDF
+- Download JSON template
+- Export as PNG image
+- Print directly
+
+---
+
+## Phase 9: NPM Package API
+
+```tsx
+<TemplateEditor
+  initialTemplate={template}
+  onSave={(doc) => console.log(doc)}
+  onExport={(pdfDoc) => downloadPdf(pdfDoc)}
+  theme="light"
+  locale="en-AU"
+/>
+```
+
+---
+
+## Phase 10: Future Features
+
+- Multi-page documents
+- Custom font support
+- Image upload (base64)
+- Conditional visibility
+- Data binding
+- Real-time collaboration

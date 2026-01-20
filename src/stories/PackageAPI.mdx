@@ -1,0 +1,401 @@
+---
+title: NPM Package API
+description: Public API and integration guide for pdfmake-template-editor
+---
+
+# NPM Package API
+
+This document defines the public API for consuming the pdfmake-template-editor NPM package.
+
+---
+
+## Installation
+
+```bash
+npm install pdfmake-template-editor
+# or
+yarn add pdfmake-template-editor
+# or
+pnpm add pdfmake-template-editor
+```
+
+---
+
+## Basic Usage
+
+```tsx
+import { TemplateEditor } from 'pdfmake-template-editor';
+
+function App() {
+    return (
+        <div style={{ height: '100vh' }}>
+            <TemplateEditor />
+        </div>
+    );
+}
+```
+
+---
+
+## Props Interface
+
+```typescript
+interface TemplateEditorProps {
+    /**
+     * Initial template to load when the editor mounts.
+     */
+    initialTemplate?: DocumentSchema;
+    
+    /**
+     * Callback fired when user saves the template.
+     */
+    onSave?: (document: DocumentSchema) => void;
+    
+    /**
+     * Callback fired when user exports to PDF.
+     * Receives the pdfmake document definition.
+     */
+    onExport?: (pdfmakeDoc: any) => void;
+    
+    /**
+     * Callback fired when the document changes.
+     * Use for auto-save functionality.
+     */
+    onChange?: (document: DocumentSchema) => void;
+    
+    /**
+     * Callback fired when user clicks "Load Template".
+     * Return a DocumentSchema to load, or null to cancel.
+     */
+    onLoadTemplate?: () => Promise<DocumentSchema | null>;
+    
+    /**
+     * Theme configuration.
+     */
+    theme?: 'light' | 'dark' | ThemeConfig;
+    
+    /**
+     * Locale for date formats, currency, etc.
+     * @default 'en-AU'
+     */
+    locale?: 'en-AU' | 'en-US' | 'en-GB';
+    
+    /**
+     * Read-only mode. Useful for previewing templates.
+     * @default false
+     */
+    readOnly?: boolean;
+    
+    /**
+     * Custom blocks to add to the sidebar.
+     */
+    customBlocks?: CustomBlock[];
+    
+    /**
+     * Variables to populate dynamic fields.
+     */
+    variables?: Record<string, string>;
+    
+    /**
+     * Whether to persist state to localStorage.
+     * @default true
+     */
+    persistState?: boolean;
+    
+    /**
+     * Storage key for localStorage persistence.
+     * @default 'pdfmake-editor-storage'
+     */
+    storageKey?: string;
+}
+```
+
+---
+
+## Types
+
+### DocumentSchema
+
+```typescript
+interface DocumentSchema {
+    page: PageSettings;
+    elements: Record<string, EditorElement>;
+    rootElementIds: string[];
+}
+```
+
+### PageSettings
+
+```typescript
+interface PageSettings {
+    size: 'A4' | 'LETTER' | 'LEGAL';
+    width: number;
+    height: number;
+    margins: { top: number; right: number; bottom: number; left: number };
+    padding: number;
+    backgroundColor?: string;
+    watermark?: WatermarkSettings;
+}
+```
+
+### EditorElement
+
+```typescript
+type EditorElement =
+    | TextElement
+    | ImageElement
+    | DividerElement
+    | ColumnsElement
+    | TableElement
+    | BusinessInfoElement
+    | DateFieldElement
+    | AutoNumberElement
+    | VariableElement
+    | QRCodeElement
+    | ListElement;
+```
+
+---
+
+## Exports
+
+The package exports the following:
+
+```typescript
+// Main component
+export { TemplateEditor } from './editor/TemplateEditor';
+
+// Store hook for advanced usage
+export { useEditorStore } from './store/useEditorStore';
+
+// Export utility
+export { exportToPdfMake } from './exporters/pdfmakeMapper';
+
+// Types
+export type {
+    DocumentSchema,
+    PageSettings,
+    EditorElement,
+    ElementType,
+    // ... all element types
+} from './types/editor';
+
+// Template presets
+export { invoiceTemplate } from './templates/presets/invoice-au';
+export { quoteTemplate } from './templates/presets/quote-au';
+export { complianceTemplate } from './templates/presets/compliance';
+```
+
+---
+
+## Advanced Usage
+
+### Controlled Mode
+
+```tsx
+import { TemplateEditor, useEditorStore, DocumentSchema } from 'pdfmake-template-editor';
+
+function ControlledEditor() {
+    const [template, setTemplate] = useState<DocumentSchema>(initialTemplate);
+    
+    return (
+        <TemplateEditor
+            initialTemplate={template}
+            onChange={(doc) => {
+                setTemplate(doc);
+                // Auto-save to server
+                saveToServer(doc);
+            }}
+            onSave={(doc) => {
+                saveToServer(doc);
+                toast.success('Template saved!');
+            }}
+        />
+    );
+}
+```
+
+### Using Pre-built Templates
+
+```tsx
+import { TemplateEditor, invoiceTemplate, quoteTemplate } from 'pdfmake-template-editor';
+
+function TemplateSelector() {
+    const [template, setTemplate] = useState(invoiceTemplate);
+    
+    return (
+        <>
+            <select onChange={(e) => {
+                if (e.target.value === 'invoice') setTemplate(invoiceTemplate);
+                if (e.target.value === 'quote') setTemplate(quoteTemplate);
+            }}>
+                <option value="invoice">Invoice</option>
+                <option value="quote">Quote</option>
+            </select>
+            
+            <TemplateEditor initialTemplate={template} />
+        </>
+    );
+}
+```
+
+### Custom PDF Generation
+
+```tsx
+import { useEditorStore, exportToPdfMake } from 'pdfmake-template-editor';
+import pdfMake from 'pdfmake/build/pdfmake';
+
+function CustomExport() {
+    const { document } = useEditorStore();
+    
+    const handleExport = () => {
+        const pdfDoc = exportToPdfMake(document);
+        
+        // Add custom fonts, headers, footers, etc.
+        pdfDoc.defaultStyle = {
+            font: 'Roboto'
+        };
+        
+        pdfMake.createPdf(pdfDoc).download('document.pdf');
+    };
+    
+    return <button onClick={handleExport}>Download PDF</button>;
+}
+```
+
+### Populating Variables
+
+```tsx
+import { TemplateEditor } from 'pdfmake-template-editor';
+
+function InvoiceGenerator({ customer, invoice }) {
+    return (
+        <TemplateEditor
+            variables={{
+                customerName: customer.name,
+                customerAddress: customer.address,
+                customerEmail: customer.email,
+                invoiceNumber: invoice.number,
+                invoiceDate: format(invoice.date, 'dd/MM/yyyy'),
+                dueDate: format(invoice.dueDate, 'dd/MM/yyyy'),
+                subtotal: formatCurrency(invoice.subtotal),
+                gst: formatCurrency(invoice.gst),
+                total: formatCurrency(invoice.total),
+            }}
+        />
+    );
+}
+```
+
+---
+
+## Theming
+
+### Theme Config
+
+```typescript
+interface ThemeConfig {
+    colors: {
+        primary: string;
+        secondary: string;
+        background: string;
+        surface: string;
+        text: string;
+        textSecondary: string;
+        border: string;
+        error: string;
+        success: string;
+    };
+    fonts: {
+        sans: string;
+        mono: string;
+    };
+    radius: {
+        sm: string;
+        md: string;
+        lg: string;
+    };
+}
+```
+
+### Example
+
+```tsx
+<TemplateEditor
+    theme={{
+        colors: {
+            primary: '#3b82f6',
+            secondary: '#64748b',
+            background: '#0f172a',
+            surface: '#1e293b',
+            text: '#f8fafc',
+            textSecondary: '#94a3b8',
+            border: '#334155',
+            error: '#ef4444',
+            success: '#22c55e',
+        },
+        fonts: {
+            sans: 'Inter, sans-serif',
+            mono: 'JetBrains Mono, monospace',
+        },
+        radius: {
+            sm: '4px',
+            md: '8px',
+            lg: '12px',
+        }
+    }}
+/>
+```
+
+---
+
+## Custom Blocks
+
+```tsx
+import { TemplateEditor, CustomBlock } from 'pdfmake-template-editor';
+
+const customBlocks: CustomBlock[] = [
+    {
+        type: 'custom-widget',
+        label: 'My Widget',
+        category: 'Custom',
+        defaultProps: {
+            content: 'Default content',
+        },
+        render: (element, isSelected) => (
+            <div className={isSelected ? 'selected' : ''}>
+                {element.content}
+            </div>
+        ),
+        propertiesPanel: (element, onUpdate) => (
+            <div>
+                <label>Content</label>
+                <input
+                    value={element.content}
+                    onChange={(e) => onUpdate({ content: e.target.value })}
+                />
+            </div>
+        ),
+        toPdfMake: (element) => ({
+            text: element.content,
+            bold: true,
+        }),
+    }
+];
+
+<TemplateEditor customBlocks={customBlocks} />
+```
+
+---
+
+## Events
+
+| Event | Payload | Description |
+|-------|---------|-------------|
+| `onSave` | DocumentSchema | User clicked Save |
+| `onExport` | pdfmake doc | User clicked Export PDF |
+| `onChange` | DocumentSchema | Any document change |
+| `onLoadTemplate` | - | User clicked Load Template |
+| `onElementSelect` | element ID or null | Selection changed |
+| `onElementAdd` | element | New element added |
+| `onElementRemove` | element ID | Element deleted |
