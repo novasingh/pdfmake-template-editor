@@ -26,6 +26,7 @@ import Sidebar from '../sidebar/Sidebar';
 import PageCanvas from '../canvas/PageCanvas';
 import PropertiesPanel from '../properties/PropertiesPanel';
 import EditorHeader from './EditorHeader';
+import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { useEditorStore } from '../store/useEditorStore';
 import CustomDialog from '../components/CustomDialog';
 
@@ -37,6 +38,7 @@ export interface TemplateEditorProps {
 
 const TemplateEditor: React.FC<TemplateEditorProps> = () => {
     const { document: doc, reorderElements, addElement, insertModule, moveElement, selectedElementId, selectElement } = useEditorStore();
+    useKeyboardShortcuts();
     const [activeId, setActiveId] = React.useState<string | null>(null);
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
     const [isPropertiesOpen, setIsPropertiesOpen] = React.useState(true);

@@ -95,6 +95,45 @@ const ImageProperties: React.FC<ImagePropertiesProps> = ({ element, onUpdate, on
                     ))}
                 </div>
             </div>
+
+            <div className="prop-section border-top">
+                <label className="section-label">Spacing & Layout</label>
+                <div className="prop-group">
+                    <span>Margin (Top/Bottom)</span>
+                    <div className="prop-grid">
+                        <input
+                            type="number"
+                            placeholder="Top"
+                            value={element.style.margin?.[1] ?? 0}
+                            onChange={(e) => {
+                                const m = element.style.margin || [0, 0, 0, 0];
+                                onStyleChange('margin', [m[0], parseInt(e.target.value, 10), m[2], m[3]]);
+                            }}
+                        />
+                        <input
+                            type="number"
+                            placeholder="Bottom"
+                            value={element.style.margin?.[3] ?? 0}
+                            onChange={(e) => {
+                                const m = element.style.margin || [0, 0, 0, 0];
+                                onStyleChange('margin', [m[0], m[1], m[2], parseInt(e.target.value, 10)]);
+                            }}
+                        />
+                    </div>
+                </div>
+
+                <div className="prop-group">
+                    <span>Padding (All sides)</span>
+                    <input
+                        type="number"
+                        value={element.style.padding?.[0] ?? 0}
+                        onChange={(e) => {
+                            const val = parseInt(e.target.value, 10);
+                            onStyleChange('padding', [val, val, val, val]);
+                        }}
+                    />
+                </div>
+            </div>
         </>
     );
 };

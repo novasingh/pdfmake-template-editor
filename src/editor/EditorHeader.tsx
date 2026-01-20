@@ -130,6 +130,25 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({ onToggleSidebar, onTogglePr
     return (
         <header className="editor-header">
             <div className="header-left">
+                <div className="action-group">
+                    <button
+                        className="header-btn secondary"
+                        onClick={() => (useEditorStore as any).temporal.getState().undo()}
+                        title="Undo (Ctrl+Z)"
+                    >
+                        <span>↩ Undo</span>
+                    </button>
+                    <button
+                        className="header-btn secondary"
+                        onClick={() => (useEditorStore as any).temporal.getState().redo()}
+                        title="Redo (Ctrl+Y)"
+                    >
+                        <span>↪ Redo</span>
+                    </button>
+                </div>
+
+                <div className="header-divider" />
+
                 <div className="template-dropdown-container">
                     <button
                         className="header-btn secondary"
@@ -240,6 +259,25 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({ onToggleSidebar, onTogglePr
             <div className="header-right">
                 <div className="header-divider" />
                 <div className="action-group">
+                    <button
+                        className="header-btn secondary"
+                        onClick={() => showDialog({
+                            type: 'alert',
+                            title: '⌨️ Keyboard Shortcuts',
+                            message: `
+• Delete / Backspace : Remove selected element
+• Ctrl + D : Duplicate element
+• Ctrl + C : Copy element
+• Ctrl + V : Paste element
+• Ctrl + Z : Undo
+• Ctrl + Y : Redo
+• Arrow Up/Down : Move element
+• Escape : Deselect
+                            `,
+                        })}
+                    >
+                        <span>Help</span>
+                    </button>
                     <button
                         className={`header-btn secondary ${isFullscreen ? 'active' : ''}`}
                         onClick={toggleFullscreen}
