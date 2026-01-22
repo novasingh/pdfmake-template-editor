@@ -16,6 +16,12 @@ const mapStyle = (style: BaseStyle) => {
         background: style.background,
         alignment: style.alignment,
         margin: style.margin,
+        opacity: style.opacity,
+        decoration: style.decoration,
+        decorationStyle: style.decorationStyle,
+        decorationColor: style.decorationColor,
+        lineHeight: style.lineHeight,
+        characterSpacing: style.characterSpacing,
     };
 };
 
@@ -75,6 +81,7 @@ export const exportToPdfMake = (doc: DocumentSchema, variables: Record<string, s
                             dash: div.lineStyle === 'dashed' ? { length: 5 } : div.lineStyle === 'dotted' ? { length: 1, space: 2 } : undefined
                         }
                     ],
+                    ...mapStyle(element.style),
                     margin: element.style.margin || [0, 5, 0, 5],
                 };
             }
@@ -86,6 +93,9 @@ export const exportToPdfMake = (doc: DocumentSchema, variables: Record<string, s
                     width: typeof img.width === 'string' && img.width.endsWith('%') ? pageWidth * (parseFloat(img.width) / 100) : (img.width || pageWidth),
                     height: img.height === 'auto' || !img.height ? undefined : img.height,
                     ...mapStyle(element.style),
+                    // borderRadius is not directly supported on images in pdfmake, 
+                    // but we can wrap in a table if we really need it. 
+                    // For now, we'll map what we can.
                 };
             }
 
@@ -93,7 +103,7 @@ export const exportToPdfMake = (doc: DocumentSchema, variables: Record<string, s
                 const cols = element as any;
                 const columnGap = cols.columnGap ?? 10;
 
-                const columnsContent = {
+                const columnsContent: any = {
                     columns: cols.columns.map((col: any) => ({
                         width: col.width,
                         stack: col.content.map(mapElement).filter(Boolean)
@@ -101,6 +111,13 @@ export const exportToPdfMake = (doc: DocumentSchema, variables: Record<string, s
                     columnGap: columnGap,
                     ...mapStyle(element.style),
                 };
+
+                // Apply vertical alignment to columns
+                if (cols.verticalAlign) {
+                    columnsContent.columns.forEach((col: any) => {
+                        col.verticalAlign = cols.verticalAlign === 'middle' ? 'center' : cols.verticalAlign;
+                    });
+                }
 
                 // If the columns element has border or background, wrap it in a table for visual effect
                 if ((cols.borderWidth && cols.borderStyle !== 'none') ||
@@ -189,10 +206,10 @@ export const exportToPdfMake = (doc: DocumentSchema, variables: Record<string, s
                             vLineWidth: (i: number) => (i === 0 ? (info.borderWidth || 3) : 0),
                             hLineColor: () => 'white',
                             vLineColor: () => info.borderColor || '#3b82f6',
-                            paddingLeft: () => info.borderPadding ?? 10,
-                            paddingRight: () => 0,
-                            paddingTop: () => 2,
-                            paddingBottom: () => 2,
+                            paddingLeft: () => (info.borderPadding ?? 10) + (element.style.padding?.[0] ?? 0),
+                            paddingRight: () => element.style.padding?.[2] ?? 0,
+                            paddingTop: () => 2 + (element.style.padding?.[1] ?? 0),
+                            paddingBottom: () => 2 + (element.style.padding?.[3] ?? 0),
                         },
                         ...mapStyle(element.style),
                     };
@@ -253,7 +270,8 @@ export const exportToPdfMake = (doc: DocumentSchema, variables: Record<string, s
                     stack: [
                         an.label ? { text: an.label, fontSize: (element.style.fontSize || 11) * 0.8, color: '#64748b', margin: [0, 0, 0, 2] } : null,
                         { text: numberText, ...mapStyle(element.style) }
-                    ].filter(Boolean)
+                    ].filter(Boolean),
+                    ...mapStyle(element.style)
                 };
             }
 
@@ -326,7 +344,16 @@ export const exportToPdfMake = (doc: DocumentSchema, variables: Record<string, s
                 return {
                     table: {
                         widths: ['*'],
-                        body: [[{ stack: bankStack, padding: [8, 5, 8, 5], border: [true, true, true, true] }]]
+                        body: [[{
+                            stack: bankStack,
+                            padding: [
+                                (element.style.padding?.[0] ?? 8),
+                                (element.style.padding?.[1] ?? 5),
+                                (element.style.padding?.[2] ?? 8),
+                                (element.style.padding?.[3] ?? 5)
+                            ],
+                            border: [true, true, true, true]
+                        }]]
                     },
                     layout: {
                         hLineWidth: () => 1,

@@ -51,7 +51,7 @@ const CanvasBlock: React.FC<CanvasBlockProps> = ({ element }) => {
     const style: React.CSSProperties = {
         transform: CSS.Transform.toString(transform),
         transition,
-        opacity: isDragging ? 0.5 : 1,
+        opacity: isDragging ? 0.5 : (element.style.opacity ?? 1),
         padding: mapMargins(element.style.padding),
         margin: mapMargins(element.style.margin),
         backgroundColor: element.style.background || 'transparent',
@@ -61,6 +61,11 @@ const CanvasBlock: React.FC<CanvasBlockProps> = ({ element }) => {
         textAlign: element.style.alignment as any,
         fontSize: element.style.fontSize ? `${element.style.fontSize}pt` : undefined,
         fontWeight: element.style.fontWeight as any,
+        lineHeight: element.style.lineHeight,
+        letterSpacing: element.style.characterSpacing ? `${element.style.characterSpacing}pt` : undefined,
+        textDecoration: element.style.decoration === 'lineThrough' ? 'line-through' : element.style.decoration,
+        textDecorationStyle: element.style.decorationStyle as any,
+        textDecorationColor: element.style.decorationColor,
     };
 
     const handleClick = (e: React.MouseEvent) => {

@@ -230,41 +230,66 @@ const TableProperties: React.FC<TablePropertiesProps> = ({
             </div>
 
             <div className="prop-section border-top">
+                <label className="section-label">Styling</label>
+                <div className="prop-grid">
+                    <div className="prop-group">
+                        <label>Opacity</label>
+                        <input
+                            type="number"
+                            step="0.1"
+                            min="0"
+                            max="1"
+                            value={element.style.opacity ?? 1}
+                            onChange={(e) => onStyleChange('opacity', parseFloat(e.target.value))}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div className="prop-section border-top">
                 <label className="section-label">Spacing & Layout</label>
                 <div className="prop-group">
-                    <span>Margin (Top/Bottom)</span>
-                    <div className="prop-grid">
-                        <input
-                            type="number"
-                            placeholder="Top"
-                            value={element.style.margin?.[1] ?? 0}
-                            onChange={(e) => {
-                                const m = element.style.margin || [0, 0, 0, 0];
-                                onStyleChange('margin', [m[0], parseInt(e.target.value, 10), m[2], m[3]]);
-                            }}
-                        />
-                        <input
-                            type="number"
-                            placeholder="Bottom"
-                            value={element.style.margin?.[3] ?? 0}
-                            onChange={(e) => {
-                                const m = element.style.margin || [0, 0, 0, 0];
-                                onStyleChange('margin', [m[0], m[1], m[2], parseInt(e.target.value, 10)]);
-                            }}
-                        />
+                    <label>Margin (px)</label>
+                    <div className="prop-grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                        {[0, 1, 2, 3].map((idx) => (
+                            <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <span style={{ fontSize: '9px', width: '12px', color: 'var(--text-rich-muted)' }}>
+                                    {['L', 'T', 'R', 'B'][idx]}
+                                </span>
+                                <input
+                                    type="number"
+                                    value={element.style.margin?.[idx] ?? 0}
+                                    onChange={(e) => {
+                                        const m = [...(element.style.margin || [0, 0, 0, 0])];
+                                        m[idx] = parseInt(e.target.value, 10) || 0;
+                                        onStyleChange('margin', m);
+                                    }}
+                                />
+                            </div>
+                        ))}
                     </div>
                 </div>
 
                 <div className="prop-group">
-                    <span>Padding (All sides)</span>
-                    <input
-                        type="number"
-                        value={element.style.padding?.[0] ?? 0}
-                        onChange={(e) => {
-                            const val = parseInt(e.target.value, 10);
-                            onStyleChange('padding', [val, val, val, val]);
-                        }}
-                    />
+                    <label>Padding (px)</label>
+                    <div className="prop-grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                        {[0, 1, 2, 3].map((idx) => (
+                            <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <span style={{ fontSize: '9px', width: '12px', color: 'var(--text-rich-muted)' }}>
+                                    {['L', 'T', 'R', 'B'][idx]}
+                                </span>
+                                <input
+                                    type="number"
+                                    value={element.style.padding?.[idx] ?? 0}
+                                    onChange={(e) => {
+                                        const p = [...(element.style.padding || [0, 0, 0, 0])];
+                                        p[idx] = parseInt(e.target.value, 10) || 0;
+                                        onStyleChange('padding', p);
+                                    }}
+                                />
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
         </>

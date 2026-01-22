@@ -24,6 +24,12 @@ export interface BaseStyle {
     alignment?: Alignment;
     margin?: [number, number, number, number]; // [left, top, right, bottom]
     padding?: [number, number, number, number];
+    opacity?: number;
+    decoration?: 'underline' | 'lineThrough' | 'overline' | 'none';
+    decorationStyle?: 'dashed' | 'dotted' | 'double' | 'wavy';
+    decorationColor?: string;
+    lineHeight?: number;
+    characterSpacing?: number;
 }
 
 export interface WatermarkSettings {

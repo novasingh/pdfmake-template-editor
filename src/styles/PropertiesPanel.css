@@ -30,14 +30,14 @@
 }
 
 .panel-header {
-    padding: 24px 20px;
+    padding: 16px 20px;
     border-bottom: 1px solid var(--border-rich);
     background: #fff;
     flex-shrink: 0;
 }
 
 .panel-header h2 {
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 800;
     color: var(--text-rich-main);
     margin: 0;
@@ -46,13 +46,12 @@
 }
 
 .panel-content {
-    padding: 24px 20px;
-    overflow-y: auto;
-    overflow-x: hidden;
     flex: 1;
+    overflow-y: auto;
+    padding: 16px;
     display: flex;
     flex-direction: column;
-    gap: 32px;
+    gap: 16px;
 }
 
 /* Custom Scrollbar */
@@ -76,39 +75,45 @@
 .prop-section {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 10px;
 }
 
 .prop-section label {
     display: block;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
     color: var(--text-rich-muted);
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .prop-section input,
 .prop-section select,
 .prop-section textarea {
     width: 100%;
-    padding: 10px 5px;
+    min-width: 0;
+    /* Critical for grid stability */
+    padding: 8px 10px;
     border: 1px solid var(--border-rich);
     border-radius: var(--radius-rich);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     background-color: var(--bg-rich-input);
     color: var(--text-rich-main);
     transition: var(--transition-smooth);
     box-shadow: var(--shadow-rich-sm);
+    box-sizing: border-box;
 }
 
 .prop-section input:hover,
 .prop-section select:hover,
 .prop-section textarea:hover {
     border-color: #cbd5e1;
-    background-color: #f1f5f9;
+    background-color: #f8fafc;
 }
 
 .prop-section input:focus,
@@ -116,23 +121,30 @@
 .prop-section textarea:focus {
     background-color: #ffffff;
     border-color: var(--brand-primary);
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12), var(--shadow-rich-md);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), var(--shadow-rich-md);
     outline: none;
 }
 
+.secure-input {
+    background-color: #f0f9ff !important;
+    border-color: #bae6fd !important;
+    font-family: monospace;
+    letter-spacing: 0.05em;
+}
+
 .prop-section input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     margin: 0;
     cursor: pointer;
-    border-radius: 6px;
+    border-radius: 4px;
     accent-color: var(--brand-primary);
     box-shadow: none;
 }
 
 .prop-section input[type="color"] {
     width: 100%;
-    height: 40px;
+    height: 32px;
     padding: 4px;
     cursor: pointer;
     border-radius: var(--radius-rich);
@@ -141,9 +153,9 @@
 .checkbox-row {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     cursor: pointer;
-    padding: 12px;
+    padding: 10px;
     background: var(--bg-rich-input);
     border-radius: var(--radius-rich);
     border: 1px solid var(--border-rich);
@@ -158,7 +170,7 @@
 .checkbox-row label {
     margin: 0;
     text-transform: none;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     color: var(--text-rich-main);
     cursor: pointer;
@@ -167,17 +179,24 @@
 .prop-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    gap: 12px;
+    min-width: 0;
+}
+
+.prop-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
 }
 
 .prop-group span {
     display: block;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
     color: var(--text-rich-muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
 .alignment-toggle {
@@ -242,14 +261,14 @@
 }
 
 .delete-btn {
-    margin-top: 40px;
+    margin-top: 20px;
     width: 100%;
-    padding: 12px;
+    padding: 10px;
     background-color: #fff1f2;
     color: #e11d48;
     border: 1px solid #fecaca;
     border-radius: var(--radius-rich);
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
     cursor: pointer;
     transition: var(--transition-smooth);

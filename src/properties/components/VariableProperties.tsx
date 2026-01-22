@@ -104,6 +104,49 @@ const VariableProperties: React.FC<VariablePropertiesProps> = ({ element, onUpda
                     <label htmlFor="boldVar">Bold Text</label>
                 </div>
             </div>
+            {/* Styling */}
+            <div className="prop-section border-top">
+                <label className="section-label">Styling</label>
+                <div className="prop-grid">
+                    <div className="prop-group">
+                        <label>Opacity</label>
+                        <input
+                            type="number"
+                            step="0.1"
+                            min="0"
+                            max="1"
+                            value={element.style.opacity ?? 1}
+                            onChange={(e) => onStyleChange('opacity', parseFloat(e.target.value))}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {/* Margin & Padding */}
+            <div className="prop-section border-top">
+                <label className="section-label">Spacing & Layout</label>
+                <div className="prop-group">
+                    <label>Margin (px)</label>
+                    <div className="prop-grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                        {[0, 1, 2, 3].map((idx) => (
+                            <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <span style={{ fontSize: '9px', width: '12px', color: 'var(--text-rich-muted)' }}>
+                                    {['L', 'T', 'R', 'B'][idx]}
+                                </span>
+                                <input
+                                    type="number"
+                                    value={element.style.margin?.[idx] ?? 0}
+                                    onChange={(e) => {
+                                        const m = [...(element.style.margin || [0, 0, 0, 0])];
+                                        m[idx] = parseInt(e.target.value, 10) || 0;
+                                        onStyleChange('margin', m);
+                                    }}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
         </>
     );
 };

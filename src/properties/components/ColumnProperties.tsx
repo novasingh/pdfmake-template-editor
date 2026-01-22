@@ -159,112 +159,68 @@ const ColumnProperties: React.FC<ColumnPropertiesProps> = ({ element, onUpdate, 
                 />
             </div>
 
-            {/* Margin */}
-            <div className="prop-section">
-                <label>Margin (px)</label>
-                <div className="spacing-grid">
-                    <div>
-                        <span>Top</span>
+            {/* Styling */}
+            <div className="prop-section border-top">
+                <label className="section-label">Styling</label>
+                <div className="prop-grid">
+                    <div className="prop-group">
+                        <label>Opacity</label>
                         <input
                             type="number"
-                            value={element.style.margin?.[1] ?? 0}
-                            onChange={(e) => {
-                                const val = parseInt(e.target.value, 10) || 0;
-                                const current = element.style.margin || [0, 0, 0, 0];
-                                onStyleChange('margin', [current[0], val, current[2], current[3]]);
-                            }}
-                        />
-                    </div>
-                    <div>
-                        <span>Right</span>
-                        <input
-                            type="number"
-                            value={element.style.margin?.[2] ?? 0}
-                            onChange={(e) => {
-                                const val = parseInt(e.target.value, 10) || 0;
-                                const current = element.style.margin || [0, 0, 0, 0];
-                                onStyleChange('margin', [current[0], current[1], val, current[3]]);
-                            }}
-                        />
-                    </div>
-                    <div>
-                        <span>Bottom</span>
-                        <input
-                            type="number"
-                            value={element.style.margin?.[3] ?? 0}
-                            onChange={(e) => {
-                                const val = parseInt(e.target.value, 10) || 0;
-                                const current = element.style.margin || [0, 0, 0, 0];
-                                onStyleChange('margin', [current[0], current[1], current[2], val]);
-                            }}
-                        />
-                    </div>
-                    <div>
-                        <span>Left</span>
-                        <input
-                            type="number"
-                            value={element.style.margin?.[0] ?? 0}
-                            onChange={(e) => {
-                                const val = parseInt(e.target.value, 10) || 0;
-                                const current = element.style.margin || [0, 0, 0, 0];
-                                onStyleChange('margin', [val, current[1], current[2], current[3]]);
-                            }}
+                            step="0.1"
+                            min="0"
+                            max="1"
+                            value={element.style.opacity ?? 1}
+                            onChange={(e) => onStyleChange('opacity', parseFloat(e.target.value))}
                         />
                     </div>
                 </div>
             </div>
 
-            {/* Padding */}
-            <div className="prop-section">
-                <label>Padding (px)</label>
-                <div className="spacing-grid">
-                    <div>
-                        <span>Top</span>
-                        <input
-                            type="number"
-                            value={element.style.padding?.[1] ?? 0}
-                            onChange={(e) => {
-                                const val = parseInt(e.target.value, 10) || 0;
-                                const current = element.style.padding || [0, 0, 0, 0];
-                                onStyleChange('padding', [current[0], val, current[2], current[3]]);
-                            }}
-                        />
+            {/* Margin & Padding */}
+            <div className="prop-section border-top">
+                <label className="section-label">Spacing & Layout</label>
+                <div className="prop-group">
+                    <label>Margin (px)</label>
+                    <div className="prop-grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                        {[0, 1, 2, 3].map((idx) => (
+                            <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <span style={{ fontSize: '9px', width: '12px', color: 'var(--text-rich-muted)' }}>
+                                    {['L', 'T', 'R', 'B'][idx]}
+                                </span>
+                                <input
+                                    type="number"
+                                    value={element.style.margin?.[idx] ?? 0}
+                                    onChange={(e) => {
+                                        const m = [...(element.style.margin || [0, 0, 0, 0])];
+                                        m[idx] = parseInt(e.target.value, 10) || 0;
+                                        onStyleChange('margin', m);
+                                    }}
+                                />
+                            </div>
+                        ))}
                     </div>
-                    <div>
-                        <span>Right</span>
-                        <input
-                            type="number"
-                            value={element.style.padding?.[2] ?? 0}
-                            onChange={(e) => {
-                                const val = parseInt(e.target.value, 10) || 0;
-                                const current = element.style.padding || [0, 0, 0, 0];
-                                onStyleChange('padding', [current[0], current[1], val, current[3]]);
-                            }}
-                        />
-                    </div>
-                    <div>
-                        <span>Bottom</span>
-                        <input
-                            type="number"
-                            value={element.style.padding?.[3] ?? 0}
-                            onChange={(e) => {
-                                const val = parseInt(e.target.value, 10) || 0;
-                                const current = element.style.padding || [0, 0, 0, 0];
-                                onStyleChange('padding', [current[0], current[1], current[2], val]);
-                            }}
-                        />
-                    </div>
-                    <div>
-                        <span>Left</span>
-                        <input
-                            type="number"
-                            value={element.style.padding?.[0] ?? 0}
-                            onChange={(e) => {
-                                const val = parseInt(e.target.value, 10) || 0;
-                                const current = element.style.padding || [0, 0, 0, 0];
-                                onStyleChange('padding', [val, current[1], current[2], current[3]]);
-                            }}
-                        />
+                </div>
+
+                <div className="prop-group">
+                    <label>Padding (px)</label>
+                    <div className="prop-grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                        {[0, 1, 2, 3].map((idx) => (
+                            <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <span style={{ fontSize: '9px', width: '12px', color: 'var(--text-rich-muted)' }}>
+                                    {['L', 'T', 'R', 'B'][idx]}
+                                </span>
+                                <input
+                                    type="number"
+                                    value={element.style.padding?.[idx] ?? 0}
+                                    onChange={(e) => {
+                                        const p = [...(element.style.padding || [0, 0, 0, 0])];
+                                        p[idx] = parseInt(e.target.value, 10) || 0;
+                                        onStyleChange('padding', p);
+                                    }}
+                                />
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
