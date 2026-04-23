@@ -1,6 +1,5 @@
 import React from 'react';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import { useSortable } from '../dnd/useDnd';
 import { EditorElement, ColumnsElement } from '../types/editor';
 import { useEditorStore } from '../store/useEditorStore';
 import '../styles/CanvasBlock.css';
@@ -25,15 +24,16 @@ const CanvasBlock: React.FC<CanvasBlockProps> = ({ element }) => {
 
     // All hooks must be called before any conditional returns
     const {
-        attributes,
-        listeners,
         setNodeRef,
         transform,
         transition,
         isDragging,
+        listeners,
+        attributes,
     } = useSortable({
         id: element?.id ?? 'placeholder',
-        disabled: isEditing || !element
+        data: {},
+        disabled: isEditing || !element,
     });
 
     // Early return after all hooks are called
@@ -49,7 +49,7 @@ const CanvasBlock: React.FC<CanvasBlockProps> = ({ element }) => {
     };
 
     const style: React.CSSProperties = {
-        transform: CSS.Transform.toString(transform),
+        transform: transform,
         transition,
         opacity: isDragging ? 0.5 : (element.style.opacity ?? 1),
         padding: mapMargins(element.style.padding),
@@ -327,13 +327,22 @@ const CanvasBlock: React.FC<CanvasBlockProps> = ({ element }) => {
                 return (
                     <ListTag style={{
                         margin: 0,
+                        padding: 0,
+                        paddingLeft: '22px',
                         listStyleType: listStyle,
-                        paddingLeft: '20px',
+                        listStylePosition: 'outside',
                         textAlign: 'inherit',
-                        fontSize: 'inherit'
+                        fontSize: 'inherit',
                     }}>
-                        {le.items.map((item: string, i: number) => (
-                            <li key={i}>{item}</li>
+                        {(le.items || []).map((item: string, i: number) => (
+                            <li key={i} style={{
+                                display: 'list-item',
+                                marginBottom: '2px',
+                                whiteSpace: 'pre-wrap',
+                                wordBreak: 'break-word',
+                            }}>
+                                {item}
+                            </li>
                         ))}
                     </ListTag>
                 );
@@ -349,17 +358,73 @@ const CanvasBlock: React.FC<CanvasBlockProps> = ({ element }) => {
             }
             case 'bank-details': {
                 const bd = element as any;
+                const fontSize = element.style.fontSize ? `${element.style.fontSize}pt` : '10pt';
+                const color = element.style.color || '#374151';
+                const labelColor = '#6b7280';
+
+                // Build lines array — each entry is one line
+                const lines: React.ReactNode[] = [];
+
+                if (bd.bankName) lines.push(
+                    <span key="bank">
+                        <span style={{ color: labelColor }}>Bank: </span>
+                        <strong>{bd.bankName}</strong>
+                    </span>
+                );
+                if (bd.accountName) lines.push(
+                    <span key="acct">
+                        <span style={{ color: labelColor }}>Account Name: </span>
+                        {bd.accountName}
+                    </span>
+                );
+                if (bd.bsb) lines.push(
+                    <span key="bsb">
+                        <span style={{ color: labelColor }}>BSB: </span>
+                        {bd.bsb}
+                    </span>
+                );
+                if (bd.accountNumber) lines.push(
+                    <span key="accnum">
+                        <span style={{ color: labelColor }}>Account Number: </span>
+                        {bd.accountNumber}
+                    </span>
+                );
+
+                if (lines.length === 0) lines.push(
+                    <span key="empty" style={{ color: '#94a3b8', fontStyle: 'italic' }}>
+                        Bank Name · Account Name · BSB · Account Number
+                    </span>
+                );
+
                 return (
                     <div style={{
-                        fontSize: 'inherit',
-                        fontWeight: 'inherit',
-                        textAlign: 'inherit',
-                        border: element.style.background ? 'none' : '1px solid #e2e8f0', // Only show border if no background
+                        display: 'block',
+                        fontSize,
+                        textAlign: element.style.alignment as any || 'left',
+                        color,
+                        background: element.style.background || '#f8fafc',
+                        border: '1px solid #e2e8f0',
                         borderRadius: '4px',
+                        padding: '8px 10px',
                     }}>
-                        <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>{bd.bankName || 'Bank Name'}</div>
-                        <div>Account: {bd.accountName || 'Account Name'}</div>
-                        <div>BSB: {bd.bsb || '000-000'} | Acc: {bd.accountNumber || '00000000'}</div>
+                        {/* Each line separated by <br /> — 100% CSS-reset-proof */}
+                        {lines.map((line, i) => (
+                            <span key={i} style={{ display: 'block', lineHeight: 1.8 }}>
+                                {line}
+                            </span>
+                        ))}
+                        {bd.note && (
+                            <span style={{
+                                display: 'block',
+                                marginTop: '6px',
+                                paddingTop: '6px',
+                                borderTop: '1px solid #e2e8f0',
+                                color: labelColor,
+                                lineHeight: 1.8,
+                            }}>
+                                {bd.note}
+                            </span>
+                        )}
                     </div>
                 );
             }
@@ -371,11 +436,11 @@ const CanvasBlock: React.FC<CanvasBlockProps> = ({ element }) => {
     return (
         <div
             ref={setNodeRef}
-            style={style}
+            style={{ ...style, ...attributes.style }}
             className={`canvas-block ${isSelected ? 'selected' : ''}`}
             onClick={handleClick}
             onDoubleClick={handleDoubleClick}
-            {...attributes}
+            data-draggable-id={attributes['data-draggable-id']}
             {...listeners}
         >
             {isSelected && !isEditing && (

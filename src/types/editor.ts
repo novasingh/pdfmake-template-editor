@@ -229,6 +229,7 @@ export interface BankDetailsElement extends BaseElement {
     accountName?: string;
     bsb?: string;
     accountNumber?: string;
+    note?: string; // e.g. "Please include invoice number as payment reference"
 }
 
 

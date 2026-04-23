@@ -1,9 +1,5 @@
 import React from 'react';
-import { useDroppable } from '@dnd-kit/core';
-import {
-    SortableContext,
-    verticalListSortingStrategy
-} from '@dnd-kit/sortable';
+import { useDroppable } from '../dnd/useDnd';
 import { ColumnsElement, Column } from '../types/editor';
 import { useEditorStore } from '../store/useEditorStore';
 import CanvasBlock from './CanvasBlock';
@@ -18,13 +14,13 @@ const DroppableColumn: React.FC<DroppableColumnProps> = ({ column, columnIndex, 
     const { document: doc } = useEditorStore();
     const dropId = `${parentElement.id}-col-${columnIndex}`;
 
-    const { setNodeRef, isOver } = useDroppable({
+    const { ref: setNodeRef, isOver } = useDroppable({
         id: dropId,
         data: {
             parentId: parentElement.id,
             colIndex: columnIndex,
             isColumnContainer: true,
-        }
+        },
     });
 
     const columnBorderStyle = parentElement.showColumnBorders
@@ -47,16 +43,11 @@ const DroppableColumn: React.FC<DroppableColumnProps> = ({ column, columnIndex, 
                 boxSizing: 'border-box',
             }}
         >
-            <SortableContext
-                items={column.content.filter(id => doc.elements[id])}
-                strategy={verticalListSortingStrategy}
-            >
-                {column.content
-                    .filter((childId) => doc.elements[childId])
-                    .map((childId) => (
-                        <CanvasBlock key={childId} element={doc.elements[childId]} />
-                    ))}
-            </SortableContext>
+            {column.content
+                .filter((childId) => doc.elements[childId])
+                .map((childId) => (
+                    <CanvasBlock key={childId} element={doc.elements[childId]} />
+                ))}
 
             {column.content.filter(id => doc.elements[id]).length === 0 && !isOver && (
                 <div style={{ fontSize: '10px', color: '#94a3b8', textAlign: 'center', paddingTop: '10px' }}>

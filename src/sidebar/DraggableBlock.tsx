@@ -1,5 +1,5 @@
 import React from 'react';
-import { useDraggable } from '@dnd-kit/core';
+import { useDraggable } from '../dnd/useDnd';
 import { ElementType } from '../types/editor';
 
 interface DraggableBlockProps {
@@ -9,7 +9,7 @@ interface DraggableBlockProps {
 }
 
 const DraggableBlock: React.FC<DraggableBlockProps> = ({ type, label, moduleName }) => {
-    const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    const { ref, attributes, listeners, isDragging } = useDraggable({
         id: moduleName ? `sidebar-module-${moduleName}` : `sidebar-${type}`,
         data: {
             type,
@@ -21,7 +21,7 @@ const DraggableBlock: React.FC<DraggableBlockProps> = ({ type, label, moduleName
 
     return (
         <div
-            ref={setNodeRef}
+            ref={ref}
             className={`draggable-block-preview ${isDragging ? 'dragging' : ''}`}
             {...listeners}
             {...attributes}

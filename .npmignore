@@ -1,0 +1,28 @@
+# Source files — not needed by consumers, dist/ is sufficient
+src/
+
+# Storybook — dev tooling only
+.storybook/
+storybook-static/
+
+# Build tooling — consumers don't need these
+rollup.config.js
+tsconfig.json
+check-size.ps1
+
+# Test artefacts
+jest.config.*
+*.test.*
+*.spec.*
+
+# Dist artefacts to exclude
+dist/*.map
+dist/index.esm.css
+dist/stories/
+dist/src/
+
+# Misc
+*.tgz
+.gitignore
+.antigravityignore
+node_modules/

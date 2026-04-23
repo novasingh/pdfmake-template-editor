@@ -1,22 +1,5 @@
 import React from 'react';
-import {
-    DndContext,
-    DragOverlay,
-    closestCenter,
-    pointerWithin,
-    rectIntersection,
-    KeyboardSensor,
-    PointerSensor,
-    useSensor,
-    useSensors,
-    DragStartEvent,
-    DragEndEvent,
-    CollisionDetection,
-} from '@dnd-kit/core';
-import {
-    SortableContext,
-    sortableKeyboardCoordinates,
-} from '@dnd-kit/sortable';
+import { DndProvider, DragOverlay, DragStartEvent, DragEndEvent } from '../dnd/useDnd';
 
 import Sidebar from '../sidebar/Sidebar';
 import PageCanvas from '../canvas/PageCanvas';
@@ -151,77 +134,30 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
         document.body.style.userSelect = 'none';
     };
 
-    const sensors = useSensors(
-        useSensor(PointerSensor, {
-            activationConstraint: {
-                distance: 5,
-            },
-        }),
-        useSensor(KeyboardSensor, {
-            coordinateGetter: sortableKeyboardCoordinates,
-        })
-    );
-
-    // Custom collision detection that prioritizes containers (columns/tables) when pointer is inside them
-    const customCollisionDetection: CollisionDetection = React.useCallback((args) => {
-        // First, use pointerWithin to detect if we're inside a container (column or table cell)
-        const pointerCollisions = pointerWithin(args);
-
-        // Check if any of the pointer collisions are column containers or table cells
-        const containerCollisions = pointerCollisions.filter(collision => {
-            const id = collision.id as string;
-            return id.includes('-col-') || id.includes('-cell-');
-        });
-
-        // If we're inside a container (column or table cell), prioritize that
-        if (containerCollisions.length > 0) {
-            return containerCollisions;
-        }
-
-        // Next, check for collisions with sortable root elements using closestCenter
-        const closestCenterCollisions = closestCenter(args);
-
-        // Filter to get only collisions with root-level elements
-        const sortableCollisions = closestCenterCollisions.filter(collision => {
-            const id = collision.id as string;
-            return id !== 'page-canvas' && doc.rootElementIds.includes(id);
-        });
-
-        // If we have sortable element collisions, use those
-        if (sortableCollisions.length > 0) {
-            return sortableCollisions;
-        }
-
-        // If pointer is over the canvas, return that
-        if (pointerCollisions.length > 0) {
-            return pointerCollisions;
-        }
-
-        // Final fallback to rectIntersection
-        return rectIntersection(args);
-    }, [doc.rootElementIds]);
+    // Sensors handled internally by DndProvider (5px activation distance)
 
     const handleDragStart = (event: DragStartEvent) => {
-        setActiveId(event.active.id as string);
+        setActiveId(event.active.id);
     };
 
     const handleDragEnd = (event: DragEndEvent) => {
-        const { active, over, delta } = event;
+        const { active, over, delta, activatorEvent } = event;
 
         if (!over) {
             setActiveId(null);
             return;
         }
 
-        const activeId = active.id as string;
-        const overId = over.id as string;
-        const overData = over.data.current;
+        const activeId = active.id;
+        const overId = over.id;
+        // Our useDroppable stores data directly (not .current)
+        const overData = over.data;
 
         // Handle dropping a NEW element from the sidebar
-        if (active.data.current?.isSidebarItem) {
-            const type = active.data.current.type;
-            const isModule = active.data.current.isModule;
-            const moduleName = active.data.current.moduleName;
+        if (active.data?.isSidebarItem) {
+            const type = active.data.type as string;
+            const isModule = active.data.isModule as boolean;
+            const moduleName = active.data.moduleName as string | undefined;
 
             if (isModule && moduleName) {
                 insertModule(moduleName);
@@ -230,59 +166,40 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
             }
 
             if (overData?.isColumnContainer) {
-                addElement(type, overData.parentId, overData.colIndex);
+                addElement(type as any, overData.parentId as string, overData.colIndex as number);
             } else if (overData?.isTableCell) {
-                addElement(type, overData.parentId, overData.rowIndex, overData.colIndex);
+                addElement(type as any, overData.parentId as string, overData.rowIndex as number, overData.colIndex as number);
             } else {
-                // Calculate the drop position based on where the element is dropped
                 if (overId !== 'page-canvas' && doc.rootElementIds.includes(overId)) {
                     const overIndex = doc.rootElementIds.indexOf(overId);
-
-                    const overRect = over.rect;
-                    const isBelow = overRect && event.activatorEvent instanceof MouseEvent
-                        ? (event.activatorEvent as MouseEvent).clientY > (overRect.top + overRect.height / 2)
+                    const isBelow = over.rect && activatorEvent
+                        ? activatorEvent.clientY > (over.rect.top + over.rect.height / 2)
                         : delta.y > 0;
-
-                    if (isBelow) {
-                        addElement(type, undefined, overIndex + 1);
-                    } else {
-                        addElement(type, undefined, overIndex);
-                    }
+                    addElement(type as any, undefined, isBelow ? overIndex + 1 : overIndex);
                 } else {
-                    addElement(type);
+                    addElement(type as any);
                 }
             }
         }
+
         // Handle moving/reordering EXISTING elements
         if (activeId !== overId) {
-            // Moving to a column container
             if (overData?.isColumnContainer) {
-                moveElement(activeId, overData.parentId, overData.colIndex);
-            }
-            // Moving to a table cell
-            else if (overData?.isTableCell) {
-                moveElement(activeId, overData.parentId, overData.rowIndex, overData.colIndex);
-            }
-            // Moving to root level (canvas or another root element)
-            else if (overId === 'page-canvas') {
-                // Move to end of root
+                moveElement(activeId, overData.parentId as string, overData.colIndex as number);
+            } else if (overData?.isTableCell) {
+                moveElement(activeId, overData.parentId as string, overData.rowIndex as number, overData.colIndex as number);
+            } else if (overId === 'page-canvas') {
                 moveElement(activeId, null);
-            }
-            else if (doc.rootElementIds.includes(overId)) {
-                // Reorder within root elements
+            } else if (doc.rootElementIds.includes(overId)) {
                 const overIndex = doc.rootElementIds.indexOf(overId);
                 const activeInRoot = doc.rootElementIds.includes(activeId);
 
                 if (activeInRoot) {
-                    // Simple reorder within root
                     reorderElements(activeId, overId);
                 } else {
-                    // Moving from container to root
-                    const overRect = over.rect;
-                    const isBelow = overRect && event.activatorEvent instanceof MouseEvent
-                        ? (event.activatorEvent as MouseEvent).clientY > (overRect.top + overRect.height / 2)
+                    const isBelow = over.rect && activatorEvent
+                        ? activatorEvent.clientY > (over.rect.top + over.rect.height / 2)
                         : delta.y > 0;
-
                     moveElement(activeId, null, isBelow ? overIndex + 1 : overIndex);
                 }
             }
@@ -295,7 +212,7 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
         if (!activeId) return null;
 
         if (activeId.startsWith('sidebar-')) {
-            const type = activeId.replace('sidebar-', '');
+            const type = activeId.replace('sidebar-module-', '').replace('sidebar-', '');
             return <div className="drag-overlay-item">{type.toUpperCase()}</div>;
         }
 
@@ -333,11 +250,10 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
                     hideButtons={config?.hideHeaderButtons}
                 />
 
-                <DndContext
-                    sensors={sensors}
-                    collisionDetection={customCollisionDetection}
+                <DndProvider
                     onDragStart={handleDragStart}
                     onDragEnd={handleDragEnd}
+                    activationDistance={5}
                 >
                     <div className="editor-main-layout">
                         <div
@@ -383,7 +299,7 @@ const TemplateEditor: React.FC<TemplateEditorProps> = ({
                     <DragOverlay>
                         {renderDragOverlay()}
                     </DragOverlay>
-                </DndContext>
+                </DndProvider>
                 <CustomDialog />
             </div>
         </LocalizationProvider>

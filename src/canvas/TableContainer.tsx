@@ -2,8 +2,7 @@ import React from 'react';
 import { TableElement, TableCell } from '../types/editor';
 import { useEditorStore } from '../store/useEditorStore';
 import CanvasBlock from './CanvasBlock';
-import { useDroppable } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { useDroppable } from '../dnd/useDnd';
 import '../styles/TableContainer.css';
 
 interface DroppableTableCellProps {
@@ -17,14 +16,14 @@ const DroppableTableCell: React.FC<DroppableTableCellProps> = ({ cell, rowIndex,
     const { document: doc, updateTableWidths } = useEditorStore();
     const dropId = `${parentElement.id}-cell-${rowIndex}-${colIndex}`;
 
-    const { setNodeRef, isOver } = useDroppable({
+    const { ref: setNodeRef, isOver } = useDroppable({
         id: dropId,
         data: {
             parentId: parentElement.id,
             rowIndex: rowIndex,
             colIndex: colIndex,
             isTableCell: true,
-        }
+        },
     });
 
     const isHeader = parentElement.headerRow && rowIndex === 0;
@@ -73,16 +72,11 @@ const DroppableTableCell: React.FC<DroppableTableCellProps> = ({ cell, rowIndex,
                 position: 'relative'
             }}
         >
-            <SortableContext
-                items={cell.content.filter(id => doc.elements[id])}
-                strategy={verticalListSortingStrategy}
-            >
-                {cell.content
-                    .filter((childId) => doc.elements[childId])
-                    .map((childId) => (
-                        <CanvasBlock key={childId} element={doc.elements[childId]} />
-                    ))}
-            </SortableContext>
+            {cell.content
+                .filter((childId) => doc.elements[childId])
+                .map((childId) => (
+                    <CanvasBlock key={childId} element={doc.elements[childId]} />
+                ))}
 
             {/* Column Resize Handle */}
             <div

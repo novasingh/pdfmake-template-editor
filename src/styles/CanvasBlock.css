@@ -21,6 +21,24 @@
     text-align: inherit;
 }
 
+/* Ensure list items always stack vertically, overriding any host CSS resets */
+.canvas-block ul,
+.canvas-block ol {
+    display: block;
+    margin: 0;
+}
+
+.canvas-block li {
+    display: list-item !important;
+    text-align: inherit;
+}
+
+/* Bank-details rows use span with display:block — protect against host resets */
+.canvas-block span[style*="display: block"],
+.canvas-block span[style*="display:block"] {
+    display: block !important;
+}
+
 .canvas-block.selected::after {
     content: '';
     position: absolute;

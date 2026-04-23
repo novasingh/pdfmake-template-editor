@@ -2,20 +2,16 @@ import React from 'react';
 import { useEditorStore } from '../store/useEditorStore';
 import { A4_DIMENSIONS, mmToPt } from '../utils/dimensions';
 import '../styles/PageCanvas.css';
-import { useDroppable } from '@dnd-kit/core';
-import {
-    SortableContext,
-    verticalListSortingStrategy
-} from '@dnd-kit/sortable';
+import { useDroppable } from '../dnd/useDnd';
 import CanvasBlock from './CanvasBlock';
 
 const PageCanvas: React.FC = () => {
     const { document: doc, selectElement, canvasZoom, setCanvasZoom } = useEditorStore();
     const { page, rootElementIds, elements } = doc;
 
-    const { setNodeRef: setCanvasRef } = useDroppable({
+    const { ref: setCanvasRef } = useDroppable({
         id: 'page-canvas',
-        data: { isCanvas: true }
+        data: { isCanvas: true },
     });
 
 
@@ -152,14 +148,9 @@ const PageCanvas: React.FC = () => {
                         boxSizing: 'border-box'
                     }}
                 >
-                    <SortableContext
-                        items={rootElementIds}
-                        strategy={verticalListSortingStrategy}
-                    >
-                        {rootElementIds.map((id) => (
-                            <CanvasBlock key={id} element={elements[id]} />
-                        ))}
-                    </SortableContext>
+                    {rootElementIds.map((id) => (
+                        <CanvasBlock key={id} element={elements[id]} />
+                    ))}
                 </div>
             </div>
 

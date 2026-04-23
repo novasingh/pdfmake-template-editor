@@ -62,6 +62,16 @@ const BankDetailsProperties: React.FC<BankDetailsPropertiesProps> = ({ element, 
                 </div>
             </div>
 
+            <div className="prop-group">
+                <label>Payment Note</label>
+                <textarea
+                    style={{ width: '100%', resize: 'vertical', minHeight: '52px', fontFamily: 'inherit', fontSize: '12px', padding: '4px 6px', boxSizing: 'border-box' }}
+                    value={(element as any).note || ''}
+                    placeholder="e.g. Please include invoice number as payment reference"
+                    onChange={(e) => onUpdate({ note: e.target.value } as any)}
+                />
+            </div>
+
             <div className="prop-grid">
                 <div className="prop-group">
                     <label>Alignment</label>

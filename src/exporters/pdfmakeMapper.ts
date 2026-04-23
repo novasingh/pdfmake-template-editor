@@ -335,11 +335,23 @@ export const exportToPdfMake = (doc: DocumentSchema, variables: Record<string, s
 
             case 'bank-details': {
                 const bd = element as any;
-                const bankStack = [
-                    { text: bd.bankName || 'Bank Name', bold: true, margin: [0, 0, 0, 2] },
-                    { text: `Account: ${bd.accountName || ''}`, fontSize: (element.style.fontSize || 10) },
-                    { text: `BSB: ${bd.bsb || ''} | Acc: ${bd.accountNumber || ''}`, fontSize: (element.style.fontSize || 10) }
-                ];
+                const bankStack: any[] = [
+                    bd.bankName && { text: [{ text: 'Bank: ', color: '#6b7280' }, { text: bd.bankName, bold: true }], fontSize: (element.style.fontSize || 10), margin: [0, 0, 0, 0] },
+                    bd.accountName && { text: [{ text: 'Account Name: ', color: '#6b7280' }, { text: bd.accountName }], fontSize: (element.style.fontSize || 10) },
+                    bd.bsb && { text: [{ text: 'BSB: ', color: '#6b7280' }, { text: bd.bsb }], fontSize: (element.style.fontSize || 10) },
+                    bd.accountNumber && { text: [{ text: 'Account Number: ', color: '#6b7280' }, { text: bd.accountNumber }], fontSize: (element.style.fontSize || 10) },
+                ].filter(Boolean);
+
+                if (bd.note) {
+                    bankStack.push(
+                        { canvas: [{ type: 'line', x1: 0, y1: 4, x2: 500, y2: 4, lineWidth: 0.5, lineColor: '#e2e8f0' }], margin: [0, 4, 0, 0] },
+                        { text: bd.note, color: '#6b7280', fontSize: (element.style.fontSize || 10), margin: [0, 4, 0, 0] }
+                    );
+                }
+
+                if (!bankStack.length) {
+                    bankStack.push({ text: 'Bank Name · Account Name · BSB · Account Number', color: '#94a3b8', italics: true });
+                }
 
                 return {
                     table: {
